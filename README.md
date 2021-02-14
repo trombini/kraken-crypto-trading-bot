@@ -1,0 +1,1 @@
+# kraken-cypto-trading-bot
