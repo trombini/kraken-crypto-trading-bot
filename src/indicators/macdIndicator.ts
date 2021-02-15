@@ -2,6 +2,7 @@ import { takeRight, filter, round } from 'lodash'
 import { MACD } from 'technicalindicators'
 import { BotConfig } from '../common/config'
 import { OHLCBlock } from '../krakenService'
+import { logger } from '../common/logger'
 import moment from 'moment'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length
@@ -18,7 +19,7 @@ export const isUpSwing = (historgram: number[]) => () => {
   const v = takeRight(historgram, 3)
   const result = allNegatives(v) && v[0] > v[1] && v[1] < v[2]
 
-  console.log(`MACD // isUpswing: ${v[0]} | ${v[1]} | ${v[2]} -> ${result}`)
+  logger.debug(`MACD // isUpswing: ${v[0]} | ${v[1]} | ${v[2]} -> ${result}`)
 
   return result
 }
@@ -52,7 +53,7 @@ export const indicator = (config: BotConfig, head: OHLCBlock, blocks: OHLCBlock[
   const headMaturity = getBlockMaturity(config.interval, head)
   const maturedBlocks = getMaturedBlocks(config.interval, config.blockMaturity, blocks)
 
-  console.log(`Head Block Maturity: ${headMaturity}. Needs to be above ${config.blockMaturity}.`)
+  logger.debug(`Head Block Maturity: ${headMaturity}. Needs to be above ${config.blockMaturity}.`)
 
   const closes = maturedBlocks.map(b => b.close)
   const macdOutput = MACD.calculate({

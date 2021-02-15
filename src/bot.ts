@@ -1,6 +1,7 @@
 import { Analyst } from './analyst'
-import { BuyOrder, BuyRecommendation, SellOrder, Trade } from './interfaces/trade.interface'
+import { BuyRecommendation, SellOrder, Trade } from './interfaces/trade.interface'
 import { KrakenService } from './krakenService'
+import { logger } from './common/logger'
 import { round } from 'lodash'
 
 const MAX_BET = 500
@@ -43,8 +44,8 @@ export class Bot {
         volume
       }).then(trade => {
         const sell = calculateExitStrategy(50, trade)
-        console.log(`Bought ${trade.volume} ADA for ${trade.price}$ (${trade.cost}$)`)
-        console.log(`New SellOrder ${sell.volume} ADA for ${sell.price}$`)
+        logger.debug(`Bought ${trade.volume} ADA for ${trade.price}$ (${trade.cost}$)`)
+        logger.debug(`New SellOrder ${sell.volume} ADA for ${sell.price}$`)
         // console.log(trade)
         // console.log(sell)
       })

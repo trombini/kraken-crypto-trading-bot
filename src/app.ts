@@ -4,11 +4,12 @@ import { Analyst } from './analyst'
 import { Bot } from './bot'
 import { MockKrakenService } from './mockKrakenService'
 import { config } from './common/config'
+import { logger } from './common/logger'
 
 // TODO: find a better way how to run a script forever
 setInterval(() => { }, 10000)
 
-console.log(config)
+logger.info(config)
 
 const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
 const krakenService = new MockKrakenService(krakenApi, config)

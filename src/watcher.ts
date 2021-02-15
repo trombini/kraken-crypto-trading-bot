@@ -17,7 +17,6 @@ export class Watcher extends events.EventEmitter {
   }
 
   fetchData() {
-    //console.log(`Fetch new prices for ${this.config.pair}`)
     this.kraken.getOHLCData(this.config.pair, this.config.interval).then(result => {
       this.emit('WATCHER:UPDATE', {
         pair: this.config.pair,

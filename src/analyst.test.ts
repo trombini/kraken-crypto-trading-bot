@@ -3,12 +3,13 @@ import { Analyst } from './analyst'
 import { KrakenService, OHLCBlock } from './krakenService'
 import { Watcher } from './watcher'
 import { config } from './common/config'
+import { logger } from './common/logger'
 
 let watcher: Watcher
 let blocks: OHLCBlock[]
 
 beforeAll(() => {
-  console.log('before all')
+  logger.debug('before all')
 })
 
 beforeEach(() => {

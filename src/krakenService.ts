@@ -1,5 +1,6 @@
 import { last } from 'lodash'
 import { BotConfig } from './common/config'
+import { logger } from './common/logger'
 import { BuyOrder, SellOrder, Trade } from './interfaces/trade.interface'
 import moment from 'moment'
 import KrakenClient from 'kraken-api'
@@ -31,8 +32,8 @@ export class KrakenService {
   async getOHLCData(pair: string, interval: number): Promise<any> {
     const since = moment().subtract(12, 'h').unix()
     return this.krakenApi.api('OHLC', { pair, interval, since }, () => {})
-      .then((response) => response.result[this.config.pair])
-      .then((result) => {
+      .then(response => response.result[this.config.pair])
+      .then(result => {
         const blocks = result.map(mapOhlcResultToObject)
         const head = last(blocks)
         return {
@@ -56,7 +57,7 @@ export class KrakenService {
   }
 
   async sell(order: SellOrder): Promise<any> {
-    console.log(`SELL ${order.volume} for '${order.price ? order.price : 'market'}'`)
+    logger.debug(`SELL ${order.volume} for '${order.price ? order.price : 'market'}'`)
   }
 
   async createBuyOrder(order: BuyOrder): Promise<Trade> {

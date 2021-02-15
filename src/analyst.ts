@@ -2,6 +2,7 @@ import { Watcher, WatcherUpdateEvent } from './watcher'
 import { indicator as macdIndicator } from './indicators/macdIndicator'
 import { OHLCBlock } from './krakenService'
 import { BotConfig } from './common/config'
+import { logger } from './common/logger'
 import { filter } from 'lodash'
 import moment from 'moment'
 import events from 'events'
@@ -21,11 +22,11 @@ export class Analyst extends events.EventEmitter {
       const positive = filter(result, r => r === true).length === result.length
       const blockDate = moment.unix(data.head.time).format()
       if(positive) {
-        console.log(`Buy '${data.pair}'  🚀 🤑`)
+        logger.info(`Buy '${data.pair}'  🚀 🤑`)
         this.sendRecommendationToBuyEvent(data.pair, data.head)
       }
       else {
-        console.log(`Don't buy block ${blockDate} 🤬`)
+        logger.info(`Don't buy block ${blockDate} 🤬`)
       }
     })
   }

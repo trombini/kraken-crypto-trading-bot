@@ -30,12 +30,12 @@
     "@types/lodash": "^4.14.168",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
-    "got": "^11.8.1",
     "kraken-api": "^1.0.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "qs": "^6.5.2",
     "technicalindicators": "^3.1.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.3.3"
   }
 }
