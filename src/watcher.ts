@@ -1,5 +1,5 @@
 import events from 'events'
-import { BotConfig } from './interfaces/botConfig.interface'
+import { BotConfig } from './common/config'
 import { KrakenService, OHLCBlock } from './krakenService'
 
 //const INTERVAL = 360000

@@ -1,7 +1,7 @@
 import { Watcher, WatcherUpdateEvent } from './watcher'
 import { indicator as macdIndicator } from './indicators/macdIndicator'
-import { BotConfig } from './interfaces/botConfig.interface'
 import { OHLCBlock } from './krakenService'
+import { BotConfig } from './common/config'
 import { filter } from 'lodash'
 import moment from 'moment'
 import events from 'events'

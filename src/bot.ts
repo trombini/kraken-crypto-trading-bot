@@ -19,30 +19,35 @@ export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Sel
   }
 }
 
+export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 2)
+
 export class Bot {
 
   datastore: any
 
-  constructor(readonly kraken: KrakenService, readonly analyst: Analyst) {
+  constructor(readonly kraken: KrakenService, readonly analyst?: Analyst) {
     // register event handler to observe buy recommendations
-    analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (data: BuyRecommendation) => {
-      this.buy(data)
-    })
+    if(analyst) {
+      analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (data: BuyRecommendation) => {
+        this.buy(data)
+      })
+    }
   }
 
   buy(recommendation: BuyRecommendation) {
-    const volume = round(MAX_BET / recommendation.lastPrice, 2)
-    return this.kraken.buy({
-      pair: recommendation.pair,
-      idealPrice: recommendation.lastPrice,
-      volume
-    }).then(trade => {
-      const sell = calculateExitStrategy(50, trade)
-
-      console.log(`Bought ${trade.volume} ADA for ${trade.price}$ (${trade.cost}$)`)
-      console.log(`New SellOrder ${sell.volume} ADA for ${sell.price}$`)
-      // console.log(trade)
-      // console.log(sell)
+    return this.kraken.getAskPrice(recommendation.pair).then(price => {
+      // TOOD: make MAX_BET configurable
+      const volume = caluclateVolume(MAX_BET, price)
+      return this.kraken.createBuyOrder({
+        pair: recommendation.pair,
+        volume
+      }).then(trade => {
+        const sell = calculateExitStrategy(50, trade)
+        console.log(`Bought ${trade.volume} ADA for ${trade.price}$ (${trade.cost}$)`)
+        console.log(`New SellOrder ${sell.volume} ADA for ${sell.price}$`)
+        // console.log(trade)
+        // console.log(sell)
+      })
     })
   }
 }

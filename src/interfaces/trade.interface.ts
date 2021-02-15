@@ -10,7 +10,6 @@ export interface Trade {
 
 export interface BuyOrder {
   pair: string
-  idealPrice: number // we don't really need that. just for MockKrakenService
   price?: number
   volume?: number
 }
@@ -23,6 +22,6 @@ export interface SellOrder {
 
 export interface BuyRecommendation {
   pair: string
-  lastPrice: number
-  confidene: number
+  lastPrice?: number
+  confidene?: number
 }

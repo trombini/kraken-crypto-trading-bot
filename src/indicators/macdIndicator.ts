@@ -1,7 +1,7 @@
 import { takeRight, filter, round } from 'lodash'
 import { MACD } from 'technicalindicators'
+import { BotConfig } from '../common/config'
 import { OHLCBlock } from '../krakenService'
-import { BotConfig } from 'src/interfaces/botConfig.interface'
 import moment from 'moment'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length

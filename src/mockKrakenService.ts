@@ -9,7 +9,7 @@ export class MockKrakenService extends KrakenService {
     console.log(`BUY ${order.volume} for '${order.price ? order.price : 'market'}'`)
 
     return new Promise((resolve, reject) => {
-      const price = order.idealPrice
+      const price = 12
       if(order?.volume) {
         resolve({
           id: uuidv4(),

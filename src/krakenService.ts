@@ -1,10 +1,8 @@
-import { v4 as uuidv4 } from 'uuid'
-import { BotConfig } from './interfaces/botConfig.interface'
-import { KrakenApi } from './krakenApi'
 import { last } from 'lodash'
-import moment from 'moment'
+import { BotConfig } from './common/config'
 import { BuyOrder, SellOrder, Trade } from './interfaces/trade.interface'
-import { priceFallsBetweenBarRange } from 'technicalindicators/declarations/volume/VolumeProfile'
+import moment from 'moment'
+import KrakenClient from 'kraken-api'
 
 export interface OHLCBlock {
   time: number
@@ -28,12 +26,11 @@ const mapOhlcResultToObject = (result: any[]): OHLCBlock => {
 }
 
 export class KrakenService {
-  constructor(readonly krakenApi: KrakenApi, readonly config: BotConfig) {}
+  constructor(readonly krakenApi: KrakenClient, readonly config: BotConfig) {}
 
   async getOHLCData(pair: string, interval: number): Promise<any> {
     const since = moment().subtract(12, 'h').unix()
-    return this.krakenApi
-      .api('OHLC', { pair, interval, since })
+    return this.krakenApi.api('OHLC', { pair, interval, since }, () => {})
       .then((response) => response.result[this.config.pair])
       .then((result) => {
         const blocks = result.map(mapOhlcResultToObject)
@@ -45,11 +42,28 @@ export class KrakenService {
       })
   }
 
+  // https://www.kraken.com/features/api#get-ticker-info
+  async getTicker(pair: string): Promise<any> {
+    return this.krakenApi.api('Ticker', { pair }, () => {})
+    .then(response => {
+      return response.result[pair.toUpperCase()]
+    })
+  }
+
+  // https://www.kraken.com/features/api#get-ticker-info
+  async getAskPrice(pair: string): Promise<number> {
+    return this.getTicker(pair).then(response => response['a'][0])
+  }
+
   async sell(order: SellOrder): Promise<any> {
     console.log(`SELL ${order.volume} for '${order.price ? order.price : 'market'}'`)
   }
 
-  async buy(order: BuyOrder): Promise<Trade> {
+  async createBuyOrder(order: BuyOrder): Promise<Trade> {
+
+
+    //return this.krakenApi.api('DDD')
+
     throw Error('NOT IMPLEMENTED')
   }
 }

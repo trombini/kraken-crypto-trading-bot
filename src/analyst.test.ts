@@ -1,22 +1,19 @@
+import KrakenClient from 'kraken-api'
 import { Analyst } from './analyst'
-import { BotConfig } from './interfaces/botConfig.interface'
-import { KrakenApi } from './krakenApi'
 import { KrakenService, OHLCBlock } from './krakenService'
 import { Watcher } from './watcher'
+import { config } from './common/config'
 
-let config: BotConfig
 let watcher: Watcher
 let blocks: OHLCBlock[]
 
+beforeAll(() => {
+  console.log('before all')
+})
+
 beforeEach(() => {
 
-  config = {
-    interval: 5,
-    pair: 'ADAUSD',
-    blockMaturity: 0.75
-  }
-
-  const krakenApi = new KrakenApi('', '')
+  const krakenApi = new KrakenClient('key', 'secret')
   const krakenService = new KrakenService(krakenApi, config)
   watcher = new Watcher(krakenService, config)
 
