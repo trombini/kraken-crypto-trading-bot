@@ -4,20 +4,23 @@ import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
 import { round } from 'lodash'
-import fs from 'fs'
+import { PositionsService } from './positions.service'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
+
+const positionIdentifier = (position: Position) => ``
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
 
-  repo: PositionsRepository
-
-  constructor(readonly kraken: KrakenService, readonly analyst: DownswingAnalyst, readonly config: BotConfig) {
-
-    this.repo = new PositionsRepository()
-
-    this.repo.positions().then(positions => {
+  constructor(
+    readonly kraken: KrakenService,
+    readonly analyst: DownswingAnalyst,
+    readonly config: BotConfig,
+    readonly repo: PositionsService
+  ) {
+    // load positions and start watching for sell opporunities
+    this.repo.findAll().then(positions => {
       positions.map(position => {
         const key = `[${position.pair}_${position.price}_${position.volume}]`
         logger.info(`Start watching sell opportunity for ${key}`)
@@ -46,19 +49,20 @@ export class TrailingStopLossBot {
     const targetProfit = 50
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
 
-    this.repo.positions().then(positions => {
+    this.repo.findAll().then(positions => {
       positions.forEach(position => {
         if(this.inBuyZone(currentBidPrice, targetProfit, position)) {
           this.sell(position, currentBidPrice)
+        }
+        else {
+          logger.info(`Unfortunately position '${positionIdentifier(position)}' is not yet in WIN zone 🤬`)
         }
       })
     })
   }
 
   async sell(position: Position, currentBidPrice: number) {
-
-    const key = `[${position.pair}_${position.price}_${position.volume}]`
-    logger.info(`Position '${key}' is in WIN zone. Sell now! 🤑`)
+    logger.info(`Position '${positionIdentifier(position)}' is in WIN zone. Sell now! 🤑`)
 
     const costs = position.price * position.volume
     const fee = costs * this.config.tax * 2
@@ -66,45 +70,8 @@ export class TrailingStopLossBot {
     const volumeToSell = round((totalCosts / currentBidPrice), 0)
     const volumeToKeep = position.volume - volumeToSell
 
-    logger.debug(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
+    logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
 
     // TODO: calculate real profit based on actual transaction data
-  }
-}
-
-class PositionsRepository {
-
-  data: any[]
-
-  constructor() {
-    this.data = []
-    this.loadDataFromDisk().then(positions => {
-      this.data = positions
-    })
-  }
-
-  async positions() {
-    return this.loadDataFromDisk().then(positions => {
-      return positions
-    })
-  }
-
-  async loadDataFromDisk(): Promise<Position[]> {
-
-    return new Promise((resolve) => {
-      const path = './positions.json'
-      fs.access(path, (err) => {
-        if(err) {
-          fs.writeFile(path, JSON.stringify([]), (err) => {
-            resolve([])
-          })
-        }
-        else {
-          fs.readFile(path, 'utf8', (err, data) => {
-            resolve(JSON.parse(data))
-          })
-        }
-      })
-    })
   }
 }

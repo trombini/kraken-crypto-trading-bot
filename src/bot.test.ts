@@ -3,10 +3,16 @@ import { Bot, calculateExitStrategy, caluclateVolume } from './bot'
 import { config } from './common/config'
 import { KrakenService } from './krakenService'
 import { v4 as uuidv4 } from 'uuid'
+import { AssetWatcher } from './assetWatcher'
+import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import moment from 'moment'
+import { PositionsService } from './positions.service'
 
+let positionsService: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
+let assetWatcher: AssetWatcher
+let upswingAnalyst: UpswingAnalyst
 
 const getFakeTrade = (pair: string, volume: number, price: number, time?: number) => {
   const tax = 0.0018
@@ -24,8 +30,11 @@ const getFakeTrade = (pair: string, volume: number, price: number, time?: number
 }
 
 beforeEach(() => {
+  positionsService = new PositionsService()
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
+  assetWatcher = new AssetWatcher(config.interval, krakenService, config)
+  upswingAnalyst = new UpswingAnalyst(assetWatcher, config)
 })
 
 describe('BOT', () => {
@@ -43,11 +52,11 @@ describe('BOT', () => {
 
   it('should calculate correct volume based on MAX_BET and last ask price', async () => {
     const volume = caluclateVolume(500, 0.3)
-    expect(volume).toBe(1666.67)
+    expect(volume).toBe(1667)
   })
 
   it('should order correct volume based on MAX_BET and last ask price', async () => {
-    const bot = new Bot(krakenService)
+    const bot = new Bot(krakenService, upswingAnalyst, positionsService)
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'some-transaction-id'} ])
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(0.3)
 
@@ -55,12 +64,12 @@ describe('BOT', () => {
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
-      volume: 1666.67
+      volume: 1667
     })
   })
 
   it('should fail to buy the same asset within a short period', async () => {
-    const bot = new Bot(krakenService)
+    const bot = new Bot(krakenService, upswingAnalyst, positionsService)
     const buyRecommendation = { pair: 'ADAUSD' }
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'some-transaction-id'} ])
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(99)

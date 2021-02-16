@@ -19,7 +19,8 @@ export class DownswingAnalyst extends Analyst {
 
   analyse(head: OHLCBlock, blocks: OHLCBlock[]) {
     return Promise.all([
-      macdIndicator(this.config, head, blocks)
+      macdIndicator(5, 0.5, head, blocks)
+      //macdIndicator(5, this.config.blockMaturity, head, blocks)
     ])
   }
 

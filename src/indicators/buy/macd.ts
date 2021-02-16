@@ -4,6 +4,7 @@ import { BotConfig } from '../../common/config'
 import { OHLCBlock } from '../../krakenService'
 import { logger } from '../../common/logger'
 import { allNegatives, getMaturedBlocks, getBlockMaturity } from '../utils'
+import { round } from 'lodash'
 
 // Returns true if last three data points swing from netgative trend to a positive trend
 export const isUpSwing = (historgram: number[]) => () => {
@@ -12,10 +13,10 @@ export const isUpSwing = (historgram: number[]) => () => {
   }
 
   // v0 oldest, v1 middel, v2 now
-  const v = takeRight(historgram, 3)
+  const v = takeRight(historgram, 3).map(v => round(v, 6))
   const result = allNegatives(v) && v[0] > v[1] && v[1] < v[2]
 
-  logger.debug(`MACD // isUpswing: ${v[0]} | ${v[1]} | ${v[2]} -> ${result}`)
+  logger.debug(`MACD BUY: [${v[0]} | ${v[1]} | ${v[2]}] -> ${result}`)
 
   return result
 }
@@ -31,12 +32,14 @@ export const isUpTrend = (historgram: number[]) => () => {
   return v[0] < v[1] && v[1] < v[2]
 }
 
-export const indicator = (config: BotConfig, head: OHLCBlock, blocks: OHLCBlock[]) => {
+export const indicator = (interval: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
 
-  const headMaturity = getBlockMaturity(config.interval, head)
-  const maturedBlocks = getMaturedBlocks(config.interval, config.blockMaturity, blocks)
+  const headMaturity = getBlockMaturity(interval, head)
+  const maturedBlocks = getMaturedBlocks(interval, blockMaturity, blocks)
 
-  logger.debug(`Head Block Maturity: ${headMaturity}. Needs to be above ${config.blockMaturity}.`)
+  if(headMaturity < blockMaturity) {
+    logger.debug(`MACD BUY: block maturity: ${headMaturity}. Needs to be above ${blockMaturity}.`)
+  }
 
   const closes = maturedBlocks.map(b => b.close)
   const macdOutput = MACD.calculate({

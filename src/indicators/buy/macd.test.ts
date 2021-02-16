@@ -64,3 +64,12 @@ describe('MACD / Buy', () => {
   })
 
 })
+
+
+// UPSWING??
+
+// 2021-02-16T07:56:06.349Z [debug] Head Block Maturity: 0.74. Needs to be above 0.75.
+// 2021-02-16T07:56:06.349Z [debug] MACD // isUpswing: -0.0012221514570677986 | -0.0016832052687486946 | -0.001487754135497297 -> true
+// 2021-02-16T07:56:06.349Z [info] UPSWING detected for [ADAUSD]
+// 2021-02-16T07:56:06.349Z [info] Won't buy ADAUSD as we just bought it.
+

@@ -5,8 +5,9 @@ import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
+import { PositionsService } from './positions.service'
 
-const MAX_BET = 500
+const MAX_BET = 1500
 
 export const calculateExitStrategy = (
   expectedProfit: number,
@@ -25,13 +26,16 @@ export const calculateExitStrategy = (
   }
 }
 
-export const caluclateVolume = (maxBet: number, price: number) =>
-  round(maxBet / price, 2)
+export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 0)
 
 export class Bot {
   datastore: any[]
 
-  constructor(readonly kraken: KrakenService, readonly analyst?: Analyst) {
+  constructor(
+    readonly kraken: KrakenService,
+    readonly analyst: Analyst,
+    readonly positionsService: PositionsService
+  ) {
     this.datastore = []
 
     // register event handler to observe buy recommendations
@@ -44,15 +48,16 @@ export class Bot {
 
   // TOOD: make MAX_BET configurable
   async buy(recommendation: BuyRecommendation) {
-    const threshold = moment().subtract(5, 'm').unix()
+    const threshold = moment().subtract(15, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
-      logger.info(`Won't buy ${recommendation.pair} as we just bought it.`)
+      logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
       return
     }
 
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
     const volume = caluclateVolume(MAX_BET, askPrice)
+
     return this.kraken
       .createBuyOrder({ pair: recommendation.pair, volume })
       .then(transactions => {

@@ -61,7 +61,7 @@ export class KrakenService {
     return this.getTicker(pair)
       .then(response => {
         const ask = response['a'][0]
-        logger.debug(`Current ASK price for ${pair} is '${ask}'`)
+        logger.info(`Current ASK price for ${pair} is '${ask}'`)
         return ask
       })
       .catch(err => {
@@ -75,7 +75,7 @@ export class KrakenService {
     return this.getTicker(pair)
       .then(response => {
         const bid = response['b'][0]
-        logger.debug(`Current BID price for ${pair} is '${bid}'`)
+        logger.info(`Current BID price for ${pair} is '${bid}'`)
         return bid
       })
       .catch(err => {
@@ -107,18 +107,21 @@ export class KrakenService {
       ordertype: 'market'
     }
 
-    return this.krakenApi.api('AddOrder', buyOrder, fakeCallbak)
-      .then((response: KrakenAddOrderApiResponse) => {
-        return response.result.txid.map(transactionId => {
-          return {
-            id: transactionId
-          }
-        })
-      })
-      .catch(err => {
-        logger.error(err.message)
-        throw err
-      })
+    logger.info(`FAKE BUY ${order.volume} [${order.pair}]`)
+    return [{ id: 'xxx' }]
+
+    // return this.krakenApi.api('AddOrder', buyOrder, fakeCallbak)
+    //   .then((response: KrakenAddOrderApiResponse) => {
+    //     return response.result.txid.map(transactionId => {
+    //       return {
+    //         id: transactionId
+    //       }
+    //     })
+    //   })
+    //   .catch(err => {
+    //     logger.error(err.message)
+    //     throw err
+    //   })
   }
 }
 

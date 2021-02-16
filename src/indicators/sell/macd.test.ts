@@ -40,3 +40,4 @@ describe('MACD / Sell', () => {
 
 })
 
+// Signal Line still below Zero. Then we might not sell
