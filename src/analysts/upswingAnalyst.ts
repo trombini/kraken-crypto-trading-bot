@@ -1,21 +1,12 @@
-import { Watcher, WatcherUpdateEvent } from './watcher'
-import { indicator as macdIndicator } from './indicators/macdIndicator'
-import { OHLCBlock } from './krakenService'
-import { BotConfig } from './common/config'
-import { logger } from './common/logger'
+import { WatcherUpdateEvent } from '../assetWatcher'
+import { indicator as macdIndicator } from '../indicators/buy/macd'
+import { OHLCBlock } from '../krakenService'
+import { logger } from '../common/logger'
 import { filter } from 'lodash'
+import { Analyst } from './analyst'
 import moment from 'moment'
-import events from 'events'
 
-export class Analyst extends events.EventEmitter {
-
-  constructor(readonly watcher: Watcher, readonly config: BotConfig) {
-    super()
-
-    watcher.on('WATCHER:UPDATE', (data: WatcherUpdateEvent) => {
-      this.analyseMarketData(data)
-    })
-  }
+export class UpswingAnalyst extends Analyst {
 
   analyseMarketData(data: WatcherUpdateEvent): Promise<void> {
     return this.analyse(data.head, data.blocks).then(result => {

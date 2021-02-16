@@ -11,7 +11,7 @@ export interface WatcherUpdateEvent {
   blocks: OHLCBlock[]
 }
 
-export class Watcher extends events.EventEmitter {
+export class AssetWatcher extends events.EventEmitter {
   constructor(readonly kraken: KrakenService, readonly config: BotConfig) {
     super()
   }

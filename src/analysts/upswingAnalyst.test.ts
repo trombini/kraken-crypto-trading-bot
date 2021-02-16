@@ -1,11 +1,13 @@
 import KrakenClient from 'kraken-api'
-import { Analyst } from './analyst'
-import { KrakenService, OHLCBlock } from './krakenService'
-import { Watcher } from './watcher'
-import { config } from './common/config'
-import { logger } from './common/logger'
+import { KrakenService, OHLCBlock } from '../krakenService'
+import { AssetWatcher } from '../assetWatcher'
+import { config } from '../common/config'
+import { logger } from '../common/logger'
+import { UpswingAnalyst } from './upswingAnalyst'
 
-let watcher: Watcher
+let krakenApi: KrakenClient
+let krakenService: KrakenService
+let watcher: AssetWatcher
 let blocks: OHLCBlock[]
 
 beforeAll(() => {
@@ -14,10 +16,9 @@ beforeAll(() => {
 
 beforeEach(() => {
 
-  const krakenApi = new KrakenClient('key', 'secret')
-  const krakenService = new KrakenService(krakenApi, config)
-  watcher = new Watcher(krakenService, config)
-
+  krakenApi = new KrakenClient('key', 'secret')
+  krakenService = new KrakenService(krakenApi, config)
+  watcher = new AssetWatcher(krakenService, config)
   blocks = [{
     time: 1,
     open: 1,
@@ -28,10 +29,10 @@ beforeEach(() => {
   }]
 })
 
-describe('Analyst', () => {
+describe('UpswingAnalyst', () => {
 
-  it('should not trigger BUY event if analysis was negative', () => {
-    const analyst = new Analyst(watcher, config)
+  it('should not trigger BUY event if part of the analysis was negative', () => {
+    const analyst = new UpswingAnalyst(watcher, config)
     const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
     const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true, false])
 
@@ -45,7 +46,7 @@ describe('Analyst', () => {
   })
 
   it('should trigger BUY event if analysis was positive', () => {
-    const analyst = new Analyst(watcher, config)
+    const analyst = new UpswingAnalyst(watcher, config)
     const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
     const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true])
 

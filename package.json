@@ -10,7 +10,8 @@
     "dev": "tsc --watch",
     "build": "tsc",
     "test": "jest",
-    "test:dev": "jest --watchAll"
+    "test:dev": "jest --watchAll",
+    "test:coverage": "jest --coverage=true"
   },
   "keywords": [],
   "author": "",

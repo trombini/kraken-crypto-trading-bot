@@ -1,13 +1,9 @@
-import { takeRight, filter, round } from 'lodash'
+import { takeRight } from 'lodash'
 import { MACD } from 'technicalindicators'
-import { BotConfig } from '../common/config'
-import { OHLCBlock } from '../krakenService'
-import { logger } from '../common/logger'
-import moment from 'moment'
-
-export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length
-
-export const allPositives = (values: number[]) => filter(values, (e) => e > 0).length == values.length
+import { BotConfig } from '../../common/config'
+import { OHLCBlock } from '../../krakenService'
+import { logger } from '../../common/logger'
+import { allNegatives, getMaturedBlocks, getBlockMaturity } from '../utils'
 
 // Returns true if last three data points swing from netgative trend to a positive trend
 export const isUpSwing = (historgram: number[]) => () => {
@@ -33,19 +29,6 @@ export const isUpTrend = (historgram: number[]) => () => {
   // v0 oldest, v1 middel, v2 now
   const v = takeRight(historgram, 3)
   return v[0] < v[1] && v[1] < v[2]
-}
-
-export const getBlockMaturity = (interval: number, block: OHLCBlock): number => {
-  const now = moment().unix()
-  const age = now - block.time
-  return round(age / (interval * 60), 2)
-}
-
-export const getMaturedBlocks = (interval: number, maturity: number, blocks: OHLCBlock[]) : OHLCBlock[] => {
-  const now = moment().unix()
-  const margin = (interval * 60) * maturity
-  const threshold = now - margin
-  return filter(blocks, o => o.time < threshold)
 }
 
 export const indicator = (config: BotConfig, head: OHLCBlock, blocks: OHLCBlock[]) => {
