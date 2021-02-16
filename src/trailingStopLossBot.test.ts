@@ -13,7 +13,7 @@ let downswingAnalyst: DownswingAnalyst
 beforeEach(() => {
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
-  assetWatcher = new AssetWatcher(krakenService, config)
+  assetWatcher = new AssetWatcher(config.interval, krakenService, config)
   downswingAnalyst = new DownswingAnalyst(assetWatcher, config)
 })
 

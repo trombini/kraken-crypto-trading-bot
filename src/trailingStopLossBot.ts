@@ -45,7 +45,6 @@ export class TrailingStopLossBot {
   async handleSellRecommendation(recommendation: SellRecommendation) {
     const targetProfit = 50
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-    logger.debug(`Current BID price for ${recommendation.pair} is '${currentBidPrice}'`)
 
     this.repo.positions().then(positions => {
       positions.forEach(position => {

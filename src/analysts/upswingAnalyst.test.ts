@@ -18,7 +18,7 @@ beforeEach(() => {
 
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
-  watcher = new AssetWatcher(krakenService, config)
+  watcher = new AssetWatcher(config.interval, krakenService, config)
   blocks = [{
     time: 1,
     open: 1,

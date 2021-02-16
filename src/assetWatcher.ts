@@ -1,9 +1,8 @@
 import events from 'events'
 import { BotConfig } from './common/config'
+import { logger } from './common/logger'
 import { KrakenService, OHLCBlock } from './krakenService'
-
-//const INTERVAL = 360000
-const INTERVAL = 10
+import { random } from './common/utils'
 
 export interface WatcherUpdateEvent {
   pair: string
@@ -12,12 +11,12 @@ export interface WatcherUpdateEvent {
 }
 
 export class AssetWatcher extends events.EventEmitter {
-  constructor(readonly kraken: KrakenService, readonly config: BotConfig) {
+  constructor(readonly interval: number, readonly kraken: KrakenService, readonly config: BotConfig) {
     super()
   }
 
   fetchData() {
-    this.kraken.getOHLCData(this.config.pair, this.config.interval).then(result => {
+    this.kraken.getOHLCData(this.config.pair, this.interval).then(result => {
       this.emit('WATCHER:UPDATE', {
         pair: this.config.pair,
         head: result.head,
@@ -27,9 +26,13 @@ export class AssetWatcher extends events.EventEmitter {
   }
 
   start() {
-    this.fetchData()
-    setInterval(() => {
-      this.fetchData()
-    }, INTERVAL * 1000)
+    //this.fetchData()
+    setTimeout(() => {
+      logger.info(`Start AssetWatcher for [${this.config.pair}] with interval ${this.interval}`)
+      setInterval(() => {
+        this.fetchData()
+      }, random(15, 30) * 1000)
+    }, 0)
+
   }
 }

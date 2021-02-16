@@ -1,7 +1,4 @@
 
-
-
-
-export const round = (factor: number, number: number) => {
-  return Math.round((number + Number.EPSILON) * 1000) / 1000
+export const random = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1) + min)
 }

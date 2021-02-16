@@ -4,7 +4,6 @@ import { OHLCBlock } from '../krakenService'
 import { logger } from '../common/logger'
 import { filter } from 'lodash'
 import { Analyst } from './analyst'
-import moment from 'moment'
 
 export class DownswingAnalyst extends Analyst {
 
@@ -12,7 +11,7 @@ export class DownswingAnalyst extends Analyst {
     return this.analyse(data.head, data.blocks).then(result => {
       const positive = filter(result, r => r === true).length === result.length
       if(positive) {
-        logger.info(`Downswing for '${data.pair}'. Sell now! Go go go 🚀 🤑 🤑 🤑 🤑`)
+        logger.info(`DOWNSWING detected for [${data.pair}]`)
         this.sendRecommendationToSellEvent(data.pair, data.head)
       }
     })

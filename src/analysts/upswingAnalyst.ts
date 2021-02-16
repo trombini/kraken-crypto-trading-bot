@@ -13,11 +13,8 @@ export class UpswingAnalyst extends Analyst {
       const positive = filter(result, r => r === true).length === result.length
       const blockDate = moment.unix(data.head.time).format()
       if(positive) {
-        logger.info(`Buy '${data.pair}'  🚀 🤑`)
+        logger.info(`UPSWING detected for [${data.pair}]`)
         this.sendRecommendationToBuyEvent(data.pair, data.head)
-      }
-      else {
-        logger.info(`Don't buy block ${blockDate} 🤬`)
       }
     })
   }
