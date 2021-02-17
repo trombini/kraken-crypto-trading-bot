@@ -1,11 +1,12 @@
 import { last, takeRight } from 'lodash'
-import { MACD } from 'technicalindicators'
-import { BotConfig } from '../../common/config'
 import { OHLCBlock } from '../../krakenService'
 import { logger } from '../../common/logger'
-import { allNegatives, getMaturedBlocks, getBlockMaturity } from '../utils'
-import { round } from 'lodash'
+import { allNegatives } from '../utils'
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
+import { round, every } from 'lodash'
+import { calculateMACD } from '../macd'
+
+// TODO: check if sell period was long and strong enough. Don't just buy because three blocks were in the reds.
 
 // Returns true if last three data points swing from netgative trend to a positive trend
 export const isUpSwing = (historgram: number[]) => {
@@ -40,33 +41,18 @@ export const macdCrossesAboveSignal = (macdInput: MACDOutput[]) => {
     const macdAboveSignal = head.MACD > head.signal
     const macdBelowZero = head.MACD < 0
     const delta = head.MACD - head.signal
-    logger.debug(`MACD BUY/SIGNAL: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${delta}] -> ${macdAboveSignal}`)
+    logger.debug(`MACD BUY/MACD: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${delta}] -> ${macdAboveSignal}`)
 
     return macdBelowZero && macdAboveSignal
   }
   return false
 }
 
-export const indicator = (interval: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
-
-  const headMaturity = getBlockMaturity(interval, head)
-  const maturedBlocks = getMaturedBlocks(interval, blockMaturity, blocks)
-
-  if(headMaturity < blockMaturity) {
-    logger.debug(`MACD BUY: block maturity: ${headMaturity}. Needs to be above ${blockMaturity}.`)
-  }
-
-  // reduce input to "close" values, MACD is not interested in anything else
-  const closes = maturedBlocks.map(b => b.close)
-  const macdOutput = MACD.calculate({
-    values: closes,
-    fastPeriod: 12,
-    slowPeriod: 26,
-    signalPeriod: 9,
-    SimpleMAOscillator: false,
-    SimpleMASignal: false,
-  })
-
+export const indicator = (period: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
+  const macdOutput = calculateMACD(period, blockMaturity, head, blocks)
   const historgram = macdOutput.map(e => e.histogram || 0)
-  return isUpSwing(historgram) && macdCrossesAboveSignal(macdOutput)
+  return every([
+    isUpSwing(historgram),
+    macdCrossesAboveSignal(macdOutput)
+  ], Boolean)
 }
