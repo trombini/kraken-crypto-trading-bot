@@ -21,6 +21,11 @@ export const isDownSwing = (historgram: number[]) => () => {
   return result
 }
 
+// and sell—or short—the security when the MACD crosses below the signal line.
+export const signal = () => {
+
+}
+
 export const indicator = (interval: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
 
   const headMaturity = getBlockMaturity(interval, head)

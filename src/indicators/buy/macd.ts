@@ -33,16 +33,17 @@ export const isUpTrend = (historgram: number[]) => {
   return v[0] < v[1] && v[1] < v[2]
 }
 
-export const signal = (macd: MACDOutput[]) => {
-
-  const head = last(macd)
+// Traders may buy the asset when the MACD crosses above its signal line
+export const macdCrossesAboveSignal = (macdInput: MACDOutput[]) => {
+  const head = last(macdInput)
   if (head && head.signal && head?.MACD) {
     const macdAboveSignal = head.MACD > head.signal
+    const macdBelowZero = head.MACD < 0
     const delta = head.MACD - head.signal
     logger.debug(`MACD BUY/SIGNAL: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${delta}] -> ${macdAboveSignal}`)
-    return head.MACD < 0 && macdAboveSignal
-  }
 
+    return macdBelowZero && macdAboveSignal
+  }
   return false
 }
 
@@ -66,12 +67,6 @@ export const indicator = (interval: number, blockMaturity: number, head: OHLCBlo
     SimpleMASignal: false,
   })
 
-  const s = signal(macdOutput)
-
   const historgram = macdOutput.map(e => e.histogram || 0)
-  const upswing = isUpSwing(historgram)
-  const uptrend = isUpTrend(historgram)
-
-  //return upswing() && uptrend()
-  return upswing && s
+  return isUpSwing(historgram) && macdCrossesAboveSignal(macdOutput)
 }
