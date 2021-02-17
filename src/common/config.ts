@@ -8,6 +8,7 @@ export interface BotConfig {
   pair: string
   tax: number
   maxBet: number
+  bypassKrakenApi: boolean
   blockMaturity: number
   krakenApiKey: string
   krakenApiSecret: string
@@ -20,5 +21,6 @@ export const config: BotConfig = {
   tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0018,
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
-  krakenApiSecret: process.env.KRAKEN_API_SECRET || ''
+  krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
+  bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false
 }

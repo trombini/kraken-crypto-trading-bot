@@ -1,8 +1,9 @@
 import { last } from 'lodash'
 import { BotConfig } from './common/config'
 import { logger } from './common/logger'
-import { BuyOrder, SellOrder, Trade, Transaction } from './interfaces/trade.interface'
+import { Order, Trade, Transaction } from './interfaces/trade.interface'
 import { KrakenAddOrderApiResponse } from './interfaces/kraken.interface'
+import { v4 as uuidv4 } from 'uuid'
 import KrakenClient from 'kraken-api'
 import moment from 'moment'
 
@@ -84,8 +85,19 @@ export class KrakenService {
       })
   }
 
-  async createSellOrder(order: SellOrder): Promise<any> {
-    logger.debug(`SELL ${order.volume} for '${order.price ? order.price : 'market'}'`)
+  async createSellOrder(order: Order): Promise<any> {
+    logger.debug(`New SELL order: ${order.volume} for '${order.price ? order.price : 'market'}'`)
+
+    if(!order.volume || order.volume <= 0) {
+      throw new Error('Volume is less than 1.')
+    }
+
+    return this.createBuySellOrder({
+      pair: order.pair,
+      volume: order.volume,
+      type: 'sell',
+      ordertype: 'market'
+    })
   }
 
   /**
@@ -94,37 +106,39 @@ export class KrakenService {
    * This has to be checked in a subsequent call to lookup the transaction.
    * @param order
    */
-  async createBuyOrder(order: BuyOrder): Promise<Transaction[]> {
+  async createBuyOrder(order: Order): Promise<Transaction[]> {
+    logger.debug(`New BUY order: ${order.volume} for market price'`)
 
     if(!order.volume || order.volume <= 0) {
       throw new Error('Volume is less than 1.')
     }
 
-    const buyOrder = {
+    return this.createBuySellOrder({
       pair: order.pair,
       volume: order.volume,
       type: 'buy',
       ordertype: 'market'
+    })
+  }
+
+  async createBuySellOrder(order: Order) {
+    if(this.config.bypassKrakenApi) {
+      logger.info(`FAKE ${order.type} ORDER: ${order.volume} [${order.pair}]`)
+      return [{ id: uuidv4() }]
     }
-
-    logger.info(`FAKE BUY ${order.volume} [${order.pair}]`)
-    return [{ id: 'xxx' }]
-
-    // return this.krakenApi.api('AddOrder', buyOrder, fakeCallbak)
-    //   .then((response: KrakenAddOrderApiResponse) => {
-    //     return response.result.txid.map(transactionId => {
-    //       return {
-    //         id: transactionId
-    //       }
-    //     })
-    //   })
-    //   .catch(err => {
-    //     logger.error(err.message)
-    //     throw err
-    //   })
+    else {
+      return this.krakenApi.api('AddOrder', order, fakeCallbak)
+        .then((response: KrakenAddOrderApiResponse) => {
+          return response.result.txid.map(transactionId => {
+            return {
+              id: transactionId
+            }
+          })
+        })
+        .catch(err => {
+          logger.error(err.message)
+          throw err
+        })
+    }
   }
 }
-
-
-
-

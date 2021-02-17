@@ -1,5 +1,5 @@
 import { Analyst } from './analysts/analyst'
-import { BuyRecommendation, SellOrder, Trade } from './interfaces/trade.interface'
+import { BuyRecommendation, Order, Trade } from './interfaces/trade.interface'
 import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
@@ -11,7 +11,7 @@ import moment from 'moment'
 export const calculateExitStrategy = (
   expectedProfit: number,
   trade: Trade,
-): SellOrder => {
+): Order => {
   // TODO should TAX be configuration?
   const costs = trade.price * trade.volume
   const totalFee = costs * trade.tax * 2

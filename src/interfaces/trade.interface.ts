@@ -23,18 +23,6 @@ export interface Transaction {
   id: string
 }
 
-export interface BuyOrder {
-  pair: string
-  price?: number
-  volume?: number
-}
-
-export interface SellOrder {
-  pair: string
-  price: number
-  volume: number
-}
-
 export interface BuyRecommendation {
   pair: string
   lastPrice?: number
@@ -43,4 +31,12 @@ export interface BuyRecommendation {
 
 export interface SellRecommendation {
   pair: string
+}
+
+export interface Order {
+  pair: string
+  price?: number
+  volume: number
+  type?: string
+  ordertype?: string
 }

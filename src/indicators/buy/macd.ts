@@ -15,10 +15,10 @@ export const isUpSwing = (historgram: number[]) => {
   }
 
   // v0 oldest, v1 middel, v2 now
-  const v = takeRight(historgram, 3).map(v => round(v, 6))
-  const result = allNegatives(v) && v[0] > v[1] && v[1] < v[2]
+  const b = takeRight(historgram, 3).map(v => round(v, 6))
+  const result = allNegatives(b) && b[0] > b[1] && b[1] < b[2]
 
-  logger.debug(`MACD BUY/HISTOGRAM: [${v[0]} | ${v[1]} | ${v[2]}] -> ${result}`)
+  logger.debug(`MACD BUY/HISTOGRAM: [${b[0]} | ${b[1]} | ${b[2]}] -> ${result}`)
 
   return result
 }
@@ -30,8 +30,8 @@ export const isUpTrend = (historgram: number[]) => {
   }
 
   // v0 oldest, v1 middel, v2 now
-  const v = takeRight(historgram, 3)
-  return v[0] < v[1] && v[1] < v[2]
+  const b = takeRight(historgram, 3)
+  return b[0] < b[1] && b[1] < b[2]
 }
 
 // Traders may buy the asset when the MACD crosses above its signal line
