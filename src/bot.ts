@@ -4,10 +4,9 @@ import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
-import moment from 'moment'
 import { PositionsService } from './positions.service'
-
-const MAX_BET = 1500
+import { BotConfig } from './common/config'
+import moment from 'moment'
 
 export const calculateExitStrategy = (
   expectedProfit: number,
@@ -34,9 +33,13 @@ export class Bot {
   constructor(
     readonly kraken: KrakenService,
     readonly analyst: Analyst,
-    readonly positionsService: PositionsService
+    readonly positionsService: PositionsService,
+    readonly config: BotConfig
   ) {
     this.datastore = []
+
+    // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
+    // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
 
     // register event handler to observe buy recommendations
     if (analyst) {
@@ -56,7 +59,7 @@ export class Bot {
     }
 
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
-    const volume = caluclateVolume(MAX_BET, askPrice)
+    const volume = caluclateVolume(this.config.maxBet, askPrice)
 
     return this.kraken
       .createBuyOrder({ pair: recommendation.pair, volume })

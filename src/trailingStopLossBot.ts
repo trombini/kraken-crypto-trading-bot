@@ -8,7 +8,7 @@ import { PositionsService } from './positions.service'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
-const positionIdentifier = (position: Position) => ``
+const positionIdentifier = (position: Position) => `${position.pair}_${position.price}_${position.volume}`
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {

@@ -2,7 +2,7 @@ import { Position } from './interfaces/trade.interface'
 import fs from 'fs'
 import { logger } from './common/logger'
 
-const filePath = () => `positions.${process.env.NODE_ENV}.json`
+const filePath = () => `positions.${process.env.NODE_ENV || 'prod' }.json`
 
 export class PositionsService {
 

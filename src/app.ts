@@ -20,7 +20,7 @@ const krakenService = new KrakenService(krakenApi, config)
 // Watch for uptrends to buy new positions
 const assetWatcherMid = new AssetWatcher(15, krakenService, config)
 const upswingAnalyst = new UpswingAnalyst(assetWatcherMid, config)
-const bot = new Bot(krakenService, upswingAnalyst, positionsService)
+const bot = new Bot(krakenService, upswingAnalyst, positionsService, config)
 
 // Watch for downtrends to sell open positions
 const assetWatcherShort = new AssetWatcher(5, krakenService, config)

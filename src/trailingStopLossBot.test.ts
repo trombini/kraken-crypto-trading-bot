@@ -26,8 +26,20 @@ describe('TrailingStopLossBot', () => {
     const bot = new TrailingStopLossBot(krakenService, downswingAnalyst, config, positionsService)
     const position = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.0, tax: 0.0018 }
     const currentBidPrice = 1.05
+    const targetProfit = 50
 
-    const result = bot.inBuyZone(currentBidPrice, 50, position)
+    const result = bot.inBuyZone(currentBidPrice, targetProfit, position)
+    expect(result).toBe(false)
+  })
+
+  it('currentBidPrize should not yet be in profit range for given position', () => {
+    // Becuase Volume is too low to reach the targetProfit
+    const bot = new TrailingStopLossBot(krakenService, downswingAnalyst, config, positionsService)
+    const position = { id: 123, pair: 'ADAUSD', volume: 500, price: 1.0, tax: 0.0018 }
+    const currentBidPrice = 1.1
+    const targetProfit = 50
+
+    const result = bot.inBuyZone(currentBidPrice, targetProfit, position)
     expect(result).toBe(false)
   })
 
@@ -40,16 +52,7 @@ describe('TrailingStopLossBot', () => {
     expect(result).toBe(true)
   })
 
-  it('currentBidPrize should be in profit range for given position', () => {
-    const bot = new TrailingStopLossBot(krakenService, downswingAnalyst, config, positionsService)
-    const position = { id: 123, pair: 'ADAUSD', volume: 500, price: 1.0, tax: 0.0018 }
-    const currentBidPrice = 1.1
-
-    const result = bot.inBuyZone(currentBidPrice, 50, position)
-    expect(result).toBe(true)
-  })
-
-  it('dd', async () => {
+  it('xx', async () => {
     const bot = new TrailingStopLossBot(krakenService, downswingAnalyst, config, positionsService)
     const position = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.0, tax: 0.0018 }
     const currentBidPrice = 1.1

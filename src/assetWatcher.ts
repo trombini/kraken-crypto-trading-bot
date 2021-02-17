@@ -11,12 +11,12 @@ export interface WatcherUpdateEvent {
 }
 
 export class AssetWatcher extends events.EventEmitter {
-  constructor(readonly interval: number, readonly kraken: KrakenService, readonly config: BotConfig) {
+  constructor(readonly period: number, readonly kraken: KrakenService, readonly config: BotConfig) {
     super()
   }
 
   fetchData() {
-    this.kraken.getOHLCData(this.config.pair, this.interval).then(result => {
+    this.kraken.getOHLCData(this.config.pair, this.period).then(result => {
       this.emit('WATCHER:UPDATE', {
         pair: this.config.pair,
         head: result.head,
@@ -28,7 +28,7 @@ export class AssetWatcher extends events.EventEmitter {
   start() {
     //this.fetchData()
     setTimeout(() => {
-      logger.info(`Start AssetWatcher for [${this.config.pair}] with interval ${this.interval}`)
+      logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
       setInterval(() => {
         this.fetchData()
       }, random(15, 30) * 1000)
