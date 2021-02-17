@@ -1,64 +1,60 @@
-import { isUpSwing, isUpTrend } from './macd'
+import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
+import { isUpSwing } from './macd'
+
+const getFakeHistogram = (values: number[]): MACDOutput[] => {
+  return values.map(value => {
+    return {
+      histogram: value
+    }
+  })
+}
 
 describe('MACD / Buy', () => {
-
-  describe('isUpTrend', () => {
-
-    it('should fail because not enough data', () => {
-      const input = [-3, -2]
-      expect(() => {
-        isUpTrend(input)
-      }).toThrow()
-    })
-
-    it('should be false because down trend', () => {
-      const input = [-1, -2, -3]
-      expect(isUpTrend(input)).toBe(false)
-    })
-
-    it('should be true because up trend', () => {
-      const input = [-3, -2, -1]
-      expect(isUpTrend(input)).toBe(true)
-    })
-
-    it('should be true because up trend', () => {
-      const input = [1, 2, 3]
-      expect(isUpTrend(input)).toBe(true)
-    })
-  })
 
   describe('isUpSwing', () => {
 
     it('should fail because not enough data', () => {
-      const input = [-3, -2]
       expect(() => {
-        isUpSwing(input)
+        isUpSwing({
+          isHeadMatured: true,
+          blocks: getFakeHistogram([-3, -2]),
+        })
       }).toThrow()
     })
 
     it('should be false because it is a down trend', () => {
-      const input = [-1, -2, -3]
-      expect(isUpSwing(input)).toBe(false)
+      expect(isUpSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([-1, -2, -3]),
+      })).toBe(false)
     })
 
     it('should be false because it is an up trend, upswing is over', () => {
-      const input = [-3, -2, -1]
-      expect(isUpSwing(input)).toBe(false)
+      expect(isUpSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([-3, -2, -1]),
+      })).toBe(false)
     })
 
     it('should be false because it is already positive', () => {
-      const input = [-1, 1, 2]
-      expect(isUpSwing(input)).toBe(false)
+      expect(isUpSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([-1, 1, 2]),
+      })).toBe(false)
     })
 
     it('should be false because history is flat', () => {
-      const input = [-2, -2, -1]
-      expect(isUpSwing(input)).toBe(false)
+      expect(isUpSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([-2, -2, -1]),
+      })).toBe(false)
     })
 
     it('should be true because up swing', () => {
-      const input = [-2, -3, -1]
-      expect(isUpSwing(input)).toBe(true)
+      expect(isUpSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([-2, -3, -1]),
+      })).toBe(true)
     })
   })
 

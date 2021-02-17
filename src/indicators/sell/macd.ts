@@ -1,23 +1,26 @@
 import { takeRight } from 'lodash'
 import { OHLCBlock } from '../../krakenService'
 import { logger } from '../../common/logger'
-import { allPositives } from '../utils'
+import { allPositives } from '../common/utils'
 import { round, every } from 'lodash'
-import { calculateMACD } from '../macd'
+import { calculateMACD, histogram, MACDResult, matured } from '../common/macdUtils'
 
 // TODO: Signal Line still below Zero. Then we might not sell
 
 // Returns true if last three data points swing from positive trend to a negative trend
-export const isDownSwing = (historgram: number[]) => {
-  if(historgram.length < 3) {
-    throw new Error('Not enough data points')
+export const isDownSwing = (macd: MACDResult) => {
+
+  if(macd.blocks.length < 3) {
+    throw Error('Not enough data')
   }
 
   // v0 oldest, v1 middel, v2 now
-  const v = takeRight(historgram, 3).map(v => round(v, 6))
-  const result = allPositives(v) && v[0] < v[1] && v[1] > v[2]
+  const maturedBlocks = matured(macd)
+  const histogramOfMaturedBlocks = histogram(maturedBlocks)
+  const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
+  const result = allPositives(b) && b[0] < b[1] && b[1] > b[2]
 
-  logger.debug(`MACD SELL/HISTOGRAM: [${v[0]} | ${v[1]} | ${v[2]}] -> ${result}`)
+  logger.debug(`MACD SELL/HISTOGRAM: [${b[0]} | ${b[1]} | ${b[2]}] -> ${result}`)
 
   return result
 }
@@ -28,9 +31,8 @@ export const signal = () => {
 }
 
 export const indicator = (period: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
-  const macdOutput = calculateMACD(period, blockMaturity, head, blocks)
-  const historgram = macdOutput.map(e => e.histogram || 0)
+  const macd = calculateMACD(period, blockMaturity, blocks)
   return every([
-    isDownSwing(historgram),
+    isDownSwing(macd),
   ], Boolean)
 }

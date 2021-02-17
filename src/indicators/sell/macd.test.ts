@@ -1,40 +1,61 @@
+import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
 import { isDownSwing } from './macd'
+
+const getFakeHistogram = (values: number[]): MACDOutput[] => {
+  return values.map(value => {
+    return {
+      histogram: value
+    }
+  })
+}
 
 describe('MACD / Sell', () => {
 
   describe('isUpSwing', () => {
 
     it('should fail because not enough data', () => {
-      const input = [1, 2]
       expect(() => {
-        isDownSwing(input)
+        isDownSwing({
+          isHeadMatured: true,
+          blocks: getFakeHistogram([1, 2]),
+        })
       }).toThrow()
     })
 
     it('should be false because it is a up trend', () => {
-      const input = [1, 2, 3]
-      expect(isDownSwing(input)).toBe(false)
+      expect(isDownSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([1, 2, 3]),
+      })).toBe(false)
     })
 
     it('should be false because it is a down trend, downswing is over', () => {
-      const input = [3, 2, 1]
-      expect(isDownSwing(input)).toBe(false)
+      expect(isDownSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([3, 2, 1]),
+      })).toBe(false)
     })
 
     it('should be false because it is already negative', () => {
-      const input = [2, 1, -1]
-      expect(isDownSwing(input)).toBe(false)
+      expect(isDownSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([2, 1, -1]),
+      })).toBe(false)
     })
 
     // TODO: does this make sense as an indicator??
     it('should be false because history is flat', () => {
-      const input = [2, 2, 1]
-      expect(isDownSwing(input)).toBe(false)
+      expect(isDownSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([2, 2, 1]),
+      })).toBe(false)
     })
 
-    it('should be true because up swing', () => {
-      const input = [1, 2, 1]
-      expect(isDownSwing(input)).toBe(true)
+    it('should be true because we are in a down swing', () => {
+      expect(isDownSwing({
+        isHeadMatured: true,
+        blocks: getFakeHistogram([1, 2, 1]),
+      })).toBe(true)
     })
   })
 

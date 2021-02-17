@@ -49,7 +49,6 @@ export class Bot {
     }
   }
 
-  // TOOD: make MAX_BET configurable
   async buy(recommendation: BuyRecommendation) {
     const threshold = moment().subtract(15, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
@@ -69,6 +68,15 @@ export class Bot {
           id: uuidv4(),
           date: moment().unix(),
           transactions
+        })
+
+        // register new position
+        this.positionsService.add({
+          id: moment().unix(),
+          pair: recommendation.pair,
+          price: 0,
+          volume: 0,
+          tax: 0
         })
 
         // const sell = calculateExitStrategy(50, trade)
