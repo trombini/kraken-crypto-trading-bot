@@ -1,5 +1,5 @@
-import { takeRight, filter, round } from 'lodash'
-import { OHLCBlock } from 'src/krakenService'
+import { filter, round } from 'lodash'
+import { OHLCBlock } from '../../interfaces/trade.interface'
 import moment from 'moment'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length

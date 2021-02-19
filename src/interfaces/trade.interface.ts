@@ -1,14 +1,10 @@
-
-// TODO: do we really need that?
-export interface Trade {
-  id: string
+export interface OHLCBlock {
   time: number
-  pair: string
-  price: number
-  volume: number
-  cost: number
-  fee: number
-  tax: number
+  close: number
+  open?: number
+  high?: number
+  low?: number
+  volume?: number
 }
 
 export interface Position {
@@ -22,6 +18,8 @@ export interface Position {
 export interface Transaction {
   id: string
 }
+
+export type OrderId = Transaction
 
 export interface BuyRecommendation {
   pair: string

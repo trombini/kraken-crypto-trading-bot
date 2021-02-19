@@ -28,7 +28,7 @@ describe('TrailingStopLossBot', () => {
     const currentBidPrice = 1.05
     const targetProfit = 50
 
-    const result = bot.inBuyZone(currentBidPrice, targetProfit, position)
+    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
     expect(result).toBe(false)
   })
 
@@ -39,7 +39,7 @@ describe('TrailingStopLossBot', () => {
     const currentBidPrice = 1.1
     const targetProfit = 50
 
-    const result = bot.inBuyZone(currentBidPrice, targetProfit, position)
+    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
     expect(result).toBe(false)
   })
 
@@ -47,8 +47,9 @@ describe('TrailingStopLossBot', () => {
     const bot = new TrailingStopLossBot(krakenService, downswingAnalyst, config, positionsService)
     const position = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.0, tax: 0.0018 }
     const currentBidPrice = 1.1
+    const targetProfit = 50
 
-    const result = bot.inBuyZone(currentBidPrice, 50, position)
+    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
     expect(result).toBe(true)
   })
 

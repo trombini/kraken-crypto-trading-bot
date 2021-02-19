@@ -1,10 +1,9 @@
 import { last, takeRight } from 'lodash'
-import { OHLCBlock } from '../../krakenService'
+import { OHLCBlock } from '../../interfaces/trade.interface'
 import { logger } from '../../common/logger'
 import { allNegatives } from '../common/utils'
-import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
 import { round, every } from 'lodash'
-import { calculateMACD, histogram, MACDResult, matured } from '../common/macdUtils'
+import { calculateMACD, histogram, MACDResult, maturedBlocks } from '../common/macdUtils'
 
 // TODO: check if sell period was long and strong enough. Don't just buy because three blocks were in the reds.
 
@@ -16,8 +15,8 @@ export const isUpSwing = (macd: MACDResult) => {
   }
 
   // v0 oldest, v1 middel, v2 now
-  const maturedBlocks = matured(macd)
-  const histogramOfMaturedBlocks = histogram(maturedBlocks)
+  const matured = maturedBlocks(macd)
+  const histogramOfMaturedBlocks = histogram(matured)
   const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
   const result = allNegatives(b) && b[0] > b[1] && b[1] < b[2]
 
@@ -26,28 +25,33 @@ export const isUpSwing = (macd: MACDResult) => {
   return result
 }
 
+// TODO: take only blocks into cosideration which are in the right region. in this case negative
 export const isStrongSignal = (macd: MACDResult) => {
-  const sum = round(takeRight(macd.blocks, 10).reduce((acc, macd, index) => {
-    return acc + (macd.histogram ? macd.histogram : 0)
-  }, 0), 3)
+  const sum = takeRight(macd.blocks, 4).reduce((acc, macd) => {
+    const h = macd.histogram ? macd.histogram : 0
+    return acc + (h < 0 ? (h * -1) : 0)
+  }, 0)
 
-  logger.debug(`MACD BUY/HISTOGRAM/STRENGTH: [${ sum * -1 }] -> ${true}`)
+  const result = sum > 0.006
 
-  return true
+  logger.debug(`MACD BUY/HISTOGRAM/STRENGTH: [${ round(sum, 5) }] -> ${result}`)
+
+  return result
 }
 
 // Traders may buy the asset when the MACD crosses above its signal line
 export const macdCrossesAboveSignal = (macd: MACDResult) => {
-  const head = last(matured(macd))
+  const head = last(maturedBlocks(macd))
   if (head && head.signal && head?.MACD) {
     const macdAboveSignal = head.MACD > head.signal
     const macdBelowZero = head.MACD < 0
     const delta = head.MACD - head.signal
     logger.debug(`MACD BUY/MACD: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${delta}] -> ${macdAboveSignal}`)
 
+    return true
     return macdBelowZero && macdAboveSignal
   }
-  return false
+  return true
 }
 
 export const indicator = (period: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {

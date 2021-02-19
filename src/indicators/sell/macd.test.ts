@@ -16,6 +16,8 @@ describe('MACD / Sell', () => {
     it('should fail because not enough data', () => {
       expect(() => {
         isDownSwing({
+          period: 1,
+          headMaturity: 0,
           isHeadMatured: true,
           blocks: getFakeHistogram([1, 2]),
         })
@@ -24,6 +26,8 @@ describe('MACD / Sell', () => {
 
     it('should be false because it is a up trend', () => {
       expect(isDownSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([1, 2, 3]),
       })).toBe(false)
@@ -31,6 +35,8 @@ describe('MACD / Sell', () => {
 
     it('should be false because it is a down trend, downswing is over', () => {
       expect(isDownSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([3, 2, 1]),
       })).toBe(false)
@@ -38,6 +44,8 @@ describe('MACD / Sell', () => {
 
     it('should be false because it is already negative', () => {
       expect(isDownSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([2, 1, -1]),
       })).toBe(false)
@@ -46,6 +54,8 @@ describe('MACD / Sell', () => {
     // TODO: does this make sense as an indicator??
     it('should be false because history is flat', () => {
       expect(isDownSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([2, 2, 1]),
       })).toBe(false)
@@ -53,6 +63,8 @@ describe('MACD / Sell', () => {
 
     it('should be true because we are in a down swing', () => {
       expect(isDownSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([1, 2, 1]),
       })).toBe(true)

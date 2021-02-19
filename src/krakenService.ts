@@ -1,22 +1,16 @@
 import { last } from 'lodash'
 import { BotConfig } from './common/config'
 import { logger } from './common/logger'
-import { Order, Trade, Transaction } from './interfaces/trade.interface'
+import { Order, OrderId } from './interfaces/trade.interface'
+import { OHLCBlock } from './interfaces/trade.interface'
 import { KrakenAddOrderApiResponse } from './interfaces/kraken.interface'
 import { v4 as uuidv4 } from 'uuid'
 import KrakenClient from 'kraken-api'
 import moment from 'moment'
 
-export interface OHLCBlock {
-  time: number
-  close: number
-  open?: number
-  high?: number
-  low?: number
-  volume?: number
-}
-
 const fakeCallbak = () => {}
+
+const apiErrorHandler = response => response
 
 // array (<time>, <open>, <high>, <low>, <close>, <vwap>, <volume>, <count>)
 export const mapOhlcResultToObject = (result: any[]): OHLCBlock => {
@@ -35,7 +29,8 @@ export class KrakenService {
 
   async getOHLCData(pair: string, interval: number): Promise<any> {
     const since = moment().subtract(12, 'h').unix()
-    return this.krakenApi.api('OHLC', { pair, interval, since }, () => {})
+    return this.krakenApi
+      .api('OHLC', { pair, interval, since }, () => {})
       .then(response => response.result[this.config.pair])
       .then(result => {
         const blocks = result.map(mapOhlcResultToObject)
@@ -49,9 +44,10 @@ export class KrakenService {
 
   // https://www.kraken.com/features/api#get-ticker-info
   async getTicker(pair: string): Promise<any> {
-    return this.krakenApi.api('Ticker', { pair }, fakeCallbak)
-      .then(response => response.result[pair.toUpperCase()])
-      .catch(err => {
+    return this.krakenApi
+      .api('Ticker', { pair }, fakeCallbak)
+      .then((response) => response.result[pair.toUpperCase()])
+      .catch((err) => {
         logger.error(err.message)
         throw err
       })
@@ -60,12 +56,12 @@ export class KrakenService {
   // https://www.kraken.com/features/api#get-ticker-info
   async getAskPrice(pair: string): Promise<number> {
     return this.getTicker(pair)
-      .then(response => {
+      .then((response) => {
         const ask = response['a'][0]
         logger.info(`Current ASK price for ${pair} is '${ask}'`)
         return ask
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error(err.message)
         throw err
       })
@@ -74,21 +70,29 @@ export class KrakenService {
   // https://www.kraken.com/features/api#get-ticker-info
   async getBidPrice(pair: string): Promise<number> {
     return this.getTicker(pair)
-      .then(response => {
+      .then((response) => {
         const bid = response['b'][0]
         logger.info(`Current BID price for ${pair} is '${bid}'`)
         return bid
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error(err.message)
         throw err
       })
   }
 
-  async createSellOrder(order: Order): Promise<any> {
+  // https://www.kraken.com/features/api#query-orders-info
+  async getOrder(order: OrderId): Promise<any> {
+    return this.krakenApi
+      .api('QueryOrders', { txid: order.id }, fakeCallbak)
+      .then(apiErrorHandler)
+      .then(response => response.result[order.id])
+  }
+
+  async createSellOrder(order: Order): Promise<OrderId[]> {
     logger.debug(`New SELL order: ${order.volume} for '${order.price ? order.price : 'market'}'`)
 
-    if(!order.volume || order.volume <= 0) {
+    if (!order.volume || order.volume <= 0) {
       throw new Error('Volume is less than 1.')
     }
 
@@ -96,7 +100,7 @@ export class KrakenService {
       pair: order.pair,
       volume: order.volume,
       type: 'sell',
-      ordertype: 'market'
+      ordertype: 'market',
     })
   }
 
@@ -106,10 +110,10 @@ export class KrakenService {
    * This has to be checked in a subsequent call to lookup the transaction.
    * @param order
    */
-  async createBuyOrder(order: Order): Promise<Transaction[]> {
+  async createBuyOrder(order: Order): Promise<OrderId[]> {
     logger.debug(`New BUY order: ${order.volume} for market price'`)
 
-    if(!order.volume || order.volume <= 0) {
+    if (!order.volume || order.volume <= 0) {
       throw new Error('Volume is less than 1.')
     }
 
@@ -117,21 +121,21 @@ export class KrakenService {
       pair: order.pair,
       volume: order.volume,
       type: 'buy',
-      ordertype: 'market'
+      ordertype: 'market',
     })
   }
 
-  async createBuySellOrder(order: Order) {
-    if(this.config.bypassKrakenApi) {
+  async createBuySellOrder(order: Order): Promise<OrderId[]> {
+    if (this.config.bypassKrakenApi) {
       logger.info(`FAKE ${order.type} ORDER: ${order.volume} [${order.pair}]`)
       return [{ id: uuidv4() }]
-    }
-    else {
-      return this.krakenApi.api('AddOrder', order, fakeCallbak)
+    } else {
+      return this.krakenApi
+        .api('AddOrder', order, fakeCallbak)
         .then((response: KrakenAddOrderApiResponse) => {
           return response.result.txid.map(transactionId => {
             return {
-              id: transactionId
+              id: transactionId,
             }
           })
         })

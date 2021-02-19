@@ -1,5 +1,5 @@
 import { Analyst } from './analysts/analyst'
-import { BuyRecommendation, Order, Trade } from './interfaces/trade.interface'
+import { BuyRecommendation, Order } from './interfaces/trade.interface'
 import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
@@ -8,22 +8,19 @@ import { PositionsService } from './positions.service'
 import { BotConfig } from './common/config'
 import moment from 'moment'
 
-export const calculateExitStrategy = (
-  expectedProfit: number,
-  trade: Trade,
-): Order => {
-  // TODO should TAX be configuration?
-  const costs = trade.price * trade.volume
-  const totalFee = costs * trade.tax * 2
-  const sellVolume = trade.volume - expectedProfit
-  const targetPrice = (costs + totalFee) / sellVolume
-  const roundedTargetPrice = round(targetPrice, 4)
-  return {
-    pair: trade.pair,
-    volume: sellVolume,
-    price: roundedTargetPrice,
-  }
-}
+// export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Order => {
+//   // TODO should TAX be configuration?
+//   const costs = trade.price * trade.volume
+//   const totalFee = costs * trade.tax * 2
+//   const sellVolume = trade.volume - expectedProfit
+//   const targetPrice = (costs + totalFee) / sellVolume
+//   const roundedTargetPrice = round(targetPrice, 4)
+//   return {
+//     pair: trade.pair,
+//     volume: sellVolume,
+//     price: roundedTargetPrice,
+//   }
+// }
 
 export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 0)
 
@@ -43,45 +40,52 @@ export class Bot {
 
     // register event handler to observe buy recommendations
     if (analyst) {
-      analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (data: BuyRecommendation) => {
-        this.buy(data)
+      analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
+        this.handleBuyRecommendation(recommendation)
       })
     }
   }
 
-  async buy(recommendation: BuyRecommendation) {
+  async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
     const threshold = moment().subtract(15, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
       logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
-      return
     }
+    else {
+      return this.buy(recommendation)
+    }
+  }
 
+  // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
+  // TODO: orders might not be completed right away. so we don't really know what the AVG price is
+  async buy(recommendation: BuyRecommendation): Promise<any> {
+
+    // execute order
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
     const volume = caluclateVolume(this.config.maxBet, askPrice)
 
-    return this.kraken
-      .createBuyOrder({ pair: recommendation.pair, volume })
-      .then(transactions => {
-        // make sure we keep track of the latest trade
-        this.datastore.push({
-          id: uuidv4(),
-          date: moment().unix(),
-          transactions
-        })
+    const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
+    const orders = await Promise.all(orderIds.map(order => this.kraken.getOrder(order)))
+    orders.forEach(order => {
+      logger.info(`Order [${recommendation.pair}], volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`)
 
-        // register new position
-        this.positionsService.add({
-          id: moment().unix(),
-          pair: recommendation.pair,
-          price: 0,
-          volume: 0,
-          tax: 0
-        })
-
-        // const sell = calculateExitStrategy(50, trade)
-        // logger.debug(`Bought ${trade.volume} ADA for ${trade.price}$ (${trade.cost}$)`)
-        // logger.debug(`New SellOrder ${sell.volume} ADA for ${sell.price}$`)
+      // register position to watch for sell opportunity
+      this.positionsService.add({
+        id: moment().unix(),
+        pair: recommendation.pair,
+        price: parseFloat(order.price),
+        volume: parseFloat(order.vol_exec),
+        tax: 0.0018
       })
+    })
+
+    // make sure we keep track of trade to that we don't buy it again right away
+    this.datastore.push({
+      date: moment().unix(),
+      pair: recommendation.pair
+    })
+
+    return orders
   }
 }

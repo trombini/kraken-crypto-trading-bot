@@ -16,6 +16,8 @@ describe('MACD / Buy', () => {
     it('should fail because not enough data', () => {
       expect(() => {
         isUpSwing({
+          period: 1,
+          headMaturity: 0,
           isHeadMatured: true,
           blocks: getFakeHistogram([-3, -2]),
         })
@@ -24,6 +26,8 @@ describe('MACD / Buy', () => {
 
     it('should be false because it is a down trend', () => {
       expect(isUpSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([-1, -2, -3]),
       })).toBe(false)
@@ -31,6 +35,8 @@ describe('MACD / Buy', () => {
 
     it('should be false because it is an up trend, upswing is over', () => {
       expect(isUpSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([-3, -2, -1]),
       })).toBe(false)
@@ -38,6 +44,8 @@ describe('MACD / Buy', () => {
 
     it('should be false because it is already positive', () => {
       expect(isUpSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([-1, 1, 2]),
       })).toBe(false)
@@ -45,6 +53,8 @@ describe('MACD / Buy', () => {
 
     it('should be false because history is flat', () => {
       expect(isUpSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([-2, -2, -1]),
       })).toBe(false)
@@ -52,6 +62,8 @@ describe('MACD / Buy', () => {
 
     it('should be true because up swing', () => {
       expect(isUpSwing({
+        period: 1,
+        headMaturity: 0,
         isHeadMatured: true,
         blocks: getFakeHistogram([-2, -3, -1]),
       })).toBe(true)

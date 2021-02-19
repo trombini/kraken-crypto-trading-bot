@@ -1,35 +1,38 @@
 import { Position } from './interfaces/trade.interface'
-import fs from 'fs'
 import { logger } from './common/logger'
+import fs from 'fs'
 
 const filePath = () => `positions.${process.env.NODE_ENV || 'prod' }.json`
 
 export class PositionsService {
 
+  init: Promise<any>
   data: Position[]
 
   constructor() {
     this.data = []
-
-    fs.access(filePath(), (err) => {
-      if(err) {
-        fs.writeFile(filePath(), '', (err) => { })
-      }
+    this.init = this.loadDataFromDisk().then(position => {
+      this.data = position
     })
   }
 
   async add(position: Position) {
-    this.data.push(position)
-    return this.writeDataToDisk()
+    return this.init.then(_ => {
+      this.data.push(position)
+      return this.writeDataToDisk()
+    })
   }
 
   async delete(position: Position) {
-    this.data = this.data.filter(p => p.id !== position.id)
-    return this.writeDataToDisk()
+    return this.init.then(_ => {
+      this.data = this.data.filter(p => p.id !== position.id)
+      return this.writeDataToDisk()
+    })
   }
 
+  // for now we always read from disk so that we can edit it on the fly if we need
   async findAll() {
-    return this.loadDataFromDisk()
+    return this.init.then(_ => this.loadDataFromDisk())
   }
 
   async writeDataToDisk() {
@@ -46,11 +49,12 @@ export class PositionsService {
 
   async loadDataFromDisk(): Promise<Position[]> {
     return new Promise(resolve => {
-      fs.access(filePath(), (err) => {
-        if(!err) {
-          fs.readFile(filePath(), 'utf8', (err, data) => {
-            resolve(JSON.parse(data))
-          })
+      fs.readFile(filePath(), 'utf8', (err, data) => {
+        try {
+          resolve(JSON.parse(data))
+        }
+        catch(error) {
+          resolve([])
         }
       })
     })

@@ -1,9 +1,9 @@
 import { takeRight } from 'lodash'
-import { OHLCBlock } from '../../krakenService'
+import { OHLCBlock } from '../../interfaces/trade.interface'
 import { logger } from '../../common/logger'
 import { allPositives } from '../common/utils'
 import { round, every } from 'lodash'
-import { calculateMACD, histogram, MACDResult, matured } from '../common/macdUtils'
+import { calculateMACD, histogram, MACDResult, maturedBlocks } from '../common/macdUtils'
 
 // TODO: Signal Line still below Zero. Then we might not sell
 
@@ -15,8 +15,8 @@ export const isDownSwing = (macd: MACDResult) => {
   }
 
   // v0 oldest, v1 middel, v2 now
-  const maturedBlocks = matured(macd)
-  const histogramOfMaturedBlocks = histogram(maturedBlocks)
+  const matured = maturedBlocks(macd)
+  const histogramOfMaturedBlocks = histogram(matured)
   const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
   const result = allPositives(b) && b[0] < b[1] && b[1] > b[2]
 

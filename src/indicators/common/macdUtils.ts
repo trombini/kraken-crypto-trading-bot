@@ -1,4 +1,4 @@
-import { OHLCBlock } from 'src/krakenService'
+import { OHLCBlock } from '../../interfaces/trade.interface'
 import { getBlockMaturity } from './utils'
 import { logger } from '../../common/logger'
 import { MACD } from 'technicalindicators'
@@ -7,13 +7,15 @@ import { last } from 'lodash'
 
 export interface MACDResult {
   blocks: MACDOutput[],
+  period: number,
+  headMaturity: number,
   isHeadMatured: boolean
 }
 
 export const histogram = (macd: MACDOutput[]): number[] =>
   macd.map(m => m.histogram ? m.histogram : 0)
 
-export const matured = (input: MACDResult) => {
+export const maturedBlocks = (input: MACDResult) => {
   return input.isHeadMatured
     ? input.blocks
     : input.blocks.splice(0, input.blocks.length - 1)
@@ -29,16 +31,20 @@ export const calculateMACD = (period: number, requiredBlockMaturity: number, blo
     SimpleMASignal: false,
   })
 
+  // TODO: make sure all blocks or not UNDEFINED
+
   const head = last(blocks)
   const headMaturity = getBlockMaturity(period, head)
-  const isHeadMatured = headMaturity < requiredBlockMaturity
+  const isHeadMatured = headMaturity >= requiredBlockMaturity
 
-  if(isHeadMatured) {
-    logger.debug(`MACD BUY: block maturity: ${headMaturity}. Needs to be above ${requiredBlockMaturity}.`)
+  if(!isHeadMatured) {
+    logger.debug(`MACD: Block maturity for period '${period}' is '${headMaturity}'. Needs to be above ${requiredBlockMaturity}.`)
   }
 
   return {
+    blocks: macd,
     isHeadMatured,
-    blocks: macd
+    headMaturity,
+    period,
   }
 }

@@ -1,5 +1,5 @@
 import KrakenClient from 'kraken-api'
-import { Bot, calculateExitStrategy, caluclateVolume } from './bot'
+import { Bot, caluclateVolume } from './bot'
 import { config } from './common/config'
 import { KrakenService } from './krakenService'
 import { v4 as uuidv4 } from 'uuid'
@@ -31,7 +31,7 @@ const getFakeTrade = (pair: string, volume: number, price: number, time?: number
 
 beforeEach(() => {
   positionsService = new PositionsService()
-  krakenApi = new KrakenClient('key', 'secret')
+  krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   assetWatcher = new AssetWatcher(config.interval, krakenService, config)
   upswingAnalyst = new UpswingAnalyst(assetWatcher, config)
@@ -39,16 +39,32 @@ beforeEach(() => {
 
 describe('BOT', () => {
 
-  it('should calculate correct target price (with 0.0018% tax)', () => {
-    const expectedProfit = 50
-    const fakeTrade = getFakeTrade('ADAUSD', 1000, 0.9)
-    const sellOrder = calculateExitStrategy(expectedProfit, fakeTrade)
+  it('should fail to buy the same asset within a short period', async () => {
+    const bot = new Bot(krakenService, upswingAnalyst, positionsService, config)
+    const buyRecommendation = { pair: 'ADAUSD' }
 
-    expect(sellOrder.volume + expectedProfit).toBe(fakeTrade.volume)
-    expect(sellOrder.price).toBeGreaterThan(fakeTrade.price)
-    expect(sellOrder.volume).toBeLessThan(fakeTrade.volume)
-    expect(sellOrder.price).toBe(0.9508)
+    const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P'} ])
+    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed' })
+
+    await bot.handleBuyRecommendation(buyRecommendation)
+    await bot.handleBuyRecommendation(buyRecommendation)
+    await bot.handleBuyRecommendation(buyRecommendation)
+
+    expect(spy).toBeCalledTimes(1)
   })
+
+
+  // it('should calculate correct target price (with 0.0018% tax)', () => {
+  //   const expectedProfit = 50
+  //   const fakeTrade = getFakeTrade('ADAUSD', 1000, 0.9)
+  //   const sellOrder = calculateExitStrategy(expectedProfit, fakeTrade)
+
+  //   expect(sellOrder.volume + expectedProfit).toBe(fakeTrade.volume)
+  //   expect(sellOrder.price).toBeGreaterThan(fakeTrade.price)
+  //   expect(sellOrder.volume).toBeLessThan(fakeTrade.volume)
+  //   expect(sellOrder.price).toBe(0.9508)
+  // })
 
   it('should calculate correct volume based on MAX_BET and last ask price', async () => {
     const volume = caluclateVolume(500, 0.2)
@@ -56,51 +72,39 @@ describe('BOT', () => {
   })
 
   it('should order correct volume based on MAX_BET and last ask price', async () => {
+
     const bot = new Bot(krakenService, upswingAnalyst, positionsService, config)
-    const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'some-transaction-id'} ])
+
+    const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed' })
 
     await bot.buy({ pair: 'ADAUSD' })
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
-      volume: 1000
+      volume: 50
     })
   })
 
-  it('should fail to buy the same asset within a short period', async () => {
+
+  it('after successful buy it should register new position to watch for sell opportunity', async () => {
+
+    const orderId = 'OZORI6-KQCDS-EGXA3P'
     const bot = new Bot(krakenService, upswingAnalyst, positionsService, config)
-    const buyRecommendation = { pair: 'ADAUSD' }
-    const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'some-transaction-id'} ])
-    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(99)
 
-    await bot.buy(buyRecommendation)
-    await bot.buy(buyRecommendation)
-    await bot.buy(buyRecommendation)
+    const spy = jest.spyOn(positionsService, 'add')
 
-    expect(spy).toBeCalledTimes(1)
+    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
+    jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: orderId } ])
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
+
+    await bot.buy({ pair: 'ADAUSD' })
+
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({
+      pair: 'ADAUSD',
+      price: 0.95,
+      volume: 50
+    }))
   })
-
-  // How could this be tested? KrakenService calculates the transaction date in real time
-  // it('should allow multiple buys of the same asset if block period is over', async () => {
-  //   const bot = new Bot(krakenService)
-  //   const buyRecommendation = { pair: 'ADAUSD' }
-  //   const spy = jest.spyOn(krakenService, 'createBuyOrder')
-  //   jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(99)
-
-  //   // buy for the first time
-  //   const dateInThePast = moment().subtract(10, 'm').unix()
-  //   jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValueOnce([{ id: 'some-transaction-id'} ])
-  //   await bot.buy(buyRecommendation)
-
-  //   // buy for the second time -> will succeed
-  //   jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'some-transaction-id'} ])
-  //   await bot.buy(buyRecommendation)
-
-  //   // buy for the third time -> won't suceed
-  //   await bot.buy(buyRecommendation)
-
-  //   expect(spy).toBeCalledTimes(2)
-  // })
-
 })
