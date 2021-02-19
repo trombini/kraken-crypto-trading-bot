@@ -106,5 +106,5 @@ dist
 .tern-port
 
 # Project specific
-positions.prod.json
-positions.test.json
+positions.*.json
+profits.*.json

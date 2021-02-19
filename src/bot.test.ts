@@ -2,32 +2,15 @@ import KrakenClient from 'kraken-api'
 import { Bot, caluclateVolume } from './bot'
 import { config } from './common/config'
 import { KrakenService } from './krakenService'
-import { v4 as uuidv4 } from 'uuid'
 import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
-import { PositionsService } from './positions.service'
-import moment from 'moment'
+import { PositionsService } from './positions.repo'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
 let assetWatcher: AssetWatcher
 let upswingAnalyst: UpswingAnalyst
-
-const getFakeTrade = (pair: string, volume: number, price: number, time?: number) => {
-  const tax = 0.0018
-  const cost = price * volume
-  return {
-    id: uuidv4(),
-    time: time || moment().unix(),
-    pair: pair,
-    price: price,
-    volume: volume,
-    cost: cost,
-    fee: cost * tax,
-    tax: tax,
-  }
-}
 
 beforeEach(() => {
   positionsService = new PositionsService()

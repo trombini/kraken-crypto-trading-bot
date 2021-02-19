@@ -1,0 +1,169 @@
+[
+  {
+    "pair": "ADAUSD",
+    "bid": 1,
+    "ask": 0.8,
+    "volume": 500
+  },
+  {
+    "pair": "ADAUSD",
+    "paid": 1,
+    "soldFor": 0.8,
+    "volume": 500
+  },
+  {
+    "soldFor": 0.8,
+    "profit": 88,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": -4,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "volume": 1000,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1,
+      "tax": 0.0018
+    }
+  },
+  {
+    "soldFor": 1,
+    "volume": 1000,
+    "profit": 80,
+    "position": {
+      "id": 123,
+      "pair": "ADAUSD",
+      "volume": 1000,
+      "price": 1.1
+    }
+  }
+]

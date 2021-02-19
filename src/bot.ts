@@ -4,7 +4,7 @@ import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
-import { PositionsService } from './positions.service'
+import { PositionsService } from './positions.repo'
 import { BotConfig } from './common/config'
 import moment from 'moment'
 
@@ -47,7 +47,7 @@ export class Bot {
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
-    const threshold = moment().subtract(15, 'm').unix()
+    const threshold = moment().subtract(20, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
       logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
@@ -60,6 +60,7 @@ export class Bot {
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
   async buy(recommendation: BuyRecommendation): Promise<any> {
+    logger.info(`Create new BUY order for ${recommendation.pair}`)
 
     // execute order
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
@@ -68,7 +69,7 @@ export class Bot {
     const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
     const orders = await Promise.all(orderIds.map(order => this.kraken.getOrder(order)))
     orders.forEach(order => {
-      logger.info(`Order [${recommendation.pair}], volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`)
+      logger.info(`Order created: ${recommendation.pair}, volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`)
 
       // register position to watch for sell opportunity
       this.positionsService.add({
@@ -76,7 +77,6 @@ export class Bot {
         pair: recommendation.pair,
         price: parseFloat(order.price),
         volume: parseFloat(order.vol_exec),
-        tax: 0.0018
       })
     })
 

@@ -1,0 +1,13 @@
+[
+  {
+    "soldFor": "0.934332",
+    "profit": 12,
+    "volume": 3220,
+    "position": {
+      "id": 1613743892,
+      "pair": "ADAUSD",
+      "price": 0.928653,
+      "volume": 3232
+    }
+  }
+]

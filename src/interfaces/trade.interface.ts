@@ -12,14 +12,18 @@ export interface Position {
   pair: string
   price: number
   volume: number
-  tax: number
 }
 
-export interface Transaction {
+export interface Profit {
+  volume: number
+  soldFor: number
+  profit: number
+  position: Position
+}
+
+export interface OrderId {
   id: string
 }
-
-export type OrderId = Transaction
 
 export interface BuyRecommendation {
   pair: string

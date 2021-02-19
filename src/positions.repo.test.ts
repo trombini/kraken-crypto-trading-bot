@@ -1,14 +1,14 @@
-import { PositionsService } from './positions.service'
+import { PositionsService } from './positions.repo'
+import { Position } from './interfaces/trade.interface'
 import moment from 'moment'
 import fs from 'fs'
 
-const createFakePosition = () => {
+const createFakePosition = (): Position => {
   return {
     id: moment().unix(),
     pair: 'ada',
     price: 1,
-    volume: 100,
-    tax: 1
+    volume: 100
   }
 }
 

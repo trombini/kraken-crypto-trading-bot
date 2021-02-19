@@ -4,7 +4,8 @@ import { KrakenService } from './krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
 import { round } from 'lodash'
-import { PositionsService } from './positions.service'
+import { PositionsService } from './positions.repo'
+import { ProfitsRepo } from './profit.repo'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -17,10 +18,11 @@ export class TrailingStopLossBot {
     readonly kraken: KrakenService,
     readonly analyst: DownswingAnalyst,
     readonly config: BotConfig,
-    readonly repo: PositionsService
+    readonly positions: PositionsService,
+    readonly profits: ProfitsRepo
   ) {
     // load positions and start watching for sell opporunities
-    this.repo.findAll().then(positions => {
+    this.positions.findAll().then(positions => {
       // const total = positions.reduce((acc, pos) => {
       //   return {
       //     volume: acc.volume + pos.volume,
@@ -56,17 +58,15 @@ export class TrailingStopLossBot {
 
   async handleSellRecommendation(recommendation: SellRecommendation) {
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-
-    this.repo.findAll().then(positions => {
-      positions.forEach(position => {
-        if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
-          logger.info(`Position '${positionIdentifier(position)}' is in WIN zone. Sell now! 🤑`)
-          this.sellPosition(position, currentBidPrice)
-        }
-        else {
-          logger.info(`Unfortunately position '${positionIdentifier(position)}' is not yet in WIN zone 🤬`)
-        }
-      })
+    const positions = await this.positions.findAll()
+    positions.forEach(position => {
+      if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
+        logger.info(`Position '${positionIdentifier(position)}' is in WIN zone. Sell now! 🤑`)
+        this.sellPosition(position, currentBidPrice)
+      }
+      else {
+        logger.info(`Unfortunately position '${positionIdentifier(position)}' is not yet in WIN zone 🤬`)
+      }
     })
   }
 
@@ -77,12 +77,26 @@ export class TrailingStopLossBot {
     const volumeToSell = round((totalCosts / currentBidPrice), 0)
     const volumeToKeep = position.volume - volumeToSell
 
+    if(volumeToKeep < 0) {
+      throw Error(`Expected profit for position '${position.id}' would be negative. Stop the sell!`)
+    }
+
     logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
-    return this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell }).then(order => {
-      // TODO: calculate real profit based on actual transaction data
-      // TODO: remove from positions
-      console.log(position)
-      console.log(order)
+    const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
+
+    // remove from positions so that we don't seel it twice
+    this.positions.delete(position)
+
+    // keep track of executed order
+    orderIds.forEach(async orderId => {
+      const order = await this.kraken.getOrder(orderId)
+      logger.info(`Executed SELL order of ${position.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`)
+      this.profits.add({
+        soldFor: order.price,
+        volume: order.vol_exec,
+        profit: volumeToKeep,
+        position
+      })
     })
   }
 }
