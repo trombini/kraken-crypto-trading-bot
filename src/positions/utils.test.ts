@@ -1,5 +1,5 @@
 import { Position } from 'src/interfaces/trade.interface'
-import { average, reduce } from './utils'
+import { average, averaging } from './utils'
 
 const calculateCosts = (positions: Position[]) =>
   positions.reduce((acc, pos) => acc + pos.price * pos.volume, 0)
@@ -14,7 +14,7 @@ describe('Reduce Positions', () => {
       { id: 4, pair:'d', price: 400, volume: 4000 }
     ]
 
-    const reduced = reduce(1.0, positions)
+    const reduced = averaging(1.0, positions)
     const originalCosts = calculateCosts(positions)
     const resultingCosts = calculateCosts(reduced)
 
@@ -31,7 +31,7 @@ describe('Reduce Positions', () => {
       { id: 4, pair:'d', price: 200, volume: 4000 }
     ]
 
-    const reduced = reduce(0.1, positions)
+    const reduced = averaging(0.1, positions)
     const originalCosts = calculateCosts(positions)
     const resultingCosts = calculateCosts(reduced)
 
@@ -47,7 +47,7 @@ describe('Reduce Positions', () => {
       { id: 3, pair:'c', price: 95, volume: 1000 },
     ]
 
-    const reduced = reduce(0.1, positions)
+    const reduced = averaging(0.1, positions)
     const originalCosts = calculateCosts(positions)
     const resultingCosts = calculateCosts(reduced)
 

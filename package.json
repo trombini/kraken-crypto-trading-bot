@@ -6,12 +6,12 @@
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node ./dist/src/app.js",
-    "start:debug": "node --inspect ./dist/src/app.js",
+    "dev:debug": "node --inspect ./dist/src/app.js",
     "dev": "tsc --watch",
     "build": "tsc",
     "test": "jest",
     "test:dev": "jest --watchAll",
-    "test:coverage": "jest --coverage=true"
+    "test:cov": "jest --coverage=true"
   },
   "keywords": [],
   "author": "",

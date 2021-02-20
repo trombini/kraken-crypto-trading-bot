@@ -29,7 +29,12 @@ export const average = (positions: Position[]) => {
   }, { id: 0, pair: 'x', price: 0, volume: 0 })
 }
 
-export const reduce = (targetDeviation: number, positions: Position[]) => {
+/**
+ *s
+ * @param targetDeviation deviation of the price in percent
+ * @param positions
+ */
+export const averaging = (targetDeviation: number, positions: Position[]) => {
   const sortedPositions = sortBy(positions, 'price')
   return sortedPositions.reduce((positions, position) => {
     const d = deviation(targetDeviation, position)
