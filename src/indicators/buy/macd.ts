@@ -1,5 +1,5 @@
 import { last, takeRight } from 'lodash'
-import { OHLCBlock } from '../../interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/trade.interface'
 import { logger } from '../../common/logger'
 import { allNegatives } from '../common/utils'
 import { round, every } from 'lodash'

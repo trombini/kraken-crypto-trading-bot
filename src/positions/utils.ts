@@ -1,5 +1,5 @@
 import { round, filter, sortBy } from 'lodash'
-import { Position } from '../interfaces/trade.interface'
+import { Position } from './position.interface'
 
 const deviation = (targetDeviation: number, position: Position) => {
   const deviation = position.price * targetDeviation / 2

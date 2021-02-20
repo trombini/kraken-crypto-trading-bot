@@ -1,5 +1,5 @@
 import KrakenClient from 'kraken-api'
-import { config } from './common/config'
+import { config } from '../common/config'
 import { KrakenService, mapOhlcResultToObject } from './krakenService'
 
 let krakenApi: KrakenClient

@@ -1,5 +1,5 @@
-import { Position } from './interfaces/trade.interface'
-import { logger } from './common/logger'
+import { logger } from '../common/logger'
+import { Position } from './position.interface'
 import fs from 'fs'
 
 const filePath = () => `positions.${process.env.NODE_ENV || 'prod' }.json`

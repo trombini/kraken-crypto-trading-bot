@@ -1,11 +1,12 @@
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
-import { Position, SellRecommendation } from './interfaces/trade.interface'
-import { KrakenService } from './krakenService'
+import { SellRecommendation } from './common/interfaces/trade.interface'
+import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
 import { round } from 'lodash'
-import { PositionsService } from './positions.repo'
-import { ProfitsRepo } from './profit.repo'
+import { PositionsService } from './positions/positions.repo'
+import { Position } from './positions/position.interface'
+import { ProfitsRepo } from './profit/profit.repo'
 import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes

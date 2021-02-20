@@ -1,3 +1,4 @@
+
 export interface OHLCBlock {
   time: number
   close: number
@@ -5,21 +6,6 @@ export interface OHLCBlock {
   high?: number
   low?: number
   volume?: number
-}
-
-export interface Position {
-  id: number
-  pair: string
-  price: number
-  volume: number
-}
-
-export interface Profit {
-  date: string,
-  volume: number
-  soldFor: number
-  profit: number
-  position: Position
 }
 
 export interface OrderId {

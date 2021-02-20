@@ -1,5 +1,5 @@
 import { WatcherUpdateEvent } from '../assetWatcher'
-import { OHLCBlock } from '../interfaces/trade.interface'
+import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { indicator as macdIndicator } from '../indicators/sell/macd'
 import { logger } from '../common/logger'
 import { filter } from 'lodash'

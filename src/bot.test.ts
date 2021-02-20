@@ -1,10 +1,10 @@
 import KrakenClient from 'kraken-api'
 import { Bot, caluclateVolume } from './bot'
 import { config } from './common/config'
-import { KrakenService } from './krakenService'
+import { KrakenService } from './kraken/krakenService'
 import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
-import { PositionsService } from './positions.repo'
+import { PositionsService } from './positions/positions.repo'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient

@@ -1,11 +1,11 @@
 import KrakenClient from 'kraken-api'
 import { config } from './common/config'
-import { KrakenService } from './krakenService'
+import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { AssetWatcher } from './assetWatcher'
-import { PositionsService } from './positions.repo'
-import { ProfitsRepo } from './profit.repo'
+import { PositionsService } from './positions/positions.repo'
+import { ProfitsRepo } from './profit/profit.repo'
 import { assert } from 'console'
 
 let profitsRepo: ProfitsRepo

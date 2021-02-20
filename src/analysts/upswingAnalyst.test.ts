@@ -1,6 +1,6 @@
 import KrakenClient from 'kraken-api'
-import { KrakenService } from '../krakenService'
-import { OHLCBlock } from '../interfaces/trade.interface'
+import { KrakenService } from '../kraken/krakenService'
+import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { AssetWatcher } from '../assetWatcher'
 import { config } from '../common/config'
 import { logger } from '../common/logger'

@@ -1,6 +1,6 @@
 import { WatcherUpdateEvent } from '../assetWatcher'
 import { indicator as macdIndicator } from '../indicators/buy/macd'
-import { OHLCBlock } from '../interfaces/trade.interface'
+import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { logger } from '../common/logger'
 import { filter } from 'lodash'
 import { Analyst } from './analyst'

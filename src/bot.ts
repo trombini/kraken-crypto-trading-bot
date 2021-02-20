@@ -1,10 +1,10 @@
 import { Analyst } from './analysts/analyst'
-import { BuyRecommendation, Order } from './interfaces/trade.interface'
-import { KrakenService } from './krakenService'
+import { BuyRecommendation, Order } from './common/interfaces/trade.interface'
+import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
-import { PositionsService } from './positions.repo'
+import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
 import moment from 'moment'
 

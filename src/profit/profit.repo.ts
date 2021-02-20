@@ -1,6 +1,6 @@
-import { Position, Profit } from './interfaces/trade.interface'
-import { logger } from './common/logger'
+import { logger } from '../common/logger'
 import fs from 'fs'
+import { Profit } from './profit.interface'
 
 const filePath = () => `profits.${process.env.NODE_ENV || 'prod' }.json`
 

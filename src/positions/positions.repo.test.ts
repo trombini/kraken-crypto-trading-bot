@@ -1,5 +1,5 @@
 import { PositionsService } from './positions.repo'
-import { Position } from './interfaces/trade.interface'
+import { Position } from './position.interface'
 import moment from 'moment'
 import fs from 'fs'
 

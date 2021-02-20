@@ -1,4 +1,4 @@
-import { Position } from 'src/interfaces/trade.interface'
+import { Position } from './position.interface'
 import { average, averaging } from './utils'
 
 const calculateCosts = (positions: Position[]) =>
