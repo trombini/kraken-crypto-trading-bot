@@ -11,7 +11,8 @@
     "build": "tsc",
     "test": "jest",
     "test:dev": "jest --watchAll",
-    "test:cov": "jest --coverage=true"
+    "test:cov": "jest --coverage=true",
+    "average": "node ./dist/src/scripts/averaging.js"
   },
   "keywords": [],
   "author": "",
