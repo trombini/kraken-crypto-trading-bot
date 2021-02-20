@@ -53,7 +53,7 @@ $ npm run test:cov
 Sometimes it makes sense to Dollar-cost average over all the open positions to increase the chance that a position can be closed successfully. That might be the case if the upswings are not as powerful and the position never switches into the WIN zone. By averaging the positions, the leverage does increase.
 
 ```
-node ./dist/src/scripts/averaging.js
+$ npm run average
 
 [
   {
