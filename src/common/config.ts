@@ -13,6 +13,8 @@ export interface BotConfig {
   blockMaturity: number
   krakenApiKey: string
   krakenApiSecret: string
+  slackBotToken: string
+  slackChannel: string
 }
 
 export const config: BotConfig = {
@@ -24,5 +26,7 @@ export const config: BotConfig = {
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
-  bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false
+  bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
+  slackBotToken: process.env.SLACK_BOT_TOKEN || '',
+  slackChannel: process.env.SLACK_CHANNEL || ''
 }

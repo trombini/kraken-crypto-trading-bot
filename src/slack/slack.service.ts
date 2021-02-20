@@ -2,11 +2,11 @@
 // const  = require("@slack/web-api");
 
 import { WebClient, LogLevel } from '@slack/web-api'
+import { BotConfig } from 'src/common/config';
 
 
-
-export const slack = () => {
-  const client = new WebClient('xoxb-1462120298480-1772780122162-bv5a1NYdwiBplseoOVRAeO0g', {
+export const slack = (config: BotConfig) => {
+  const client = new WebClient(config.slackBotToken, {
     // LogLevel can be imported and used to make debugging simpler
     logLevel: LogLevel.DEBUG
   })
@@ -20,7 +20,7 @@ export const slack = () => {
     try {
       // Call the chat.postMessage method using the WebClient
       const result = await client.chat.postMessage({
-        channel: "C01CPG2NA78",
+        channel: config.slackChannel,
         text: "Hello world"
       });
       console.log(result);

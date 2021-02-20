@@ -6,6 +6,7 @@ import { BotConfig } from './common/config'
 import { round } from 'lodash'
 import { PositionsService } from './positions.repo'
 import { ProfitsRepo } from './profit.repo'
+import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -92,6 +93,7 @@ export class TrailingStopLossBot {
       const order = await this.kraken.getOrder(orderId)
       logger.info(`Executed SELL order of ${position.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`)
       this.profits.add({
+        date: moment().format(),
         soldFor: order.price,
         volume: order.vol_exec,
         profit: volumeToKeep,

@@ -15,6 +15,7 @@ export interface Position {
 }
 
 export interface Profit {
+  date: string,
   volume: number
   soldFor: number
   profit: number
