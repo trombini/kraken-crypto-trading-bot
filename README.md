@@ -31,10 +31,24 @@ $ npm run test:dev
 $ npm run test:cov
 ```
 
+## Configuration
 
-# Scripts
+| Key | Default | Description  |
+| ------------- |:-------------:| -----:|
+| BLOCK_MATURITY | 0.75 | The relative age in % of a block to be considered in the indicators (e.g. MACD) |
+| BYPASS_KRAKEN_API | false | You will f*** up. Might be a good idea to have a kill switch |
+| KRAKEN_API_KEY || API Key for Kraken |
+| KRAKEN_API_SECRET || API Secret for Kraken |
+| MAX_BET | 500 | How much are you willing to loose **each** bet? |
+| PAIR | ADAUSD | Coind to watch |
+| SLACK_BOT_TOKEN || Slack Bot Token for Oauth |
+| SLACK_CHANNEL || Slack Channel ID for updates |
+| TARGET_PROFIT | 30 | Threshold to sell position |
+| TAX | 0.0018 | Tax in % defined by Kraken |
 
-## Dollar-cost averaging of open positions
+## Scripts
+
+### Dollar-cost averaging of open positions
 
 Sometimes it makes sense to Dollar-cost average over all the open positions to increase the chance that a position can be closed successfully. That might be the case if the upswings are not as powerful and the position never switches into the WIN zone. By averaging the positions, the leverage does increase.
 
@@ -52,7 +66,7 @@ node ./dist/src/scripts/averaging.js
 ```
 
 
-# Kraken API
+## Kraken API
 
 **AddOrder**
 

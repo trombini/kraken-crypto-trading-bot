@@ -3,30 +3,32 @@
 const env = process.env.NODE_ENV || 'prod'
 require('dotenv').config({ path: `.env.${env}` })
 
+// TODO: what is interval for again?
+
 export interface BotConfig {
   interval: number
-  pair: string
-  tax: number
-  targetProfit: number
-  maxBet: number
-  bypassKrakenApi: boolean
   blockMaturity: number
+  bypassKrakenApi: boolean
   krakenApiKey: string
   krakenApiSecret: string
+  maxBet: number
+  pair: string
   slackBotToken: string
   slackChannel: string
+  targetProfit: number
+  tax: number
 }
 
 export const config: BotConfig = {
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,
   blockMaturity: process.env.BLOCK_MATURITY ? parseFloat(process.env.BLOCK_MATURITY) : 0.75,
-  pair: process.env.PAIR || '',
-  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0018,
-  targetProfit: process.env.TARGET_PROFIT ? parseFloat(process.env.TARGET_PROFIT) : 30,
-  maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
+  bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
-  bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
+  maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
+  pair: process.env.PAIR || '',
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
-  slackChannel: process.env.SLACK_CHANNEL || ''
+  slackChannel: process.env.SLACK_CHANNEL || '',
+  targetProfit: process.env.TARGET_PROFIT ? parseFloat(process.env.TARGET_PROFIT) : 30,
+  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0018,
 }
