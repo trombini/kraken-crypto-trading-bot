@@ -11,13 +11,13 @@ $ cp .env.dist .env.prod
 
 ```bash
 # development
-$ npm run start
-
-# watch mode
 $ npm run dev
 
 # debug mode
 $ npm run dev:debug
+
+# run
+$ npm run start
 ```
 
 ## Test
