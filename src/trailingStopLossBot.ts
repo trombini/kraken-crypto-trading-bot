@@ -8,6 +8,7 @@ import { PositionsService } from './positions/positions.repo'
 import { Position } from './positions/position.interface'
 import { ProfitsRepo } from './profit/profit.repo'
 import { slack } from './slack/slack.service'
+import { AssetWatcher } from './assetWatcher'
 import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
@@ -19,7 +20,6 @@ export class TrailingStopLossBot {
 
   constructor(
     readonly kraken: KrakenService,
-    readonly analyst: DownswingAnalyst,
     readonly config: BotConfig,
     readonly positions: PositionsService,
     readonly profits: ProfitsRepo
@@ -32,7 +32,8 @@ export class TrailingStopLossBot {
       })
     })
 
-    // register event handler to observe SELL recommendations
+    const watcher = new AssetWatcher(5, kraken, config)
+    const analyst = new DownswingAnalyst(watcher, config)
     if (analyst) {
       analyst.on('ANALYST:RECOMMENDATION_TO_SELL', (data: SellRecommendation) => {
         this.handleSellRecommendation(data)

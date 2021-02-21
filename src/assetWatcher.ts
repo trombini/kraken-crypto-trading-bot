@@ -42,3 +42,9 @@ export class AssetWatcher extends events.EventEmitter {
     }, 0)
   }
 }
+
+export const AssetWatcherFactory = (period: number, kraken: KrakenService, config: BotConfig) => {
+  const watcher = new AssetWatcher(period, kraken, config)
+  watcher.start()
+  return watcher
+}

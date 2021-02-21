@@ -7,6 +7,8 @@ import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
 import moment from 'moment'
 import { slack } from './slack/slack.service'
+import { AssetWatcher, AssetWatcherFactory } from './assetWatcher'
+import { UpswingAnalyst } from './analysts/upswingAnalyst'
 
 export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 0)
 
@@ -15,7 +17,6 @@ export class Bot {
 
   constructor(
     readonly kraken: KrakenService,
-    readonly analyst: Analyst,
     readonly positionsService: PositionsService,
     readonly config: BotConfig
   ) {
@@ -24,20 +25,20 @@ export class Bot {
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
 
-    // const assetWatcher = new AssetWatcher(15, this.kraken, this.config)
-    // const upswingAnalyst = new UpswingAnalyst(assetWatcher, this.config)
-    // if(upswingAnalyst) {
+    const watcher = new AssetWatcher(15, kraken, config)
+    const upswingAnalyst = new UpswingAnalyst(watcher, config)
+    if(upswingAnalyst) {
+      upswingAnalyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
+        this.handleBuyRecommendation(recommendation)
+      })
+    }
+
+    // register event handler to observe buy recommendations
+    // if (analyst) {
     //   analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
     //     this.handleBuyRecommendation(recommendation)
     //   })
     // }
-
-    // register event handler to observe buy recommendations
-    if (analyst) {
-      analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
-        this.handleBuyRecommendation(recommendation)
-      })
-    }
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {

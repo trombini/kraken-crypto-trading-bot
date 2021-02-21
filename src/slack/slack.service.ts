@@ -8,14 +8,14 @@ export const slack = (config: BotConfig) => {
   })
 
   const send = async (message: string) => {
-    return client.chat.postMessage({
-      channel: config.slackChannel,
-      text: message
-    }).then(result => {
+    // return client.chat.postMessage({
+    //   channel: config.slackChannel,
+    //   text: message
+    // }).then(result => {
       
-    }).catch(err => {
-      console.log(err)
-    })
+    // }).catch(err => {
+    //   console.log(err)
+    // })
   }
 
   return {
