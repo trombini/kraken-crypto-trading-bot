@@ -1,5 +1,6 @@
-import { WebClient, LogLevel } from '@slack/web-api'
+import { WebClient } from '@slack/web-api'
 import { BotConfig } from '../common/config'
+import { logger } from '../common/logger'
 
 export const slack = (config: BotConfig) => {
   const client = new WebClient(config.slackBotToken, {
@@ -8,14 +9,14 @@ export const slack = (config: BotConfig) => {
   })
 
   const send = async (message: string) => {
-    // return client.chat.postMessage({
-    //   channel: config.slackChannel,
-    //   text: message
-    // }).then(result => {
-      
-    // }).catch(err => {
-    //   console.log(err)
-    // })
+    if(config.slackBotToken.length > 0) {
+      return client.chat.postMessage({
+        channel: config.slackChannel,
+        text: message
+      }).catch(err => {
+        logger.error(err)
+      })
+    }
   }
 
   return {
