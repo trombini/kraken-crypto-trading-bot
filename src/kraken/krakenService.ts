@@ -47,10 +47,6 @@ export class KrakenService {
     return this.krakenApi
       .api('Ticker', { pair }, fakeCallbak)
       .then((response) => response.result[pair.toUpperCase()])
-      .catch((err) => {
-        logger.error(err.message)
-        throw err
-      })
   }
 
   // https://www.kraken.com/features/api#get-ticker-info
@@ -61,10 +57,6 @@ export class KrakenService {
         logger.info(`Current ASK price for ${pair} is '${ask}'`)
         return ask
       })
-      .catch((err) => {
-        logger.error(err.message)
-        throw err
-      })
   }
 
   // https://www.kraken.com/features/api#get-ticker-info
@@ -74,10 +66,6 @@ export class KrakenService {
         const bid = response['b'][0]
         logger.info(`Current BID price for ${pair} is '${bid}'`)
         return bid
-      })
-      .catch((err) => {
-        logger.error(err.message)
-        throw err
       })
   }
 
@@ -138,10 +126,6 @@ export class KrakenService {
               id: transactionId,
             }
           })
-        })
-        .catch(err => {
-          logger.error(err.message)
-          throw err
         })
     }
   }

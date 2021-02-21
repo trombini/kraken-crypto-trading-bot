@@ -21,40 +21,13 @@ export const average = (positions: Position[]) => {
   return positions.reduce((acc, position) => {
     const costs = (acc.volume * acc.price) + (position.volume * position.price)
     return {
-      id: acc.id + position.id,
+      id: position.id,
       pair: position.pair,
       volume: acc.volume + position.volume,
       price: costs / (acc.volume + position.volume)
     }
   }, { id: '', pair: '', price: 0, volume: 0 })
 }
-
-
-// /**
-//  *s
-//  * @param targetDeviation deviation of the price in percent
-//  * @param positions
-//  */
-// export const averaging = (targetDeviation: number, positions: Position[]) => {
-//   const sortedPositions = sortBy(positions, 'price')
-//   return sortedPositions.reduce((acc, position) => {
-
-//     console.log(position)
-
-//     const d = deviation(targetDeviation, position)
-//     const notInRange = filter(acc, not(d))
-//     const inRange = filter(acc, is(d))
-//     const avg = average(inRange)
-
-//     debugger;
-    
-//     const result = [ avg, ...notInRange ]
-
-
-//     return result
-//   }, positions)
-// }
-
 
 // TODO: improve this function
 /**

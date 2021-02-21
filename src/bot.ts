@@ -1,14 +1,14 @@
-import { Analyst } from './analysts/analyst'
 import { BuyRecommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
-import moment from 'moment'
 import { slack } from './slack/slack.service'
-import { AssetWatcher, AssetWatcherFactory } from './assetWatcher'
+import { AssetWatcher } from './assetWatcher'
+import { ANALYST_EVENTS } from './analysts/analyst'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import moment from 'moment'
 
 export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 0)
 
@@ -28,17 +28,10 @@ export class Bot {
     const watcher = new AssetWatcher(15, kraken, config)
     const upswingAnalyst = new UpswingAnalyst(watcher, config)
     if(upswingAnalyst) {
-      upswingAnalyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
+      upswingAnalyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
         this.handleBuyRecommendation(recommendation)
       })
     }
-
-    // register event handler to observe buy recommendations
-    // if (analyst) {
-    //   analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
-    //     this.handleBuyRecommendation(recommendation)
-    //   })
-    // }
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
@@ -62,30 +55,36 @@ export class Bot {
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
     const volume = caluclateVolume(this.config.maxBet, askPrice)
 
-    // execute order
-    const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
-    const orders = await Promise.all(orderIds.map(orderId => this.kraken.getOrder(orderId)))
-    orders.forEach(order => {
+    try {
+      // execute order
+      const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
+      const orders = await Promise.all(orderIds.map(orderId => this.kraken.getOrder(orderId)))
+      orders.forEach(order => {
+        // register position to watch for sell opportunity
+        this.positionsService.add({
+          id: moment().format(),
+          pair: recommendation.pair,
+          price: parseFloat(order.price),
+          volume: parseFloat(order.vol_exec),
+        })
 
-      const msg = `Order created: ${recommendation.pair}, volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`
-      logger.info(msg)
-      slack(this.config).send(msg)
-
-      // register position to watch for sell opportunity
-      this.positionsService.add({
-        id: moment().format(),
-        pair: recommendation.pair,
-        price: parseFloat(order.price),
-        volume: parseFloat(order.vol_exec),
+        this.logSuccessfulExecution(order)
       })
-    })
 
-    // make sure we keep track of trade to that we don't buy it again right away
-    this.datastore.push({
-      date: moment().unix(),
-      pair: recommendation.pair
-    })
+      // make sure we keep track of trade to that we don't buy it again right away
+      this.datastore.push({
+        date: moment().unix(),
+        pair: recommendation.pair
+      })
+    }
+    catch(err) {
+      logger.error(err)
+    }
+  }
 
-    return orders
+  logSuccessfulExecution(order: any) {
+    const msg = `Order created. volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`
+    slack(this.config).send(msg)
+    logger.info(msg)
   }
 }

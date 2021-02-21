@@ -1,4 +1,5 @@
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
+import { ANALYST_EVENTS } from './analysts/analyst'
 import { SellRecommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
@@ -27,15 +28,14 @@ export class TrailingStopLossBot {
     // load positions and start watching for sell opporunities
     this.positions.findAll().then(positions => {
       positions.map(position => {
-        const key = `[${position.pair}_${position.price}_${position.volume}]`
-        logger.info(`Start watching sell opportunity for ${key}`)
+        logger.info(`Start watching sell opportunity for ${positionIdentifier(position)}`)
       })
     })
 
     const watcher = new AssetWatcher(5, kraken, config)
     const analyst = new DownswingAnalyst(watcher, config)
     if (analyst) {
-      analyst.on('ANALYST:RECOMMENDATION_TO_SELL', (data: SellRecommendation) => {
+      analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
         this.handleSellRecommendation(data)
       })
     }
@@ -78,28 +78,34 @@ export class TrailingStopLossBot {
       throw Error(`Expected profit for position '${position.id}' would be negative. Stop the sell!`)
     }
 
-    logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
-    const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
+    try {
+      logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
+      const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
 
-    // remove from positions so that we don't seel it twice
-    this.positions.delete(position)
+      // remove from positions so that we don't seel it twice
+      this.positions.delete(position)
 
-    // keep track of executed order
-    orderIds.forEach(async orderId => {
-      const order = await this.kraken.getOrder(orderId)
-
-
-      const msg = `Executed SELL order of ${position.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`
-      logger.info(msg)
-      slack(this.config).send(msg)
-
-      this.profits.add({
-        date: moment().format(),
-        soldFor: parseFloat(order.price),
-        volume: parseFloat(order.vol_exec),
-        profit: volumeToKeep,
-        position
+      // keep track of executed order
+      orderIds.forEach(async orderId => {
+        const order = await this.kraken.getOrder(orderId)
+        this.logSuccessfulExecution(order)
+        this.profits.add({
+          date: moment().format(),
+          soldFor: parseFloat(order.price),
+          volume: parseFloat(order.vol_exec),
+          profit: volumeToKeep,
+          position
+        })
       })
-    })
+    }
+    catch(err) {
+      logger.error(err)
+    }
+  }
+
+  logSuccessfulExecution(order: any) {
+    const msg = `Executed SELL order of ${order.desc.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`
+    slack(this.config).send(msg)
+    logger.info(msg)
   }
 }

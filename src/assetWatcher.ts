@@ -34,19 +34,12 @@ export class AssetWatcher extends events.EventEmitter {
   }
 
   start() {
-    //this.fetchData()
+    logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
+    this.fetchData()
     setTimeout(() => {
-      logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
-      this.fetchData()
       setInterval(() => {
         this.fetchData()
-      }, random(15, 30) * 1000)
-    }, 0)
+      }, 30 * 1000)
+    }, random(15, 30) * 1000)
   }
-}
-
-export const AssetWatcherFactory = (period: number, kraken: KrakenService, config: BotConfig) => {
-  const watcher = new AssetWatcher(period, kraken, config)
-  watcher.start()
-  return watcher
 }
