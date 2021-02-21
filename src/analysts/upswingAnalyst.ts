@@ -2,24 +2,21 @@ import { WatcherUpdateEvent } from '../assetWatcher'
 import { indicator as macdIndicator } from '../indicators/buy/macd'
 import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { logger } from '../common/logger'
-import { filter } from 'lodash'
+import { every } from 'lodash'
 import { Analyst } from './analyst'
-import moment from 'moment'
 
 export class UpswingAnalyst extends Analyst {
-
   analyseMarketData(data: WatcherUpdateEvent): Promise<void> {
-    return this.analyse(data.head, data.blocks).then(result => {
-      const positive = filter(result, r => r === true).length === result.length
-      const blockDate = moment.unix(data.head.time).format()
-      if(positive) {
-        logger.info(`UPSWING detected for [${data.pair}]`)
-        this.sendRecommendationToBuyEvent(data.pair, data.head)
-      }
-    })
+    return this.analyse(data.head, data.blocks)
+      .then(results => {
+        if(every(results, Boolean)) {
+          logger.info(`UPSWING detected for [${data.pair}]`)
+          this.sendRecommendationToBuyEvent(data.pair, data.head)
+        }
+      })
   }
 
-  analyse(head: OHLCBlock, blocks: OHLCBlock[]) {
+  analyse(head: OHLCBlock, blocks: OHLCBlock[]): Promise<boolean[]> {
     return Promise.all([
       macdIndicator(15, this.config.blockMaturity, head, blocks)
     ])

@@ -8,7 +8,7 @@ import { calculateMACD, histogram, MACDResult, maturedBlocks } from '../common/m
 // TODO: check if sell period was long and strong enough. Don't just buy because three blocks were in the reds.
 
 // Returns true if last three data points swing from netgative trend to a positive trend
-export const isUpSwing = (macd: MACDResult) => {
+export const isUpSwing = (macd: MACDResult): Boolean => {
 
   if(macd.blocks.length < 3) {
     throw Error('Not enough data')
@@ -57,8 +57,8 @@ export const macdCrossesAboveSignal = (macd: MACDResult) => {
 export const indicator = (period: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
   const macd = calculateMACD(period, blockMaturity, blocks)
   return every([
-    isStrongSignal(macd),
     isUpSwing(macd),
+    isStrongSignal(macd),
     macdCrossesAboveSignal(macd)
   ], Boolean)
 }

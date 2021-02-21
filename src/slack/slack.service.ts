@@ -12,7 +12,7 @@ export const slack = (config: BotConfig) => {
       channel: config.slackChannel,
       text: message
     }).then(result => {
-      console.log(result)
+      
     }).catch(err => {
       console.log(err)
     })

@@ -7,7 +7,6 @@ import fs from 'fs'
 export class PositionsService {
 
   filePath: string
-  lock: Promise<any> | undefined
   init: Promise<any>
   data: Position[]
 

@@ -1,27 +1,12 @@
 import { Analyst } from './analysts/analyst'
-import { BuyRecommendation, Order } from './common/interfaces/trade.interface'
+import { BuyRecommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
-import { v4 as uuidv4 } from 'uuid'
 import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
 import moment from 'moment'
 import { slack } from './slack/slack.service'
-
-// export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Order => {
-//   // TODO should TAX be configuration?
-//   const costs = trade.price * trade.volume
-//   const totalFee = costs * trade.tax * 2
-//   const sellVolume = trade.volume - expectedProfit
-//   const targetPrice = (costs + totalFee) / sellVolume
-//   const roundedTargetPrice = round(targetPrice, 4)
-//   return {
-//     pair: trade.pair,
-//     volume: sellVolume,
-//     price: roundedTargetPrice,
-//   }
-// }
 
 export const caluclateVolume = (maxBet: number, price: number) => round(maxBet / price, 0)
 
@@ -38,6 +23,14 @@ export class Bot {
 
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
+
+    // const assetWatcher = new AssetWatcher(15, this.kraken, this.config)
+    // const upswingAnalyst = new UpswingAnalyst(assetWatcher, this.config)
+    // if(upswingAnalyst) {
+    //   analyst.on('ANALYST:RECOMMENDATION_TO_BUY', (recommendation: BuyRecommendation) => {
+    //     this.handleBuyRecommendation(recommendation)
+    //   })
+    // }
 
     // register event handler to observe buy recommendations
     if (analyst) {
@@ -58,17 +51,19 @@ export class Bot {
     }
   }
 
+  // TODO: limit order (can it be killed automatically?)
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
   async buy(recommendation: BuyRecommendation): Promise<any> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
-    // execute order
+    // determine correct buy order
     const askPrice = await this.kraken.getAskPrice(recommendation.pair)
     const volume = caluclateVolume(this.config.maxBet, askPrice)
 
+    // execute order
     const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
-    const orders = await Promise.all(orderIds.map(order => this.kraken.getOrder(order)))
+    const orders = await Promise.all(orderIds.map(orderId => this.kraken.getOrder(orderId)))
     orders.forEach(order => {
 
       const msg = `Order created: ${recommendation.pair}, volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`

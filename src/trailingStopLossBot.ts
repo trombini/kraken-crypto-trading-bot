@@ -7,8 +7,8 @@ import { round } from 'lodash'
 import { PositionsService } from './positions/positions.repo'
 import { Position } from './positions/position.interface'
 import { ProfitsRepo } from './profit/profit.repo'
-import moment from 'moment'
 import { slack } from './slack/slack.service'
+import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -26,13 +26,6 @@ export class TrailingStopLossBot {
   ) {
     // load positions and start watching for sell opporunities
     this.positions.findAll().then(positions => {
-      // const total = positions.reduce((acc, pos) => {
-      //   return {
-      //     volume: acc.volume + pos.volume,
-      //     costs: acc.costs + (pos.price * pos.volume)
-      //   }
-      // }, { volume: 0, costs: 0 })
-      // logger.debug(total.costs / total.volume)
       positions.map(position => {
         const key = `[${position.pair}_${position.price}_${position.volume}]`
         logger.info(`Start watching sell opportunity for ${key}`)
@@ -101,8 +94,8 @@ export class TrailingStopLossBot {
 
       this.profits.add({
         date: moment().format(),
-        soldFor: order.price,
-        volume: order.vol_exec,
+        soldFor: parseFloat(order.price),
+        volume: parseFloat(order.vol_exec),
         profit: volumeToKeep,
         position
       })

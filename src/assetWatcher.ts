@@ -34,6 +34,5 @@ export class AssetWatcher extends events.EventEmitter {
         this.fetchData()
       }, random(15, 30) * 1000)
     }, 0)
-
   }
 }
