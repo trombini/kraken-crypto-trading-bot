@@ -20,9 +20,9 @@ export class TrailingStopLossBot {
 
   constructor(
     readonly kraken: KrakenService,
-    readonly config: BotConfig,
     readonly positions: PositionsService,
-    readonly profits: ProfitsRepo
+    readonly profits: ProfitsRepo,
+    readonly config: BotConfig,
   ) {
     // load positions and start watching for sell opporunities
     this.positions.findAll().then(positions => {
