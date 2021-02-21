@@ -19,6 +19,7 @@ export enum ASSETS_WATCHER_EVENTS {
 export class AssetWatcher extends events.EventEmitter {
   constructor(readonly period: number, readonly kraken: KrakenService, readonly config: BotConfig) {
     super()
+    this.start()
   }
 
   fetchData() {
