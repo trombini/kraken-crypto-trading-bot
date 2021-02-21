@@ -3,7 +3,7 @@ import { getBlockMaturity } from './utils'
 import { logger } from '../../common/logger'
 import { MACD } from 'technicalindicators'
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
-import { last } from 'lodash'
+import { last, clone } from 'lodash'
 
 export interface MACDResult {
   blocks: MACDOutput[],
@@ -16,9 +16,10 @@ export const histogram = (macd: MACDOutput[]): number[] =>
   macd.map(m => m.histogram ? m.histogram : 0)
 
 export const maturedBlocks = (input: MACDResult) => {
+  const blocks = clone(input.blocks)
   return input.isHeadMatured
-    ? input.blocks
-    : input.blocks.splice(0, input.blocks.length - 1)
+    ? blocks
+    : blocks.splice(0, blocks.length - 1)
 }
 
 export const calculateMACD = (period: number, requiredBlockMaturity: number, blocks: OHLCBlock[]): MACDResult => {

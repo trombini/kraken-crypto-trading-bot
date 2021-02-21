@@ -37,6 +37,7 @@ export class AssetWatcher extends events.EventEmitter {
     //this.fetchData()
     setTimeout(() => {
       logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
+      this.fetchData()
       setInterval(() => {
         this.fetchData()
       }, random(15, 30) * 1000)

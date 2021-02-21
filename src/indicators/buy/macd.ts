@@ -25,14 +25,13 @@ export const isUpSwing = (macd: MACDResult): Boolean => {
   return result
 }
 
-// TODO: take only blocks into cosideration which are in the right region. in this case negative
 export const isStrongSignal = (macd: MACDResult) => {
-  const sum = takeRight(macd.blocks, 4).reduce((acc, macd) => {
-    const h = macd.histogram ? macd.histogram : 0
-    return acc + (h < 0 ? (h * -1) : 0)
-  }, 0)
+  const sum = takeRight(macd.blocks, 10)
+    .map(block => block.histogram || 0)
+    .filter(historgram => historgram && historgram < 0)
+    .reduce((acc, value) => acc - value, 0)
 
-  const result = sum > 0.006
+  const result = sum > 0.004
 
   logger.debug(`MACD BUY/HISTOGRAM/STRENGTH: [${ round(sum, 5) }] -> ${result}`)
 
