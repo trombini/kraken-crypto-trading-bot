@@ -1,25 +1,25 @@
-import { WatcherUpdateEvent } from '../assetWatcher'
+import { AssetsWatcherUpdateEvent } from '../assetWatcher'
 import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { indicator as macdIndicator } from '../indicators/sell/macd'
 import { logger } from '../common/logger'
-import {every } from 'lodash'
+import { every } from 'lodash'
 import { Analyst } from './analyst'
 
 export class DownswingAnalyst extends Analyst {
 
-  analyseMarketData(data: WatcherUpdateEvent): Promise<void> {
-    return this.analyse(data.head, data.blocks).then(results => {
-      if(every(results, Boolean)) {
-        logger.info(`DOWNSWING detected for [${data.pair}]`)
-        this.sendRecommendationToSellEvent(data.pair, data.head)
-      }
-    })
+  analyseMarketData(data: AssetsWatcherUpdateEvent): Promise<void> {
+    return this.analyse(data.period, data.head, data.blocks)
+      .then(results => {
+        if(every(results, Boolean)) {
+          logger.info(`DOWNSWING detected for [${data.pair}]`)
+          this.sendRecommendationToSellEvent(data.pair, data.head)
+        }
+      })
   }
 
-  analyse(head: OHLCBlock, blocks: OHLCBlock[]) {
+  analyse(period: number, head: OHLCBlock, blocks: OHLCBlock[]) {
     return Promise.all([
-      macdIndicator(5, 0.5, head, blocks)
-      //macdIndicator(5, this.config.blockMaturity, head, blocks)
+      macdIndicator(period, 0.5, head, blocks)
     ])
   }
 

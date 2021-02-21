@@ -1,13 +1,14 @@
-import { WatcherUpdateEvent } from '../assetWatcher'
-import { indicator as macdIndicator } from '../indicators/buy/macd'
+import { AssetsWatcherUpdateEvent } from '../assetWatcher'
 import { OHLCBlock } from '../common/interfaces/trade.interface'
+import { indicator as macdIndicator } from '../indicators/buy/macd'
 import { logger } from '../common/logger'
 import { every } from 'lodash'
 import { Analyst } from './analyst'
 
 export class UpswingAnalyst extends Analyst {
-  analyseMarketData(data: WatcherUpdateEvent): Promise<void> {
-    return this.analyse(data.head, data.blocks)
+
+  analyseMarketData(data: AssetsWatcherUpdateEvent): Promise<void> {
+    return this.analyse(data.period, data.head, data.blocks)
       .then(results => {
         if(every(results, Boolean)) {
           logger.info(`UPSWING detected for [${data.pair}]`)
@@ -16,9 +17,9 @@ export class UpswingAnalyst extends Analyst {
       })
   }
 
-  analyse(head: OHLCBlock, blocks: OHLCBlock[]): Promise<boolean[]> {
+  analyse(period: number, head: OHLCBlock, blocks: OHLCBlock[]): Promise<boolean[]> {
     return Promise.all([
-      macdIndicator(15, this.config.blockMaturity, head, blocks)
+      macdIndicator(period, this.config.blockMaturity, head, blocks)
     ])
   }
 

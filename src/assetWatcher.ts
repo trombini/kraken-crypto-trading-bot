@@ -5,10 +5,15 @@ import { KrakenService } from './kraken/krakenService'
 import { OHLCBlock } from './common/interfaces/trade.interface'
 import { random } from './common/utils'
 
-export interface WatcherUpdateEvent {
+export interface AssetsWatcherUpdateEvent {
+  period: number
   pair: string
   head: OHLCBlock
   blocks: OHLCBlock[]
+}
+
+export enum ASSETS_WATCHER_EVENTS {
+  UPDATE = 'ASSETS_WATCHER:UPDATED'
 }
 
 export class AssetWatcher extends events.EventEmitter {
@@ -18,11 +23,12 @@ export class AssetWatcher extends events.EventEmitter {
 
   fetchData() {
     this.kraken.getOHLCData(this.config.pair, this.period).then(result => {
-      this.emit('WATCHER:UPDATE', {
+      this.emit(ASSETS_WATCHER_EVENTS.UPDATE, ({
+        period: this.period,
         pair: this.config.pair,
         head: result.head,
         blocks: result.blocks
-      })
+      }) as AssetsWatcherUpdateEvent)
     })
   }
 

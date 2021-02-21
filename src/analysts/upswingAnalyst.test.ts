@@ -38,6 +38,7 @@ describe('UpswingAnalyst', () => {
     const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true, false])
 
     return analyst.analyseMarketData({
+      period: 5,
       pair: 'foo',
       head: blocks[0],
       blocks: blocks
@@ -52,6 +53,7 @@ describe('UpswingAnalyst', () => {
     const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true])
 
     return analyst.analyseMarketData({
+      period: 5,
       pair: 'foo',
       head: blocks[0],
       blocks: blocks

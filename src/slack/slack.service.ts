@@ -4,7 +4,7 @@ import { BotConfig } from '../common/config'
 export const slack = (config: BotConfig) => {
   const client = new WebClient(config.slackBotToken, {
     // LogLevel can be imported and used to make debugging simpler
-    logLevel: LogLevel.DEBUG
+    //logLevel: LogLevel.DEBUG
   })
 
   const send = async (message: string) => {
