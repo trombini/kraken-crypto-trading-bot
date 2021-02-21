@@ -2,15 +2,18 @@ import { logger } from '../common/logger'
 import { Position } from './position.interface'
 import fs from 'fs'
 
-const filePath = () => `positions.${process.env.NODE_ENV || 'prod' }.json`
+// export const filePath = () => `positions.${process.env.NODE_ENV || 'prod' }.json`
 
 export class PositionsService {
 
+  filePath: string
+  lock: Promise<any> | undefined
   init: Promise<any>
   data: Position[]
 
-  constructor() {
+  constructor(filePath?: string) {
     this.data = []
+    this.filePath = filePath || `positions.${process.env.NODE_ENV || 'prod' }.json`
     this.init = this.loadDataFromDisk().then(position => {
       this.data = position
     })
@@ -37,7 +40,7 @@ export class PositionsService {
 
   async writeDataToDisk() {
     return new Promise((resolve, reject) => {
-      fs.writeFile(filePath(), JSON.stringify(this.data, undefined, 2), { encoding: 'utf8', flag: 'w+' }, (err) => {
+      fs.writeFile(this.filePath, JSON.stringify(this.data, undefined, 2), { encoding: 'utf8', flag: 'w+' }, (err) => {
         if (err) {
           logger.error(`Was not able to store positions.json because of: ${err.message}`)
           reject(err)
@@ -49,7 +52,7 @@ export class PositionsService {
 
   async loadDataFromDisk(): Promise<Position[]> {
     return new Promise(resolve => {
-      fs.readFile(filePath(), 'utf8', (err, data) => {
+      fs.readFile(this.filePath, 'utf8', (err, data) => {
         try {
           resolve(JSON.parse(data))
         }

@@ -8,6 +8,7 @@ import { PositionsService } from './positions/positions.repo'
 import { Position } from './positions/position.interface'
 import { ProfitsRepo } from './profit/profit.repo'
 import moment from 'moment'
+import { slack } from './slack/slack.service'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -92,7 +93,12 @@ export class TrailingStopLossBot {
     // keep track of executed order
     orderIds.forEach(async orderId => {
       const order = await this.kraken.getOrder(orderId)
-      logger.info(`Executed SELL order of ${position.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`)
+
+
+      const msg = `Executed SELL order of ${position.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`
+      logger.info(msg)
+      slack(this.config).send(msg)
+
       this.profits.add({
         date: moment().format(),
         soldFor: order.price,

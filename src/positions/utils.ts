@@ -21,26 +21,58 @@ export const average = (positions: Position[]) => {
   return positions.reduce((acc, position) => {
     const costs = (acc.volume * acc.price) + (position.volume * position.price)
     return {
-      id: position.id,
+      id: acc.id + position.id,
       pair: position.pair,
       volume: acc.volume + position.volume,
       price: costs / (acc.volume + position.volume)
     }
-  }, { id: 0, pair: 'x', price: 0, volume: 0 })
+  }, { id: '', pair: '', price: 0, volume: 0 })
 }
 
+
+// /**
+//  *s
+//  * @param targetDeviation deviation of the price in percent
+//  * @param positions
+//  */
+// export const averaging = (targetDeviation: number, positions: Position[]) => {
+//   const sortedPositions = sortBy(positions, 'price')
+//   return sortedPositions.reduce((acc, position) => {
+
+//     console.log(position)
+
+//     const d = deviation(targetDeviation, position)
+//     const notInRange = filter(acc, not(d))
+//     const inRange = filter(acc, is(d))
+//     const avg = average(inRange)
+
+//     debugger;
+    
+//     const result = [ avg, ...notInRange ]
+
+
+//     return result
+//   }, positions)
+// }
+
+
+// TODO: improve this function
 /**
- *s
+ * Improve this function as it doesn't work in any case as it iterates over ALL initial positions.
+ * It doesn't take into account if a position was alreasy merged with another one.
+ * However, this doesn't seem to be a big issue because in that case, `inRange` will include this position explicitly (only as average)
+ * Better would be to to do it recusively
+ *
  * @param targetDeviation deviation of the price in percent
  * @param positions
  */
 export const averaging = (targetDeviation: number, positions: Position[]) => {
   const sortedPositions = sortBy(positions, 'price')
-  return sortedPositions.reduce((positions, position) => {
+  return sortedPositions.reduce((acc, position) => {
     const d = deviation(targetDeviation, position)
-    const notInRange = filter(positions, not(d))
-    const inRange = filter(positions, is(d))
+    const notInRange = filter(acc, not(d))
+    const inRange = filter(acc, is(d))
     const avg = average(inRange)
     return [ avg, ...notInRange ]
-  }, positions)
+  }, sortedPositions)
 }

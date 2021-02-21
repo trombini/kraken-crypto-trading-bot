@@ -1,5 +1,5 @@
 export interface Position {
-  id: number
+  id: string
   pair: string
   price: number
   volume: number

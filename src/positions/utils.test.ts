@@ -8,10 +8,10 @@ describe('Reduce Positions', () => {
 
   it('should sum up all if deviation is 100%', () => {
     const positions = [
-      { id: 1, pair:'a', price: 100, volume: 1000 },
-      { id: 2, pair:'b', price: 200, volume: 2000 },
-      { id: 3, pair:'c', price: 300, volume: 3000 },
-      { id: 4, pair:'d', price: 400, volume: 4000 }
+      { id: '1', pair:'a', price: 100, volume: 1000 },
+      { id: '2', pair:'b', price: 200, volume: 2000 },
+      { id: '3', pair:'c', price: 300, volume: 3000 },
+      { id: '4', pair:'d', price: 400, volume: 4000 }
     ]
 
     const reduced = averaging(1.0, positions)
@@ -25,10 +25,10 @@ describe('Reduce Positions', () => {
 
   it('should sum up correctly', () => {
     const positions = [
-      { id: 1, pair:'a', price: 100, volume: 1000 },
-      { id: 2, pair:'b', price: 102, volume: 1000 },
-      { id: 3, pair:'c', price: 98, volume: 1000 },
-      { id: 4, pair:'d', price: 200, volume: 4000 }
+      { id: '1', pair:'a', price: 100, volume: 1000 },
+      { id: '2', pair:'b', price: 102, volume: 1000 },
+      { id: '3', pair:'c', price: 98, volume: 1000 },
+      { id: '4', pair:'d', price: 200, volume: 4000 }
     ]
 
     const reduced = averaging(0.1, positions)
@@ -39,12 +39,11 @@ describe('Reduce Positions', () => {
     expect(originalCosts).toEqual(resultingCosts)
   })
 
-
   it('should sum up correctly', () => {
     const positions = [
-      { id: 1, pair:'a', price: 105, volume: 1000 },
-      { id: 2, pair:'b', price: 100, volume: 1000 },
-      { id: 3, pair:'c', price: 95, volume: 1000 },
+      { id: '1', pair:'a', price: 105, volume: 1000 },
+      { id: '2', pair:'b', price: 100, volume: 1000 },
+      { id: '3', pair:'c', price: 95, volume: 1000 },
     ]
 
     const reduced = averaging(0.1, positions)
@@ -58,9 +57,9 @@ describe('Reduce Positions', () => {
 
   it('should calculate correct average over positions', () => {
     const positions = [
-      { id: 1, pair:'a', price: 105, volume: 1000 },
-      { id: 2, pair:'b', price: 100, volume: 1000 },
-      { id: 3, pair:'c', price: 95, volume: 1000 },
+      { id: '1', pair:'a', price: 105, volume: 1000 },
+      { id: '2', pair:'b', price: 100, volume: 1000 },
+      { id: '3', pair:'c', price: 95, volume: 1000 },
     ]
 
     const avg = average(positions)

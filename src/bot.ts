@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
 import moment from 'moment'
+import { slack } from './slack/slack.service'
 
 // export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Order => {
 //   // TODO should TAX be configuration?
@@ -69,11 +70,14 @@ export class Bot {
     const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
     const orders = await Promise.all(orderIds.map(order => this.kraken.getOrder(order)))
     orders.forEach(order => {
-      logger.info(`Order created: ${recommendation.pair}, volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`)
+
+      const msg = `Order created: ${recommendation.pair}, volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`
+      logger.info(msg)
+      slack(this.config).send(msg)
 
       // register position to watch for sell opportunity
       this.positionsService.add({
-        id: moment().unix(),
+        id: moment().format(),
         pair: recommendation.pair,
         price: parseFloat(order.price),
         volume: parseFloat(order.vol_exec),

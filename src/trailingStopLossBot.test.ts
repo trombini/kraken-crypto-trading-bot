@@ -31,7 +31,7 @@ beforeEach(() => {
 describe('TrailingStopLossBot', () => {
 
   it('currentBidPrize should not yet be in profit range for given position', () => {
-    const position = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.0 }
+    const position = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.0 }
     const currentBidPrice = 1.05
     const targetProfit = 50
 
@@ -41,7 +41,7 @@ describe('TrailingStopLossBot', () => {
 
   it('currentBidPrize should not yet be in profit range for given position', () => {
     // Becuase Volume is too low to reach the targetProfit
-    const position = { id: 123, pair: 'ADAUSD', volume: 500, price: 1.0 }
+    const position = { id: '123', pair: 'ADAUSD', volume: 500, price: 1.0 }
     const currentBidPrice = 1.1
     const targetProfit = 50
 
@@ -50,7 +50,7 @@ describe('TrailingStopLossBot', () => {
   })
 
   it('currentBidPrize should be in profit range for given position', () => {
-    const position = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.0 }
+    const position = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.0 }
     const currentBidPrice = 1.1
     const targetProfit = 50
 
@@ -65,8 +65,8 @@ describe('TrailingStopLossBot', () => {
     const currentBidPrice = 1.1
 
     // initiate positions
-    const positionA = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    const positionB = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.1 }
+    const positionA = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
+    const positionB = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
     jest.spyOn(positionsService, 'findAll').mockResolvedValueOnce([positionA, positionB])
 
     bot.sellPosition(positionA, currentBidPrice)
@@ -84,8 +84,8 @@ describe('TrailingStopLossBot', () => {
     const currentBidPrice = 1.2
 
     // initiate positions
-    const positionA = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    const positionB = { id: 123, pair: 'ADAUSD', volume: 1000, price: 1.1 }
+    const positionA = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
+    const positionB = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
     jest.spyOn(positionsService, 'findAll').mockResolvedValueOnce([positionA, positionB])
 
     bot.sellPosition(positionA, currentBidPrice)
