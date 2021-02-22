@@ -2,7 +2,7 @@ import { Position } from './position.interface'
 import { average, averaging } from './utils'
 
 const calculateCosts = (positions: Position[]) =>
-  positions.reduce((acc, pos) => acc + pos.price * pos.volume, 0)
+  positions.reduce((acc, pos) => acc + (pos.price || 0) * (pos.volume || 0), 0)
 
 describe('Reduce Positions', () => {
 

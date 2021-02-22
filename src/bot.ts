@@ -60,12 +60,17 @@ export class Bot {
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
       const orders = await Promise.all(orderIds.map(orderId => this.kraken.getOrder(orderId)))
       orders.forEach(order => {
+
+        if(!order?.price || !order?.volume) {
+          logger.error(`Order doesn't provide all the required information. We need to add it manually for now.`)
+        }
+
         // register position to watch for sell opportunity
         this.positionsService.add({
           id: moment().format(),
           pair: recommendation.pair,
-          price: parseFloat(order.price),
-          volume: parseFloat(order.vol_exec),
+          price: order.price ? parseFloat(order?.price) : 0,
+          volume: order.vol_exec ? parseFloat(order?.vol_exec) : 0,
         })
 
         this.logSuccessfulExecution(order)

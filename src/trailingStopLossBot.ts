@@ -27,9 +27,15 @@ export class TrailingStopLossBot {
   ) {
     // load positions and start watching for sell opporunities
     this.positions.findAll().then(positions => {
-      positions.map(position => {
+      const risk = positions.reduce((acc, position) => {
         logger.info(`Start watching sell opportunity for ${positionIdentifier(position)}`)
-      })
+        return {
+          costs: acc.costs + (position.price * position.volume),
+          volume: acc.volume + position.volume
+        }
+      }, { costs: 0, volume: 0 })
+
+      logger.info(`Currently at risk: ${round(risk.costs, 0)} $ (${risk.volume} ADA)`)
     })
 
     const watcher = new AssetWatcher(5, kraken, config)
@@ -67,44 +73,57 @@ export class TrailingStopLossBot {
     })
   }
 
+  async validatePosition(position: Position) {
+    if(position.price === 0 || position.volume === 0) {
+      logger.error(`Position broken`)
+      return false
+    }
+    return true
+  }
+
   async sellPosition(position: Position, currentBidPrice: number) {
-    const costs = position.price * position.volume
-    const fee = costs * this.config.tax * 2
-    const totalCosts = fee + costs
-    const volumeToSell = round((totalCosts / currentBidPrice), 0)
-    const volumeToKeep = position.volume - volumeToSell
 
-    if(volumeToKeep < 0) {
-      throw Error(`Expected profit for position '${position.id}' would be negative. Stop the sell!`)
-    }
+    if(this.validatePosition(position)) {
+      const costs = position.price * position.volume
+      const fee = costs * this.config.tax * 2
+      const totalCosts = fee + costs
+      const volumeToSell = round((totalCosts / currentBidPrice), 0)
+      const volumeToKeep = position.volume - volumeToSell
 
-    try {
-      logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
-      const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
+      if(volumeToKeep < 0) {
+        throw Error(`Expected profit for position '${position.id}' would be negative. Stop the sell!`)
+      }
 
-      // remove from positions so that we don't seel it twice
-      this.positions.delete(position)
+      try {
+        logger.info(`Create SELL for ${volumeToSell} '${position.pair}' for ~ ${currentBidPrice}. Keep ${volumeToKeep}`)
+        const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
 
-      // keep track of executed order
-      orderIds.forEach(async orderId => {
-        const order = await this.kraken.getOrder(orderId)
-        this.logSuccessfulExecution(order)
-        this.profits.add({
-          date: moment().format(),
-          soldFor: parseFloat(order.price),
-          volume: parseFloat(order.vol_exec),
-          profit: volumeToKeep,
-          position
+        // remove from positions so that we don't seel it twice
+        this.positions.delete(position)
+
+        // keep track of executed order
+        orderIds.forEach(async orderId => {
+          const order = await this.kraken.getOrder(orderId)
+          this.profits.add({
+            date: moment().format(),
+            soldFor: parseFloat(order.price),
+            volume: parseFloat(order.vol_exec),
+            profit: volumeToKeep,
+            position
+          })
+
+          this.logSuccessfulExecution(order)
+
         })
-      })
-    }
-    catch(err) {
-      logger.error(err)
+      }
+      catch(err) {
+        logger.error(err)
+      }
     }
   }
 
   logSuccessfulExecution(order: any) {
-    const msg = `Executed SELL order of ${order.desc.pair} ${order.vol_exec}/${order.vol_exec} for ${order.price}`
+    const msg = `Executed SELL order of ${order.vol_exec}/${order.vol_exec} for ${order.price}`
     slack(this.config).send(msg)
     logger.info(msg)
   }

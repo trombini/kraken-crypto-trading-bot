@@ -110,6 +110,9 @@ export class KrakenService {
       volume: order.volume,
       type: 'buy',
       ordertype: 'market',
+    }).then(orderIds => {
+      logger.debug(`Created orders: ${orderIds.join(', ')}`)
+      return orderIds
     })
   }
 
