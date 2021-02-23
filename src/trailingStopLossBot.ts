@@ -73,6 +73,7 @@ export class TrailingStopLossBot {
     })
   }
 
+  // TODO: find better place for this
   async validatePosition(position: Position) {
     if(position.price === 0 || position.volume === 0) {
       logger.error(`Position broken`)
@@ -82,7 +83,6 @@ export class TrailingStopLossBot {
   }
 
   async sellPosition(position: Position, currentBidPrice: number) {
-
     if(this.validatePosition(position)) {
       const costs = position.price * position.volume
       const fee = costs * this.config.tax * 2
