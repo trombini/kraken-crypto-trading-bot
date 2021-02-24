@@ -32,7 +32,7 @@ beforeEach(() => {
 
 describe('TrailingStopLossBot', () => {
 
-  it('should fail because bet doesnt have a price set yet', () => {
+  it('should fail because position doesnt have a price set yet', () => {
     const invalidBet = new PositionModel({ volume: 1000 })
     const currentBidPrize = 1.05
     const targetProfit = 50
@@ -40,7 +40,7 @@ describe('TrailingStopLossBot', () => {
     expect(result).toBe(false)
   })
 
-  it('should fail because currentBidPrize not yet be in profit range for given bet', () => {
+  it('should fail because currentBidPrize not yet be in profit range for given position', () => {
     const highPricedBet = new PositionModel({ volume: 1000, price: 1 })
     const currentBidPrize = 1.05
     const targetProfit = 50
@@ -59,10 +59,10 @@ describe('TrailingStopLossBot', () => {
   it('should throw error because expected profit would be negative', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
-    const bet = new PositionModel({ volume: 1000, price: 1.1 })
+    const position = new PositionModel({ volume: 1000, price: 1.1 })
     const currentBidPrice = 1.1
 
-    bot.sellPosition(bet, currentBidPrice)
+    bot.sellPosition(position, currentBidPrice)
       .then(_ => fail('it should not reach here'))
       .catch(err => {
         expect(err).toBeDefined()
@@ -70,7 +70,7 @@ describe('TrailingStopLossBot', () => {
       })
   })
 
-  it('should mark the bet as closed', async (done) => {
+  it('should mark the position as closed', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
     const currentBidPrice = 1.2

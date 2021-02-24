@@ -73,7 +73,7 @@ export class Bot {
     const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
 
     try {
-      const bet = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
+      const position = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
 
       // make sure we keep track of trade to that we don't buy it again right away
@@ -85,7 +85,7 @@ export class Bot {
 
       // load order details and log position
       return Promise.all(
-        orderIds.map((orderId) => this.processOrderId(bet, orderId))
+        orderIds.map((orderId) => this.processOrderId(position, orderId))
       )
     }
     catch(err) {
@@ -94,7 +94,7 @@ export class Bot {
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(bet: Position, orderId: OrderId) {
+  async processOrderId(position: Position, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
@@ -106,8 +106,8 @@ export class Bot {
         logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
       }
 
-      // update bet to watch for sell opportunity
-      this.positionsService.update(bet, {
+      // update position to watch for sell opportunity
+      this.positionsService.update(position, {
         status: 'open',
         volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
         price: order?.price ? parseFloat(order?.price) : 0,
