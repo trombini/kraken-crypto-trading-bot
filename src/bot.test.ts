@@ -6,7 +6,7 @@ import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { PositionsService } from './positions/positions.repo'
 
-let positionsService: PositionsService
+let positionsRepo: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
@@ -14,13 +14,13 @@ let analyst: UpswingAnalyst
 let bot: Bot
 
 beforeEach(() => {
-  positionsService = new PositionsService()
+  positionsRepo = new PositionsService()
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(15, krakenService, config)
   analyst = new UpswingAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, positionsService, analyst, config)
+  bot = new Bot(krakenService, positionsRepo, analyst, config)
 })
 
 describe('BOT', () => {
@@ -88,12 +88,11 @@ describe('BOT', () => {
 
   it('after successful buy it should register new position to watch for sell opportunity', async () => {
 
-    const orderId = 'OZORI6-KQCDS-EGXA3P'
-    const spy = jest.spyOn(positionsService, 'add')
+    const spy = jest.spyOn(positionsRepo, 'add')
 
     jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
-    jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: orderId } ])
+    jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
 
     await bot.buy({ pair: 'ADAUSD' })

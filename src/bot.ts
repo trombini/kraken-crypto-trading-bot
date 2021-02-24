@@ -1,4 +1,4 @@
-import { BuyRecommendation } from './common/interfaces/trade.interface'
+import { BuyRecommendation, OrderId } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
@@ -26,22 +26,6 @@ export const caluclateVolume = (availableAmount: number, maxBet: number, lastAsk
   return round(calculateRisk(availableAmount, maxBet) / lastAskPrice, 0)
 }
 
-// export class BotFactory {
-
-//   public static create(kraken: KrakenService, positionsService: PositionsService, config: BotConfig) {
-//     const watcher = new AssetWatcher(15, kraken, config)
-//     const upswingAnalyst = new UpswingAnalyst(watcher, config)
-//     const bot = new Bot(kraken, positionsService, config)
-
-//     //
-//     upswingAnalyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
-//       bot.handleBuyRecommendation(recommendation)
-//     })
-
-//     return bot
-//   }
-// }
-
 export class Bot {
   datastore: any[]
   watcher: AssetWatcher | undefined
@@ -62,18 +46,7 @@ export class Bot {
     }
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
-    // this.init()
   }
-
-  // init() {
-  //   this.watcher = new AssetWatcher(15, this.kraken, this.config)
-  //   this.upswingAnalyst = new UpswingAnalyst(this.watcher, this.config)
-  //   if(this.upswingAnalyst) {
-  //     this.upswingAnalyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
-  //       this.handleBuyRecommendation(recommendation)
-  //     })
-  //   }
-  // }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
     const threshold = moment().subtract(20, 'm').unix()
@@ -102,29 +75,47 @@ export class Bot {
     try {
       // execute order
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
-      const orders = await Promise.all(orderIds.map(orderId => this.kraken.getOrder(orderId)))
-      orders.forEach(order => {
-        logger.debug(`Buy Order: ${JSON.stringify(order)}`)
-        if(order.price === undefined || order.vol === undefined) {
-          logger.error(`Order doesn't provide all the required information. We need to fix it manually for now.`)
-        }
-
-        // register position to watch for sell opportunity
-        this.positionsService.add({
-          id: moment().format(),
-          pair: recommendation.pair,
-          price: order?.price ? parseFloat(order?.price) : 0,
-          volume: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
-        })
-
-        this.logSuccessfulExecution(order)
-      })
 
       // make sure we keep track of trade to that we don't buy it again right away
       this.datastore.push({
         date: moment().unix(),
-        pair: recommendation.pair
+        pair: recommendation.pair,
+        orderIds: orderIds
       })
+
+      // load order details and log position
+      return Promise.all(
+        orderIds.map((orderId) => this.processOrderId(orderId))
+      )
+    }
+    catch(err) {
+      logger.error(err)
+    }
+  }
+
+  // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
+  async processOrderId(orderId: OrderId) {
+    try {
+      const order = await this.kraken.getOrder(orderId)
+      if(order === undefined) {
+        throw new Error(`Order '${orderId}' returned 'undefined'. we need to fix this manally.`)
+      }
+
+      logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)
+      if(order.price === undefined || order.vol === undefined) {
+        logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
+      }
+
+      // register position to watch for sell opportunity
+      await this.positionsService.add({
+        id: moment().format(),
+        pair: 'ADAUSD',
+        price: order?.price ? parseFloat(order?.price) : 0,
+        volume: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
+      })
+
+      // make sure we let Slack know
+      this.logSuccessfulExecution(order)
     }
     catch(err) {
       logger.error(err)
@@ -137,4 +128,3 @@ export class Bot {
     logger.info(msg)
   }
 }
-
