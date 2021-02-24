@@ -98,7 +98,7 @@ export class Bot {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
-        throw new Error(`Order '${orderId}' returned 'undefined'. we need to fix this manally.`)
+        throw new Error(`BUY order '${orderId}' returned 'undefined'. we need to fix this manally.`)
       }
 
       logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)

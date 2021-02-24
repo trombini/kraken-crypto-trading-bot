@@ -96,9 +96,6 @@ export class KrakenService {
       volume: order.volume,
       type: 'sell',
       ordertype: 'market',
-    }).then(orderIds => {
-      logger.debug(`Created orderIds: ${JSON.stringify(orderIds)}`)
-      return orderIds
     })
   }
 
