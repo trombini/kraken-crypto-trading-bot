@@ -1,3 +1,4 @@
+import { IBet } from '../bets/bet.model'
 import { Position } from '../positions/position.interface'
 
 export interface Profit {
@@ -5,5 +6,6 @@ export interface Profit {
   volume: number
   soldFor: number
   profit: number
-  position: Position
+  position?: Position
+  bet: IBet
 }

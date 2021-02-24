@@ -14,13 +14,12 @@ import { BetsService } from './bets/bets.service'
 import connect from './db/connect'
 
 // TODO: move into class
-const trailingStopLossBotFactory = (krakenService: KrakenService, betsService: BetsService, profitsRepo: ProfitsRepo, positionsRepo: PositionsService, config: BotConfig): TrailingStopLossBot => {
+const trailingStopLossBotFactory = (krakenService: KrakenService, betsService: BetsService, profitsRepo: ProfitsRepo, config: BotConfig): TrailingStopLossBot => {
   const watcher = new AssetWatcher(5, krakenService, config)
   const analyst = new DownswingAnalyst(watcher, config)
   const bot = new TrailingStopLossBot(
     krakenService,
     betsService,
-    positionsRepo,
     profitsRepo,
     analyst,
     config,
@@ -54,7 +53,7 @@ const botFactory = (krakenService: KrakenService, betsService: BetsService, repo
 
   setInterval(() => {}, 10000)
 
-  await connect('mongodb://localhost:27017/kraken-test')
+  await connect('mongodb://localhost:27017/kraken-prod')
 
   const betsService = new BetsService()
   const profitsRepo = new ProfitsRepo()
@@ -63,13 +62,7 @@ const botFactory = (krakenService: KrakenService, betsService: BetsService, repo
   const krakenService = new KrakenService(krakenApi, config)
 
   botFactory(krakenService, betsService, positionsRepo, config)
-  trailingStopLossBotFactory(
-    krakenService,
-    betsService,
-    profitsRepo,
-    positionsRepo,
-    config,
-  )
+  trailingStopLossBotFactory(krakenService, betsService, profitsRepo, config)
 
   //
   if (config.goal > 0) {

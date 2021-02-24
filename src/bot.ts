@@ -133,7 +133,7 @@ export class Bot {
   }
 
   logSuccessfulExecution(order: any) {
-    const msg = `Order created. volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`
+    const msg = `BUY order created. volume: ${round(order.vol, 0)}/${round(order.vol_exec, 0)}, price: ${order.price}, status: ${order.status}`
     slack(this.config).send(msg)
     logger.info(msg)
   }
