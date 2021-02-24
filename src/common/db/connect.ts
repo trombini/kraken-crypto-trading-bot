@@ -1,4 +1,4 @@
-import { logger } from '../common/logger'
+import { logger } from '../logger'
 import mongoose from 'mongoose'
 
 export default (db: string) => {

@@ -2,12 +2,13 @@ import moment from 'moment'
 import { UpdateQuery } from 'mongoose'
 import { logger } from '../common/logger'
 import { CreateBetInput } from './bet.interface'
-import Bet, { IBet } from './bet.model'
+import { Bet } from './bet.interface'
+import BetModel from './bet.model'
 
 export class BetsService {
 
   async create(input: CreateBetInput) {
-    return Bet.create({
+    return BetModel.create({
       date: moment().format(),
       pair: input.pair,
       status: 'created',
@@ -18,15 +19,15 @@ export class BetsService {
     })
   }
 
-  async update(bet: IBet, update: UpdateQuery<IBet>) {
-    return Bet.findByIdAndUpdate(bet._id, update, { upsert: true })
+  async update(bet: Bet, update: UpdateQuery<Bet>) {
+    return BetModel.findByIdAndUpdate(bet._id, update, { upsert: true })
   }
 
-  async save(bet: IBet) {
+  async save(bet: Bet) {
     bet.save()
   }
 
   async findByStatus(status: string) {
-    return Bet.find({ status })
+    return BetModel.find({ status })
   }
 }

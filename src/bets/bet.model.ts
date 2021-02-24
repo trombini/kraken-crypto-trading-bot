@@ -1,13 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
-
-export interface IBet extends mongoose.Document {
-  date: string
-  pair: string
-  status: string
-  volume: number
-  volumeExecuted: number
-  price?: number
-}
+import { Bet } from './bet.interface'
 
 const BetSchema: Schema = new Schema({
   date: { type: String, required: true },
@@ -18,4 +10,6 @@ const BetSchema: Schema = new Schema({
   price: { type: Number },
 })
 
-export default mongoose.model<IBet>('Bet', BetSchema)
+const BetModel = mongoose.model<Bet>('Bet', BetSchema)
+
+export default BetModel

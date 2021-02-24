@@ -9,9 +9,8 @@ import { slack } from './slack/slack.service'
 import { AssetWatcher } from './assetWatcher'
 import { ANALYST_EVENTS } from './analysts/analyst'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import { Bet } from './bets/bet.interface'
 import moment from 'moment'
-import { IBet } from './bets/bet.model'
-
 
 // TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
 
@@ -97,11 +96,11 @@ export class Bot {
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(bet: IBet, orderId: OrderId) {
+  async processOrderId(bet: Bet, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
-        throw new Error(`BUY order '${orderId}' returned 'undefined'. we need to fix this manally.`)
+        throw new Error(`BUY order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally.`)
       }
 
       logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)

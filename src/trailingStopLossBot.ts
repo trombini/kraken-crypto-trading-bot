@@ -8,12 +8,13 @@ import { ProfitsRepo } from './profit/profit.repo'
 import { slack } from './slack/slack.service'
 import { round } from 'lodash'
 import { BetsService } from './bets/bets.service'
-import { IBet } from './bets/bet.model'
+import { Bet } from './bets/bet.interface'
+import { formatCurrency, formatNumber } from './common/utils'
 import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
-const printBet = (bet: IBet) => `[${bet.pair}_${bet.price || 0}_${bet.volume || 0}]`
+const printBet = (bet: Bet) => `[${bet.pair}_${bet.price || 0}_${bet.volume || 0}]`
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
@@ -38,7 +39,7 @@ export class TrailingStopLossBot {
         }
         return acc
       }, { costs: 0, volume: 0 })
-      logger.info(`Currently at risk: ${round(risk.costs, 0)} $ (${risk.volume} ADA)`)
+      logger.info(`Currently at risk: ${formatCurrency(risk.costs)} $ (${formatNumber(risk.volume)} ADA)`)
     })
 
     if (analyst) {
@@ -48,7 +49,7 @@ export class TrailingStopLossBot {
     }
   }
 
-  inWinZone(currentBidPrice: number, targetProfit: number, bet: IBet): boolean {
+  inWinZone(currentBidPrice: number, targetProfit: number, bet: Bet): boolean {
     if(bet.price && bet.volume) {
       const costs = bet.price * bet.volume
       const fee = costs * this.config.tax * 2
@@ -76,7 +77,7 @@ export class TrailingStopLossBot {
     })
   }
 
-  async sellPosition(bet: IBet, currentBidPrice: number) {
+  async sellPosition(bet: Bet, currentBidPrice: number) {
     if(bet.price && bet.volume) {
       const costs = bet.price * bet.volume
       const fee = costs * this.config.tax * 2
@@ -109,12 +110,12 @@ export class TrailingStopLossBot {
     }
   }
 
-  async evaluateProfits(bet: IBet, volumeToKeep: number, orderId: OrderId) {
+  async evaluateProfits(bet: Bet, volumeToKeep: number, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
 
       if(order === undefined) {
-        throw new Error(`SELL order '${orderId}' returned 'undefined'. we need to fix this manally. Position ${printBet(bet)}`)
+        throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${printBet(bet)}`)
       }
 
       logger.info(`Successfully executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`)
@@ -130,7 +131,7 @@ export class TrailingStopLossBot {
     }
   }
 
-  logProfit(order: any, bet: IBet, volumeToKeep: number) {
+  logProfit(order: any, bet: Bet, volumeToKeep: number) {
     this.profits.add({
       date: moment().format(),
       soldFor: parseFloat(order.price),

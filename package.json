@@ -38,6 +38,7 @@
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "mongoose": "^5.11.18",
+    "numeral": "^2.0.6",
     "qs": "^6.5.2",
     "technicalindicators": "^3.1.0",
     "uuid": "^8.3.2",

@@ -1,6 +1,16 @@
+const numeral = require('numeral')
 
 export const random = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+
+export const formatNumber = (number: number) => {
+  return numeral(number).format('0,0.00')
+}
+
+export const formatCurrency = (number: number) => {
+  return numeral(number).format('$ 0,0.00')
 }
 
 

@@ -1,7 +1,5 @@
-import { logger } from "./common/logger"
-import connect from "./db/connect"
-import Bet, { IBet } from './bets/bet.model'
-import { BetsService } from "./bets/bets.service"
+import { BetsService } from './bets/bets.service'
+import connect from './common/db/connect'
 
 (async function() {
 
@@ -15,7 +13,7 @@ import { BetsService } from "./bets/bets.service"
   })
 
 
-  const orderIds = [{"id":"O4KCQA-CEFYO-XSOWZ4"}, {"id":"bbb"}]
+  const orderIds = [{'id':'O4KCQA-CEFYO-XSOWZ4'}, {'id':'bbb'}]
   const x = orderIds.map(orderId => orderId.id)
   console.log(x)
 
