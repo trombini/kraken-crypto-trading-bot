@@ -4,11 +4,13 @@ import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
+import { BetsService } from './bets/bets.service'
 import { slack } from './slack/slack.service'
 import { AssetWatcher } from './assetWatcher'
 import { ANALYST_EVENTS } from './analysts/analyst'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import moment from 'moment'
+import { IBet } from './bets/bet.model'
 
 
 // TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
@@ -33,6 +35,7 @@ export class Bot {
 
   constructor(
     readonly kraken: KrakenService,
+    readonly betService: BetsService,
     readonly positionsService: PositionsService,
     readonly analyst: UpswingAnalyst,
     readonly config: BotConfig
@@ -73,7 +76,7 @@ export class Bot {
     const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
 
     try {
-      // execute order
+      const bet = await this.betService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
 
       // make sure we keep track of trade to that we don't buy it again right away
@@ -85,7 +88,7 @@ export class Bot {
 
       // load order details and log position
       return Promise.all(
-        orderIds.map((orderId) => this.processOrderId(orderId))
+        orderIds.map((orderId) => this.processOrderId(bet, orderId))
       )
     }
     catch(err) {
@@ -94,7 +97,7 @@ export class Bot {
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(orderId: OrderId) {
+  async processOrderId(bet: IBet, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
@@ -105,6 +108,13 @@ export class Bot {
       if(order.price === undefined || order.vol === undefined) {
         logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
       }
+
+      // update bet to watch for sell opportunity
+      this.betService.update(bet, {
+        status: 'open',
+        volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
+        price: order?.price ? parseFloat(order?.price) : 0,
+      })
 
       // register position to watch for sell opportunity
       await this.positionsService.add({

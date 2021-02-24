@@ -9,22 +9,46 @@ import { Position } from './positions/position.interface'
 import { ProfitsRepo } from './profit/profit.repo'
 import { slack } from './slack/slack.service'
 import { round } from 'lodash'
+import { BetsService } from './bets/bets.service'
+import { IBet } from './bets/bet.model'
 import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
 const positionIdentifier = (position: Position) => `${position.pair}_${position.price}_${position.volume}`
+const printBet = (bet: IBet) => `[${bet.pair}_${bet.price || 0}_${bet.volume || 0}]`
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
 
   constructor(
     readonly kraken: KrakenService,
+    readonly betService: BetsService,
     readonly positions: PositionsService,
     readonly profits: ProfitsRepo,
     readonly analyst: DownswingAnalyst,
     readonly config: BotConfig,
   ) {
+
+    // load positions and start watching for sell opporunities
+    this.betService.findByStatus('open').then(bets => {
+      const risk = bets.reduce((acc, bet) => {
+        if(bet.price && bet.volume) {
+          logger.info(`Start watching sell opportunity for ${printBet(bet)}`)
+          return {
+            costs: acc.costs + (bet.price * bet.volume),
+            volume: acc.volume + bet.volume
+          }
+        }
+        return acc
+      }, { costs: 0, volume: 0 })
+      logger.info(`Currently at risk: ${round(risk.costs, 0)} $ (${risk.volume} ADA)`)
+    })
+
+
+
+
+
     // load positions and start watching for sell opporunities
     this.positions.findAll().then(positions => {
       const risk = positions.reduce((acc, position) => {
@@ -37,6 +61,10 @@ export class TrailingStopLossBot {
 
       logger.info(`Currently at risk: ${round(risk.costs, 0)} $ (${risk.volume} ADA)`)
     })
+
+
+
+    
 
     // const watcher = new AssetWatcher(5, kraken, config)
     // const analyst = new DownswingAnalyst(watcher, config)

@@ -6,7 +6,10 @@ import { PositionsService } from './positions/positions.repo'
 import { ProfitsRepo } from './profit/profit.repo'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { AssetWatcher } from './assetWatcher'
+import { BetsService } from './bets/bets.service'
+import { setupDb } from '../test/test-setup'
 
+let betsService: BetsService
 let profitsRepo: ProfitsRepo
 let positionsRepo: PositionsService
 let krakenApi: KrakenClient
@@ -15,14 +18,18 @@ let watcher: AssetWatcher
 let analyst: DownswingAnalyst
 let bot: TrailingStopLossBot
 
+// setup db
+setupDb('trailingStopLossBot')
+
 beforeEach(() => {
+  betsService = new BetsService()
   profitsRepo = new ProfitsRepo()
   positionsRepo = new PositionsService()
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(15, krakenService, config)
   analyst = new DownswingAnalyst(watcher, config)
-  bot = new TrailingStopLossBot(krakenService, positionsRepo, profitsRepo, analyst, config)
+  bot = new TrailingStopLossBot(krakenService, betsService, positionsRepo, profitsRepo, analyst, config)
 })
 
 describe('TrailingStopLossBot', () => {
@@ -55,16 +62,15 @@ describe('TrailingStopLossBot', () => {
     expect(result).toBe(true)
   })
 
-  it('should throw error', async (done) => {
-    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
-    const createSellOrderSpy = jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
-    const deletePositionSpy = jest.spyOn(positionsRepo, 'delete')
+  it('should throw error because expected profit would be negative', async (done) => {
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
+    jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
+    jest.spyOn(positionsRepo, 'delete')
     const currentBidPrice = 1.1
 
     // initiate positions
     const positionA = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    const positionB = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    jest.spyOn(positionsRepo, 'findAll').mockResolvedValueOnce([positionA, positionB])
+    jest.spyOn(positionsRepo, 'findAll').mockResolvedValueOnce([positionA])
 
     bot.sellPosition(positionA, currentBidPrice)
     .then(_ => fail('it should not reach here'))

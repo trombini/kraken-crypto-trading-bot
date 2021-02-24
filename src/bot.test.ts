@@ -5,7 +5,10 @@ import { KrakenService } from './kraken/krakenService'
 import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { PositionsService } from './positions/positions.repo'
+import { BetsService } from './bets/bets.service'
+import { setupDb } from '../test/test-setup'
 
+let betService: BetsService
 let positionsRepo: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
@@ -13,28 +16,21 @@ let watcher: AssetWatcher
 let analyst: UpswingAnalyst
 let bot: Bot
 
+// setup db
+setupDb('bot')
+
 beforeEach(() => {
   positionsRepo = new PositionsService()
+  betService = new BetsService()
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(15, krakenService, config)
   analyst = new UpswingAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, positionsRepo, analyst, config)
+  bot = new Bot(krakenService, betService, positionsRepo, analyst, config)
 })
 
 describe('BOT', () => {
-
-  // it('should calculate correct target price (with 0.0018% tax)', () => {
-  //   const expectedProfit = 50
-  //   const fakeTrade = getFakeTrade('ADAUSD', 1000, 0.9)
-  //   const sellOrder = calculateExitStrategy(expectedProfit, fakeTrade)
-
-  //   expect(sellOrder.volume + expectedProfit).toBe(fakeTrade.volume)
-  //   expect(sellOrder.price).toBeGreaterThan(fakeTrade.price)
-  //   expect(sellOrder.volume).toBeLessThan(fakeTrade.volume)
-  //   expect(sellOrder.price).toBe(0.9508)
-  // })
 
   it('should fallback to zero if available amount is less than 1000 $', async () => {
     const risk = calculateRisk(500, 2000)
