@@ -12,7 +12,6 @@ export class Analyst extends events.EventEmitter {
 
   constructor(readonly watcher: AssetWatcher, readonly config: BotConfig) {
     super()
-
     watcher.on(ASSETS_WATCHER_EVENTS.UPDATE, (data: AssetsWatcherUpdateEvent) => {
       this.analyseMarketData(data)
     })

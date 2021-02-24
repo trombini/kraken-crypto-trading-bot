@@ -23,6 +23,7 @@ export class TrailingStopLossBot {
     readonly kraken: KrakenService,
     readonly positions: PositionsService,
     readonly profits: ProfitsRepo,
+    readonly analyst: DownswingAnalyst,
     readonly config: BotConfig,
   ) {
     // load positions and start watching for sell opporunities
@@ -38,8 +39,8 @@ export class TrailingStopLossBot {
       logger.info(`Currently at risk: ${round(risk.costs, 0)} $ (${risk.volume} ADA)`)
     })
 
-    const watcher = new AssetWatcher(5, kraken, config)
-    const analyst = new DownswingAnalyst(watcher, config)
+    // const watcher = new AssetWatcher(5, kraken, config)
+    // const analyst = new DownswingAnalyst(watcher, config)
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
         this.handleSellRecommendation(data)
@@ -104,6 +105,7 @@ export class TrailingStopLossBot {
         // keep track of executed order
         orderIds.forEach(async orderId => {
           const order = await this.kraken.getOrder(orderId)
+          logger.debug(`Sell Order: ${JSON.stringify(order)}`)
           this.profits.add({
             date: moment().format(),
             soldFor: parseFloat(order.price),
@@ -123,7 +125,7 @@ export class TrailingStopLossBot {
   }
 
   logSuccessfulExecution(order: any) {
-    const msg = `Executed SELL order of ${order.vol_exec}/${order.vol_exec} for ${order.price}`
+    const msg = `Executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`
     slack(this.config).send(msg)
     logger.info(msg)
   }

@@ -17,9 +17,11 @@ export enum ASSETS_WATCHER_EVENTS {
 }
 
 export class AssetWatcher extends events.EventEmitter {
+
+  interval: NodeJS.Timeout | undefined
+
   constructor(readonly period: number, readonly kraken: KrakenService, readonly config: BotConfig) {
     super()
-    this.start()
   }
 
   fetchData() {
@@ -36,10 +38,14 @@ export class AssetWatcher extends events.EventEmitter {
   start() {
     logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
     this.fetchData()
-    setTimeout(() => {
-      setInterval(() => {
-        this.fetchData()
-      }, 30 * 1000)
-    }, random(15, 30) * 1000)
+    return this.interval = setInterval(() => {
+      this.fetchData()
+    }, 30 * 1000)
+  }
+
+  stop() {
+    if(this.interval) {
+      clearInterval(this.interval)
+    }
   }
 }

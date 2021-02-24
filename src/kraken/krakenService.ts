@@ -27,6 +27,13 @@ export const mapOhlcResultToObject = (result: any[]): OHLCBlock => {
 export class KrakenService {
   constructor(readonly krakenApi: KrakenClient, readonly config: BotConfig) {}
 
+  // https://api.kraken.com/0/private/Balance
+  async balance(): Promise<any> {
+    return this.krakenApi
+      .api('Balance', {}, () => {})
+      .then(response => response.result['ZUSD'])
+  }
+
   async getOHLCData(pair: string, interval: number): Promise<any> {
     const since = moment().subtract(12, 'h').unix()
     return this.krakenApi
@@ -111,7 +118,7 @@ export class KrakenService {
       type: 'buy',
       ordertype: 'market',
     }).then(orderIds => {
-      logger.debug(`Created orders: ${JSON.stringify(orderIds, undefined, 2)}`)
+      logger.debug(`Created orders: ${JSON.stringify(orderIds)}`)
       return orderIds
     })
   }
