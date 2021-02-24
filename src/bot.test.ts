@@ -4,12 +4,10 @@ import { config } from './common/config'
 import { KrakenService } from './kraken/krakenService'
 import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
-import { PositionsService } from './positions/positions.repo'
-import { BetsService } from './bets/bets.service'
 import { setupDb } from '../test/test-setup'
+import { PositionsService } from './positions/positions.service'
 
-let betService: BetsService
-let positionsRepo: PositionsService
+let positionsService: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
@@ -20,14 +18,13 @@ let bot: Bot
 setupDb('bot')
 
 beforeEach(() => {
-  positionsRepo = new PositionsService()
-  betService = new BetsService()
+  positionsService = new PositionsService()
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(15, krakenService, config)
   analyst = new UpswingAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, betService, positionsRepo, analyst, config)
+  bot = new Bot(krakenService, positionsService, analyst, config)
 })
 
 describe('BOT', () => {
@@ -82,9 +79,9 @@ describe('BOT', () => {
     })
   })
 
-  it('after successful buy it should register new position to watch for sell opportunity', async () => {
+  it('should update status, price and volumeExecuted after successful order', async () => {
 
-    const spy = jest.spyOn(positionsRepo, 'add')
+    const spy = jest.spyOn(positionsService, 'update')
 
     jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
@@ -94,9 +91,12 @@ describe('BOT', () => {
     await bot.buy({ pair: 'ADAUSD' })
 
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({
-      pair: 'ADAUSD',
-      price: 0.95,
+      status: 'created',
       volume: 50
+    }), expect.objectContaining({
+      status: 'open',
+      price: 0.95,
+      volumeExecuted: 50
     }))
   })
 })

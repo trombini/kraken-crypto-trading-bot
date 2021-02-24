@@ -1,5 +1,4 @@
 import { Position } from '../positions/position.interface'
-import { Bet } from '../bets/bet.interface'
 
 export interface Profit {
   date: string,
@@ -7,5 +6,4 @@ export interface Profit {
   soldFor: number
   profit: number
   position?: Position
-  bet: Bet
 }

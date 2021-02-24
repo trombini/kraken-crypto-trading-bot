@@ -1,11 +1,11 @@
-import { BetsService } from './bets/bets.service'
 import connect from './common/db/connect'
+import { PositionsService } from './positions/positions.service'
 
 (async function() {
 
   await connect('mongodb://localhost:27017/kraken-test')
 
-  const service = new BetsService()
+  const service = new PositionsService()
   const aa = await service.create({ pair: 'hans', volume: 123})
   service.update(aa, {
     volumeExecuted: 2,

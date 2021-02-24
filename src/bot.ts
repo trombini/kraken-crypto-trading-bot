@@ -2,14 +2,13 @@ import { BuyRecommendation, OrderId } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
-import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
-import { BetsService } from './bets/bets.service'
+import { PositionsService } from './positions/positions.service'
 import { slack } from './slack/slack.service'
 import { AssetWatcher } from './assetWatcher'
 import { ANALYST_EVENTS } from './analysts/analyst'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
-import { Bet } from './bets/bet.interface'
+import { Position } from './positions/position.interface'
 import moment from 'moment'
 
 // TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
@@ -34,7 +33,6 @@ export class Bot {
 
   constructor(
     readonly kraken: KrakenService,
-    readonly betService: BetsService,
     readonly positionsService: PositionsService,
     readonly analyst: UpswingAnalyst,
     readonly config: BotConfig
@@ -75,7 +73,7 @@ export class Bot {
     const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
 
     try {
-      const bet = await this.betService.create({ pair: 'ADAUSD', volume: volume })
+      const bet = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
 
       // make sure we keep track of trade to that we don't buy it again right away
@@ -96,7 +94,7 @@ export class Bot {
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(bet: Bet, orderId: OrderId) {
+  async processOrderId(bet: Position, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
@@ -109,18 +107,10 @@ export class Bot {
       }
 
       // update bet to watch for sell opportunity
-      this.betService.update(bet, {
+      this.positionsService.update(bet, {
         status: 'open',
         volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
         price: order?.price ? parseFloat(order?.price) : 0,
-      })
-
-      // register position to watch for sell opportunity
-      await this.positionsService.add({
-        id: moment().format(),
-        pair: 'ADAUSD',
-        price: order?.price ? parseFloat(order?.price) : 0,
-        volume: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
       })
 
       // make sure we let Slack know
