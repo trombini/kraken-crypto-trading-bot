@@ -13,7 +13,6 @@ import moment from 'moment'
 
 // TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
 
-
 // TODO: write test for this availableCurrency
 export const calculateRisk = (availableAmount: number, maxBet: number): number => {
   if(availableAmount < maxBet) {
@@ -75,7 +74,6 @@ export class Bot {
     try {
       const position = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
-
 
       // make sure we keep track of trade to that we don't buy it again right away
       this.datastore.push({

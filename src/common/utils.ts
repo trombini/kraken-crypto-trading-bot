@@ -9,7 +9,7 @@ export const formatNumber = (number: number) => {
   return numeral(number).format('0,0.00')
 }
 
-export const formatCurrency = (number: number) => {
+export const formatMoney = (number: number) => {
   return numeral(number).format('$ 0,0.00')
 }
 

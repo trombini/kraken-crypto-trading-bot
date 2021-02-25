@@ -9,12 +9,12 @@ import { slack } from './slack/slack.service'
 import { round } from 'lodash'
 import { PositionsService } from './positions/positions.service'
 import { Position } from './positions/position.interface'
-import { formatCurrency, formatNumber } from './common/utils'
+import { formatMoney, formatNumber } from './common/utils'
 import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
-const printposition = (position: Position) => `[${position.pair}_${position.price || 0}_${position.volume || 0}]`
+const positionId = (position: Position) => `[${position.pair}_${position.price || 0}_${position.volume || 0}]`
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
@@ -31,7 +31,7 @@ export class TrailingStopLossBot {
     this.positionService.findByStatus('open').then(positions => {
       const risk = positions.reduce((acc, position) => {
         if(position.price && position.volume) {
-          logger.info(`Start watching sell opportunity for ${printposition(position)}`)
+          logger.info(`Start watching sell opportunity for ${positionId(position)}`)
           return {
             costs: acc.costs + (position.price * position.volume),
             volume: acc.volume + position.volume
@@ -39,7 +39,7 @@ export class TrailingStopLossBot {
         }
         return acc
       }, { costs: 0, volume: 0 })
-      logger.info(`Currently at risk: ${formatCurrency(risk.costs)} $ (${formatNumber(risk.volume)} ADA)`)
+      logger.info(`Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(risk.volume)} ADA)`)
     })
 
     if (analyst) {
@@ -57,7 +57,7 @@ export class TrailingStopLossBot {
       const volumeToSell = round((totalCosts / currentBidPrice), 0)
       const expectedProfit = position.volume - volumeToSell
 
-      logger.debug(`Expected profit for ${printposition(position)}: ${expectedProfit}`)
+      logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
       return expectedProfit > 0 && expectedProfit >= targetProfit
     }
     return false
@@ -68,11 +68,11 @@ export class TrailingStopLossBot {
     const positions = await this.positionService.findByStatus('open')
     positions.forEach(position => {
       if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
-        logger.info(`Position ${printposition(position)} is in WIN zone. Sell now! 🤑`)
+        logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
         this.sellPosition(position, currentBidPrice)
       }
       else {
-        logger.info(`Unfortunately position ${printposition(position)} is not yet in WIN zone 🤬`)
+        logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
       }
     })
   }
@@ -86,18 +86,18 @@ export class TrailingStopLossBot {
       const volumeToKeep = position.volume - volumeToSell
 
       if(volumeToKeep < 0) {
-        throw Error(`Expected profit for ${printposition(position)} would be negative. Stop the sell!`)
+        throw Error(`Expected profit for ${positionId(position)} would be negative. Stop the sell!`)
       }
 
       try {
-        logger.info(`Create SELL order for ${printposition(position)}. volume: ${volumeToSell}, price: ~ ${currentBidPrice}, keep: ${volumeToKeep}`)
+        logger.info(`Create SELL order for ${positionId(position)}. volume: ${volumeToSell}, price: ~ ${currentBidPrice}, keep: ${volumeToKeep}`)
 
         // update the status of the position so that we don't end up selling it multiple times
         this.positionService.update(position, { status: 'processing' })
 
         // create order with Kraken
         const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
-        logger.debug(`Successfully created SELL order for ${printposition(position)}. orderIds: ${JSON.stringify(orderIds)}`)
+        logger.debug(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // try to fetch details of the KrakenOrder and log profit
         return Promise.all(
@@ -105,7 +105,7 @@ export class TrailingStopLossBot {
         )
       }
       catch(err) {
-        logger.error(`Error ${printposition(position)}:`, err)
+        logger.error(`Error ${positionId(position)}:`, err)
       }
     }
   }
@@ -115,7 +115,7 @@ export class TrailingStopLossBot {
       const order = await this.kraken.getOrder(orderId)
 
       if(order === undefined) {
-        throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${printposition(position)}`)
+        throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${positionId(position)}`)
       }
 
       logger.info(`Successfully executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`)
@@ -124,10 +124,10 @@ export class TrailingStopLossBot {
       // update the status of the position so that we don't end up selling it multiple times
       this.positionService.update(position, { status: 'closed' })
       this.logProfit(order, position, volumeToKeep)
-      this.sendSlackMessage(order)
+      this.sendSlackMessage(position, order)
     }
     catch(err) {
-      logger.error(`Error ${printposition(position)}:`, err)
+      logger.error(`Error ${positionId(position)}:`, err)
     }
   }
 
@@ -141,8 +141,8 @@ export class TrailingStopLossBot {
     })
   }
 
-  sendSlackMessage(order: any) {
-    const msg = `Successfully executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`
+  sendSlackMessage(position: Position, order: any) {
+    const msg = `Successfully SOLD ${positionId(position)} for ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${formatMoney(order.price)}`
     slack(this.config).send(msg)
   }
 }
