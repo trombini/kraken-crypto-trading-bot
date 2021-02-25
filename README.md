@@ -6,6 +6,11 @@ $ npm install
 $ cp .env.dist .env.prod
 ```
 
+Create a Mongodb Docker container
+```
+docker run -d --name mongo -p 27017:27017 mongo
+```
+
 
 ## Running the app
 
@@ -40,6 +45,7 @@ $ npm run test:cov
 | KRAKEN_API_KEY || API Key for Kraken |
 | KRAKEN_API_SECRET || API Secret for Kraken |
 | MAX_BET | 500 | How much are you willing to loose **each** bet? |
+| MONGO | mongodb://localhost:27017/kraken-prod | URI for MongoDB |
 | PAIR | ADAUSD | Coind to watch |
 | SLACK_BOT_TOKEN || Slack Bot Token for Oauth |
 | SLACK_CHANNEL || Slack Channel ID for updates |

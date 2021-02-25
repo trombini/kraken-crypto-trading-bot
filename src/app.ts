@@ -51,7 +51,7 @@ const botFactory = (krakenService: KrakenService, positionsService: PositionsSer
 
   setInterval(() => {}, 10000)
 
-  await connect('mongodb://localhost:27017/kraken-prod')
+  await connect(config.mongoDb)
 
   const positionsService = new PositionsService()
   const profitsRepo = new ProfitsRepo()

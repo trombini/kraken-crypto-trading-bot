@@ -14,6 +14,7 @@ export interface BotConfig {
   krakenApiKey: string
   krakenApiSecret: string
   maxBet: number
+  mongoDb: string
   pair: string
   slackBotToken: string
   slackChannel: string
@@ -30,6 +31,7 @@ export const config: BotConfig = {
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
+  mongoDb: process.env.MONGO || 'mongodb://localhost:27017/kraken-prod',
   pair: process.env.PAIR || '',
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
