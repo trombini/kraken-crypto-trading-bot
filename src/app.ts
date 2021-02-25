@@ -1,7 +1,6 @@
 import KrakenClient from 'kraken-api'
 import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
-import { PositionsService } from './positions/positions.repo'
 import { ProfitsRepo } from './profit/profit.repo'
 import { BotConfig, config } from './common/config'
 import { Bot } from './bot'
@@ -10,47 +9,68 @@ import { round } from 'lodash'
 import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
+import { PositionsService } from './positions/positions.service'
+import connect from './common/db/connect'
 
-console.log(config)
-
-// TODO: find a better way how to run a script forever
-setInterval(() => {}, 10000)
-
-// TODO: TEST
-const trailingStopLossBotFactory = (krakenService: KrakenService, profitsRepo: ProfitsRepo, positionsRepo: PositionsService, config: BotConfig): TrailingStopLossBot => {
+// TODO: move into class
+const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, profitsRepo: ProfitsRepo, config: BotConfig): TrailingStopLossBot => {
   const watcher = new AssetWatcher(5, krakenService, config)
   const analyst = new DownswingAnalyst(watcher, config)
-  const bot = new TrailingStopLossBot(krakenService, positionsRepo, profitsRepo, analyst, config)
+  const bot = new TrailingStopLossBot(
+    krakenService,
+    positionsService,
+    profitsRepo,
+    analyst,
+    config,
+  )
 
   watcher.start()
 
   return bot
 }
 
-// TODO: TEST
-const botFactory = (krakenService: KrakenService, repo: PositionsService, config: BotConfig): Bot => {
+// TODO: move into class
+const botFactory = (krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): Bot => {
   const watcher = new AssetWatcher(15, krakenService, config)
   const upswingAnalyst = new UpswingAnalyst(watcher, config)
-  const bot = new Bot(krakenService, repo, upswingAnalyst, config)
+  const bot = new Bot(
+    krakenService,
+    positionsService,
+    upswingAnalyst,
+    config,
+  )
 
   watcher.start()
 
   return bot
 }
 
-const profitsRepo = new ProfitsRepo()
-const positionsRepo = new PositionsService()
-const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
-const krakenService = new KrakenService(krakenApi, config)
 
-const bot = botFactory(krakenService, positionsRepo, config)
-const trailingStopLossBot  = trailingStopLossBotFactory(krakenService, profitsRepo, positionsRepo, config)
+(async function() {
+  console.log(config)
 
-//
-if(config.goal > 0) {
-  profitsRepo.findAll().then(profits => {
-    const profit = profits.reduce((acc, p) => acc + p.profit, 0)
-    const totalProfit = config.goalStart + profit
-    logger.info(`Goal reached ${round((totalProfit / config.goal) * 100, 2)} %  (${config.goalStart} + ${profit}) 🚀`)
-  })
-}
+  setInterval(() => {}, 10000)
+
+  await connect('mongodb://localhost:27017/kraken-prod')
+
+  const positionsService = new PositionsService()
+  const profitsRepo = new ProfitsRepo()
+  const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
+  const krakenService = new KrakenService(krakenApi, config)
+
+  botFactory(krakenService, positionsService, config)
+  trailingStopLossBotFactory(krakenService, positionsService, profitsRepo, config)
+
+  //
+  if (config.goal > 0) {
+    profitsRepo.findAll().then((profits) => {
+      const profit = profits.reduce((acc, p) => acc + p.profit, 0)
+      const totalProfit = config.goalStart + profit
+      logger.info(
+        `Goal reached ${round((totalProfit / config.goal) * 100, 2)} %  (${
+          config.goalStart
+        } + ${profit}) 🚀`,
+      )
+    })
+  }
+})()

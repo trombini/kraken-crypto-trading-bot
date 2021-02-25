@@ -2,14 +2,14 @@ import { BuyRecommendation, OrderId } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
-import { PositionsService } from './positions/positions.repo'
 import { BotConfig } from './common/config'
+import { PositionsService } from './positions/positions.service'
 import { slack } from './slack/slack.service'
 import { AssetWatcher } from './assetWatcher'
 import { ANALYST_EVENTS } from './analysts/analyst'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import { Position } from './positions/position.interface'
 import moment from 'moment'
-
 
 // TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
 
@@ -73,8 +73,9 @@ export class Bot {
     const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
 
     try {
-      // execute order
+      const position = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
+
 
       // make sure we keep track of trade to that we don't buy it again right away
       this.datastore.push({
@@ -85,7 +86,7 @@ export class Bot {
 
       // load order details and log position
       return Promise.all(
-        orderIds.map((orderId) => this.processOrderId(orderId))
+        orderIds.map((orderId) => this.processOrderId(position, orderId))
       )
     }
     catch(err) {
@@ -94,11 +95,11 @@ export class Bot {
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(orderId: OrderId) {
+  async processOrderId(position: Position, orderId: OrderId) {
     try {
       const order = await this.kraken.getOrder(orderId)
       if(order === undefined) {
-        throw new Error(`BUY order '${orderId}' returned 'undefined'. we need to fix this manally.`)
+        throw new Error(`BUY order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally.`)
       }
 
       logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)
@@ -106,12 +107,11 @@ export class Bot {
         logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
       }
 
-      // register position to watch for sell opportunity
-      await this.positionsService.add({
-        id: moment().format(),
-        pair: 'ADAUSD',
+      // update position to watch for sell opportunity
+      this.positionsService.update(position, {
+        status: 'open',
+        volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
         price: order?.price ? parseFloat(order?.price) : 0,
-        volume: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
       })
 
       // make sure we let Slack know
@@ -123,7 +123,7 @@ export class Bot {
   }
 
   logSuccessfulExecution(order: any) {
-    const msg = `Order created. volume: ${order.vol}/${order.vol_exec}, price: ${order.price}, status: ${order.status}`
+    const msg = `BUY order created. volume: ${round(order.vol, 0)}/${round(order.vol_exec, 0)}, price: ${order.price}, status: ${order.status}`
     slack(this.config).send(msg)
     logger.info(msg)
   }

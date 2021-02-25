@@ -1,93 +1,97 @@
 import KrakenClient from 'kraken-api'
 import { config } from './common/config'
 import { KrakenService } from './kraken/krakenService'
+import { PositionsService } from './positions/positions.service'
 import { TrailingStopLossBot } from './trailingStopLossBot'
-import { PositionsService } from './positions/positions.repo'
 import { ProfitsRepo } from './profit/profit.repo'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { AssetWatcher } from './assetWatcher'
+import { setupDb } from '../test/test-setup'
+import PositionModel from './positions/position.model'
 
+let positionsService: PositionsService
 let profitsRepo: ProfitsRepo
-let positionsRepo: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: DownswingAnalyst
 let bot: TrailingStopLossBot
 
+// setup db
+setupDb('trailingStopLossBot')
+
 beforeEach(() => {
+  positionsService = new PositionsService()
   profitsRepo = new ProfitsRepo()
-  positionsRepo = new PositionsService()
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(15, krakenService, config)
   analyst = new DownswingAnalyst(watcher, config)
-  bot = new TrailingStopLossBot(krakenService, positionsRepo, profitsRepo, analyst, config)
+  bot = new TrailingStopLossBot(krakenService, positionsService, profitsRepo, analyst, config)
 })
 
 describe('TrailingStopLossBot', () => {
 
-  it('currentBidPrize should not yet be in profit range for given position', () => {
-    const position = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.0 }
-    const currentBidPrice = 1.05
+  it('should fail because position doesnt have a price set yet', () => {
+    const invalidBet = new PositionModel({ volume: 1000 })
+    const currentBidPrize = 1.05
     const targetProfit = 50
-
-    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
+    const result = bot.inWinZone(currentBidPrize, targetProfit, invalidBet)
     expect(result).toBe(false)
   })
 
-  it('currentBidPrize should not yet be in profit range for given position', () => {
-    // Becuase Volume is too low to reach the targetProfit
-    const position = { id: '123', pair: 'ADAUSD', volume: 500, price: 1.0 }
-    const currentBidPrice = 1.1
+  it('should fail because currentBidPrize not yet be in profit range for given position', () => {
+    const highPricedBet = new PositionModel({ volume: 1000, price: 1 })
+    const currentBidPrize = 1.05
     const targetProfit = 50
-
-    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
+    const result = bot.inWinZone(currentBidPrize, targetProfit, highPricedBet)
     expect(result).toBe(false)
   })
 
-  it('currentBidPrize should be in profit range for given position', () => {
-    const position = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.0 }
-    const currentBidPrice = 1.1
+  it('should succeed successful as currentPrize in profit range for given position', () => {
+    const validBet = new PositionModel({ volume: 1000, price: 1 })
+    const currentBidPrize = 1.1
     const targetProfit = 50
-
-    const result = bot.inWinZone(currentBidPrice, targetProfit, position)
+    const result = bot.inWinZone(currentBidPrize, targetProfit, validBet)
     expect(result).toBe(true)
   })
 
-  it('should throw error', async (done) => {
-    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
-    const createSellOrderSpy = jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
-    const deletePositionSpy = jest.spyOn(positionsRepo, 'delete')
+  it('should throw error because expected profit would be negative', async (done) => {
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
+    jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
+    const position = new PositionModel({ volume: 1000, price: 1.1 })
     const currentBidPrice = 1.1
 
-    // initiate positions
-    const positionA = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    const positionB = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    jest.spyOn(positionsRepo, 'findAll').mockResolvedValueOnce([positionA, positionB])
-
-    bot.sellPosition(positionA, currentBidPrice)
-    .then(_ => fail('it should not reach here'))
-    .catch(err => {
-      expect(err).toBeDefined()
-      done()
-    })
+    bot.sellPosition(position, currentBidPrice)
+      .then(_ => fail('it should not reach here'))
+      .catch(err => {
+        expect(err).toBeDefined()
+        done()
+      })
   })
 
-  it('xx', async (done) => {
-    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
-    const createSellOrderSpy = jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
-    const deletePositionSpy = jest.spyOn(positionsRepo, 'delete')
+  it('should mark the position as closed', async (done) => {
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
+    jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
     const currentBidPrice = 1.2
-
-    // initiate positions
-    const positionA = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    const positionB = { id: '123', pair: 'ADAUSD', volume: 1000, price: 1.1 }
-    jest.spyOn(positionsRepo, 'findAll').mockResolvedValueOnce([positionA, positionB])
+    const spy = jest.spyOn(positionsService, 'update')
+    const positionA = new PositionModel({ date: 'xxx', pair: 'ADAUSD', status: 'xxx', volume: 1000, price: 1.1 })
+    await positionA.save()
 
     bot.sellPosition(positionA, currentBidPrice)
       .then(_ => {
-        expect(deletePositionSpy).toHaveBeenCalledWith(positionA)
+        expect(spy).toHaveBeenCalledTimes(2)
+
+        // first call updates status to 'processing'
+        expect(spy).toHaveBeenNthCalledWith(1,
+          expect.objectContaining({ _id: positionA._id }),
+          expect.objectContaining({ status: 'processing' }))
+
+        // first call updates status to 'closed'
+        expect(spy).toHaveBeenNthCalledWith(2,
+          expect.objectContaining({ _id: positionA._id }),
+          expect.objectContaining({ status: 'closed' }))
+
         done()
       })
   })

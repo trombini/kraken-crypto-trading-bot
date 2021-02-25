@@ -5,5 +5,5 @@ export interface Profit {
   volume: number
   soldFor: number
   profit: number
-  position: Position
+  position?: Position
 }
