@@ -35,6 +35,7 @@ export const isStrongSignal = (macd: MACDResult) => {
 
   logger.debug(`MACD BUY/HISTOGRAM/STRENGTH: [${ round(sum, 5) }] -> ${result}`)
 
+  //return true
   return result
 }
 

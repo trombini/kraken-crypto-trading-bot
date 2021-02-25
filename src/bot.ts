@@ -48,7 +48,9 @@ export class Bot {
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
-    const threshold = moment().subtract(20, 'm').unix()
+
+    // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
+    const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
       logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)

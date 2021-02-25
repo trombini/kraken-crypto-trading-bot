@@ -142,7 +142,7 @@ export class TrailingStopLossBot {
   }
 
   sendSlackMessage(position: Position, order: any) {
-    const msg = `Successfully SOLD ${positionId(position)} for ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${formatMoney(order.price)}`
+    const msg = `Successfully SOLD ${positionId(position)} volume ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${formatMoney(order.price)}`
     slack(this.config).send(msg)
   }
 }

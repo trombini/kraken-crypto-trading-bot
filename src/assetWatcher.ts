@@ -40,7 +40,7 @@ export class AssetWatcher extends events.EventEmitter {
     this.fetchData()
     return this.interval = setInterval(() => {
       this.fetchData()
-    }, 30 * 1000)
+    }, 20 * 1000)
   }
 
   stop() {
