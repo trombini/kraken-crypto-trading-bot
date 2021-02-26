@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 export interface CreatePositionInput {
   pair: string
   volume: number
+  status?: string
+  price?: number
 }
 
 export interface Position extends mongoose.Document {

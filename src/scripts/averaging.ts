@@ -1,9 +1,89 @@
-// import { PositionsService } from '../positions/positions.repo'
-// import { averaging } from '../positions/utils'
+import connect from '../common/db/connect'
+import { PositionsService } from '../positions/positions.service'
+import { round, mapKeys } from 'lodash'
+import { Position } from '../positions/position.interface'
 
-// const positionsService = new PositionsService()
+(async function() {
 
-// positionsService.findAll().then(positions => {
-//   const reducedPositions = averaging(0.02, positions)
-//   console.log(JSON.stringify(reducedPositions, undefined, 2))
-// })
+  await connect('mongodb://localhost:27017/kraken-prod')
+
+  const bucket = (base: number, deviation: number, number: number) => {
+    const input = round(number, 2)
+    const percent = 100 * deviation
+    return Math.floor(input * (100 / base) / percent)
+  }
+
+  console.log(bucket(1, 0.02, 0.01))
+  console.log(bucket(1, 0.02, 1.01))
+  console.log(bucket(1, 0.02, 1.02))
+  console.log(bucket(1, 0.02, 1.03))
+  console.log(bucket(1, 0.02, 1.08))
+  console.log(bucket(1, 0.02, 1.09))
+  console.log(bucket(1, 0.02, 9.99))
+
+
+  console.log('-----')
+
+  console.log(bucket(10, 0.02, 10))
+  console.log(bucket(10, 0.02, 19.9))
+  console.log(bucket(10, 0.02, 20))
+  console.log(bucket(10, 0.02, 20.1))
+  console.log(bucket(10, 0.02, 20.3))
+  console.log(bucket(10, 0.02, 99.90))
+  console.log(bucket(10, 0.02, 99.99))
+
+
+  const createBuckets = (positions: Position[]) : { [key: string]: Position[] } => {
+    return positions.reduce((acc, position) => {
+      if(position.price) {
+        const b = bucket(1, 0.02, position.price)
+        if(acc[b] === undefined) {
+          acc[b] = []
+        }
+        (acc[b]).push(position)
+        return acc
+      }
+      return acc
+    }, {})
+  }
+
+  const dollarCostAverage = (positions: Position[]) : { volume: number, price: number } => {
+    const merged = positions.reduce((acc, position) => {
+      const price = position.price || 0
+      return {
+        volume: acc.volume + position.volumeExecuted,
+        costs: acc.costs + (price * position.volumeExecuted)
+      }
+    }, { volume: 0, costs: 0 })
+
+    return {
+      volume: merged.volume,
+      price: merged.costs / merged.volume
+    }
+  }
+
+  const service = new PositionsService()
+  service.findByStatus('open').then(positions => {
+    const buckets = createBuckets(positions)
+    mapKeys(buckets, async (positions, key) => {
+      if(positions.length > 1) {
+
+        const dca = dollarCostAverage(positions)
+
+        console.log(dca)
+        console.log(positions)
+
+        // positions.map(async pos => {
+        //   await service.update(pos, { status: 'merged' })
+        // })
+
+        // await service.create({
+        //   status: 'open',
+        //   pair: 'ADAUSD',
+        //   volume: dca.volume,
+        //   price: dca.price
+        // })
+      }
+    })
+  })
+})()

@@ -14,7 +14,7 @@ import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
-const positionId = (position: Position) => `[${position.pair}_${position.price || 0}_${position.volume || 0}]`
+const positionId = (position: Position) => `[${position.pair}_${round(position.price || 0, 4) }_${round(position.volume || 0, 0)}]`
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
