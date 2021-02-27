@@ -72,21 +72,18 @@ describe('TrailingStopLossBot', () => {
   })
 
   it('should mark the position as closed', async (done) => {
-    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
 
     const currentBidPrice = 1.2
     const spy = jest.spyOn(positionsService, 'update')
-    const positionA = new PositionModel({
-      date: 'xxx',
-      pair: 'ADAUSD',
-      status: 'xxx',
+    const positionA = new PositionModel({ date: 'xxx', pair: 'ADAUSD', status: 'xxx',
       buy: {
         volume: 1000, price: 1.1
       }
     })
 
-    await positionA.save()
+    //await positionA.save()
 
     bot.sellPosition(positionA, currentBidPrice)
       .then(_ => {
@@ -101,6 +98,33 @@ describe('TrailingStopLossBot', () => {
         expect(spy).toHaveBeenNthCalledWith(2,
           expect.objectContaining({ _id: positionA._id }),
           expect.objectContaining({ status: 'sold' }))
+
+        done()
+      })
+  })
+
+  it('should update position with correct profit details', async (done) => {
+    const updatePositionSpy = jest.spyOn(positionsService, 'update')
+    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 80, vol_exec: 80, price: 1.2 } )
+    const positionA = new PositionModel({
+      pair: 'ADAUSD',
+      status: 'sold',
+      buy: { volume: 100, volumeExecuted: 100, price: 1.0 },
+      sell: { orderIds: [ 'some-order-id' ]}
+    })
+
+    bot.evaluateProfit(positionA)
+      .then(_ => {
+        expect(getOrderSpy).toBeCalledTimes(1)
+        expect(updatePositionSpy).toHaveBeenCalledTimes(1)
+        // first call updates status to 'processing'
+        expect(updatePositionSpy).toHaveBeenNthCalledWith(1,
+          expect.objectContaining({ _id: positionA._id }),
+          expect.objectContaining({
+            'sell.price': 1.2,
+            'sell.volume': 80,
+            'sell.profit': 20
+          }))
 
         done()
       })

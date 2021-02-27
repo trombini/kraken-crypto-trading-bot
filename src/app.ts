@@ -10,8 +10,8 @@ import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { PositionsService } from './positions/positions.service'
-import connect from './common/db/connect'
 import { formatMoney } from './common/utils'
+import connect from './common/db/connect'
 
 // TODO: move into class
 const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, profitsRepo: ProfitsRepo, config: BotConfig): TrailingStopLossBot => {

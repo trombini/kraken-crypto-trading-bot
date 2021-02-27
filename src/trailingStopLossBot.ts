@@ -127,11 +127,20 @@ export class TrailingStopLossBot {
           throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${positionId(position)}`)
         }
 
+        // update position to keep track of profit
+        const volumeSold = parseFloat(order.vol_exec) || 0
+        const profit = (position.buy.volumeExecuted || 0) - volumeSold
+        this.positionService.update(position, {
+          'sell.price': parseFloat(order.price),
+          'sell.volume': volumeSold,
+          'sell.profit': profit
+        })
+
         logger.info(`Successfully executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
-        this.logProfit(order, position)
-        this.sendSlackMessage(position, order)
+        await this.logProfit(order, position)
+        await this.sendSlackMessage(position, order)
       }
     }
     catch(err) {
