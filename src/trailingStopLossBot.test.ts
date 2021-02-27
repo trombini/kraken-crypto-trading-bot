@@ -32,44 +32,44 @@ beforeEach(() => {
 
 describe('TrailingStopLossBot', () => {
 
-  // it('should fail because position doesnt have a price set yet', () => {
-  //   const invalidBet = new PositionModel({ volume: 1000 })
-  //   const currentBidPrize = 1.05
-  //   const targetProfit = 50
-  //   const result = bot.inWinZone(currentBidPrize, targetProfit, invalidBet)
-  //   expect(result).toBe(false)
-  // })
+  it('should fail because position doesnt have a price set yet', () => {
+    const invalidBet = new PositionModel({ volume: 1000 })
+    const currentBidPrize = 1.05
+    const targetProfit = 50
+    const result = bot.inWinZone(currentBidPrize, targetProfit, invalidBet)
+    expect(result).toBe(false)
+  })
 
-  // it('should fail because currentBidPrize not yet be in profit range for given position', () => {
-  //   const highPricedBet = new PositionModel({ volume: 1000, price: 1 })
-  //   const currentBidPrize = 1.05
-  //   const targetProfit = 50
-  //   const result = bot.inWinZone(currentBidPrize, targetProfit, highPricedBet)
-  //   expect(result).toBe(false)
-  // })
+  it('should fail because currentBidPrize not yet be in profit range for given position', () => {
+    const highPricedBet = new PositionModel({ volume: 1000, price: 1 })
+    const currentBidPrize = 1.05
+    const targetProfit = 50
+    const result = bot.inWinZone(currentBidPrize, targetProfit, highPricedBet)
+    expect(result).toBe(false)
+  })
 
-  // it('should succeed successful as currentPrize in profit range for given position', () => {
-  //   const validBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
-  //   const currentBidPrize = 1.1
-  //   const targetProfit = 50
-  //   const result = bot.inWinZone(currentBidPrize, targetProfit, validBet)
-  //   expect(result).toBe(true)
-  // })
+  it('should succeed successful as currentPrize in profit range for given position', () => {
+    const validBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
+    const currentBidPrize = 1.1
+    const targetProfit = 50
+    const result = bot.inWinZone(currentBidPrize, targetProfit, validBet)
+    expect(result).toBe(true)
+  })
 
-  // it('should throw error because expected profit would be negative', async (done) => {
-  //   jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
-  //   jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
+  it('should throw error because expected profit would be negative', async (done) => {
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
+    jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
 
-  //   const position = new PositionModel({ buy: { volume: 1000, price: 1.1 }})
-  //   const currentBidPrice = 1.1
+    const position = new PositionModel({ buy: { volume: 1000, price: 1.1 }})
+    const currentBidPrice = 1.1
 
-  //   bot.sellPosition(position, currentBidPrice)
-  //     .then(_ => fail('it should not reach here'))
-  //     .catch(err => {
-  //       expect(err).toBeDefined()
-  //       done()
-  //     })
-  // })
+    bot.sellPosition(position, currentBidPrice)
+      .then(_ => fail('it should not reach here'))
+      .catch(err => {
+        expect(err).toBeDefined()
+        done()
+      })
+  })
 
   it('should mark the position as closed', async () => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1 } )
