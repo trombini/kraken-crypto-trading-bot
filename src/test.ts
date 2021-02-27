@@ -29,18 +29,32 @@ import { Bot } from './bot'
   // const analyst = new DownswingAnalyst(watcher, config)
   // const sellBot = new TrailingStopLossBot(krakenService, positionsService, profitsRepo, analyst, config)
 
+  // const watcher = new AssetWatcher(15, krakenService, config)
+  // const upswingAnalyst = new UpswingAnalyst(watcher, config)
+  // const bot = new Bot(krakenService, positionsService, upswingAnalyst, config)
 
-  const watcher = new AssetWatcher(15, krakenService, config)
-  const upswingAnalyst = new UpswingAnalyst(watcher, config)
-  const bot = new Bot(krakenService, positionsService, upswingAnalyst, config)
-
-
-  const pos = await PositionModel.findById({ _id: "603a46b42d21b737df8f3604"})
+  const pos = await PositionModel.findById({ _id: "12366c3f093b9db102a9a67e"})
   if(pos) {
-    await bot.fetchOrderDetails(pos)
+    //await bot.fetchOrderDetails(pos)
+
+    // const orderIds = [{ id: 'a' }, { id: 'b'} ]
+    // await positionsService.update(pos, {
+    //   'status': 'sold',
+    //   'sell.orderIds': orderIds.map(id => id.id)
+    // })
   }
 
 
-  //await bot.sellPosition(position, 100)
+
+
+  positionsService.findByStatus('sold').then(positions => {
+    // console.log(positions)
+    
+    positions.forEach(pos => {
+      console.log(pos.sell.volumeToKeep)
+    })
+
+
+  })
 
 })()

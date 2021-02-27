@@ -80,7 +80,6 @@ describe('BOT', () => {
     })
   })
 
-
   it('should update position details with values from Kraken API', async () => {
 
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
@@ -99,9 +98,9 @@ describe('BOT', () => {
       status: 'created',
     }), expect.objectContaining({
       status: 'open',
-      price: 0.95,
-      volume: 50,
-      volumeExecuted: 50
+      'buy.price': 0.95,
+      'buy.volume': 50,
+      'buy.volumeExecuted': 50
     }))
 
   })

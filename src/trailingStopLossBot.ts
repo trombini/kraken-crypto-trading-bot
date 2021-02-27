@@ -106,7 +106,7 @@ export class TrailingStopLossBot {
         // mark position as sold and keep track of the orderIds
         await this.positionService.update(position, {
           'status': 'sold',
-          'sell.orderId': orderIds.map(id => id.id)
+          'sell.orderIds': orderIds.map(id => id.id)
         })
       }
       catch(err) {
@@ -118,7 +118,8 @@ export class TrailingStopLossBot {
 
   async evaluateProfit(position: Position) {
     try {
-      // TODO: what do we do if we got multiple orderIds?
+      logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
+
       if(position.sell.orderIds && position.sell.orderIds.length > 0) {
         const orderId = position.sell.orderIds[0]
         const order = await this.kraken.getOrder({ id: orderId })
@@ -128,15 +129,16 @@ export class TrailingStopLossBot {
         }
 
         // update position to keep track of profit
+        const price = parseFloat(order.price)
         const volumeSold = parseFloat(order.vol_exec) || 0
-        const profit = (position.buy.volumeExecuted || 0) - volumeSold
+        const profit = (position.buy.volume || 0) - volumeSold
         this.positionService.update(position, {
-          'sell.price': parseFloat(order.price),
+          'sell.price': price,
           'sell.volume': volumeSold,
           'sell.profit': profit
         })
 
-        logger.info(`Successfully executed SELL order of ${round(order.vol_exec, 0)}/${round(order.vol_exec, 0)} for ${order.price}`)
+        logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
         await this.logProfit(order, position)
