@@ -13,34 +13,33 @@ import { AssetWatcher } from './assetWatcher'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
+import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import { Bot } from './bot'
 
 (async function() {
 
-  await connect('mongodb://localhost:27017/kraken-test')
+  await connect('mongodb://localhost:27017/kraken-prod')
 
   const positionsService = new PositionsService()
   const profitsRepo = new ProfitsRepo()
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret + 'd')
   const krakenService = new KrakenService(krakenApi, config)
 
-  const watcher = new AssetWatcher(5, krakenService, config)
-  const analyst = new DownswingAnalyst(watcher, config)
-  const bot = new TrailingStopLossBot(krakenService, positionsService, profitsRepo, analyst, config)
+  // const watcher = new AssetWatcher(5, krakenService, config)
+  // const analyst = new DownswingAnalyst(watcher, config)
+  // const sellBot = new TrailingStopLossBot(krakenService, positionsService, profitsRepo, analyst, config)
 
 
-  const positions = await positionsService.findByStatus('open')
-  const position = positions[0]
+  const watcher = new AssetWatcher(15, krakenService, config)
+  const upswingAnalyst = new UpswingAnalyst(watcher, config)
+  const bot = new Bot(krakenService, positionsService, upswingAnalyst, config)
 
 
-  const orderIds = [{ id: 'a' }, { id: 'b'} ]
+  const pos = await PositionModel.findById({ _id: "603a46b42d21b737df8f3604"})
+  if(pos) {
+    await bot.fetchOrderDetails(pos)
+  }
 
-  await positionsService.update(position, {
-    'sell.orderIds': orderIds.map(o => o.id)
-  })
-
-  await positionsService.update(position, {
-    'sell.volumeToKeep': 123
-  })
 
   //await bot.sellPosition(position, 100)
 

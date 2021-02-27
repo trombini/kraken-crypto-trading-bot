@@ -59,7 +59,8 @@ export class Bot {
     else {
       const position = await this.buyPosition(recommendation)
       if(position) {
-        await await this.fetchOrderDetails(position)
+        logger.debug('Good, now fetch Position details')
+        await this.fetchOrderDetails(position)
         return position
       }
     }
@@ -104,9 +105,12 @@ export class Bot {
   // TODO: what do we do if we got multiple orderIds?
   async fetchOrderDetails(position: Position) {
     try {
+      logger.debug(`Fetch order details for orders '${position.buy.orderIds?.join(',')}'`)
        if(position.buy.orderIds && position.buy.orderIds.length > 0) {
+
         const orderId = position.buy.orderIds[0]
         const order = await this.kraken.getOrder({ id: orderId })
+        logger.debug(`Fetch order details for order '${orderId}'`)
 
         if(order === undefined) {
           throw new Error(`BUY order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally.`)
@@ -120,11 +124,11 @@ export class Bot {
         // update position to watch for sell opportunity
         const volumeExecuted = parseFloat(order.vol_exec) || 0
         const price = parseFloat(order?.price) || 0
-        this.positionsService.update(position, {
+        await this.positionsService.update(position, {
           status: 'open',
-          volume: volumeExecuted,
-          volumeExecuted,
-          price,
+          'buy.volume': volumeExecuted,
+          'buy.volumeExecuted': volumeExecuted,
+          'buy.price': price,
         })
 
         // make sure we let Slack know

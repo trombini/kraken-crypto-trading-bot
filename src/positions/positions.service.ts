@@ -16,7 +16,8 @@ export class PositionsService {
       //volume: input.volume,
       //price: input.price || undefined,
       buy: {
-        volume: input.volume
+        volume: input.volume,
+        orderIds: input.orderIds
       }
     }).catch(err => {
       logger.error(err)
