@@ -104,7 +104,7 @@ export class TrailingStopLossBot {
         logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds
-        this.positionService.update(position, {
+        await this.positionService.update(position, {
           'status': 'sold',
           'sell.orderId': orderIds.map(id => id.id)
         })

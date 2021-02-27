@@ -118,11 +118,13 @@ export class Bot {
         }
 
         // update position to watch for sell opportunity
+        const volumeExecuted = parseFloat(order.vol_exec) || 0
+        const price = parseFloat(order?.price) || 0
         this.positionsService.update(position, {
           status: 'open',
-          volume: order?.vol ? parseFloat(order?.vol) : 0,
-          volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
-          price: order?.price ? parseFloat(order?.price) : 0,
+          volume: volumeExecuted,
+          volumeExecuted,
+          price,
         })
 
         // make sure we let Slack know
