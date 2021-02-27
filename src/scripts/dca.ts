@@ -35,8 +35,8 @@ import { Position } from '../positions/position.interface'
 
   const createBuckets = (positions: Position[]) : { [key: string]: Position[] } => {
     return positions.reduce((acc, position) => {
-      if(position.price) {
-        const b = bucket(1, 0.02, position.price)
+      if(position.buy.price) {
+        const b = bucket(1, 0.02, position.buy.price)
         if(acc[b] === undefined) {
           acc[b] = []
         }
@@ -49,10 +49,11 @@ import { Position } from '../positions/position.interface'
 
   const dollarCostAverage = (positions: Position[]) : { volume: number, price: number } => {
     const merged = positions.reduce((acc, position) => {
-      const price = position.price || 0
+      const price = position.buy.price || 0
+      const volume = position.buy.volumeExecuted || 0
       return {
-        volume: acc.volume + position.volumeExecuted,
-        costs: acc.costs + (price * position.volumeExecuted)
+        volume: acc.volume + volume,
+        costs: acc.costs + (price * volume)
       }
     }, { volume: 0, costs: 0 })
 

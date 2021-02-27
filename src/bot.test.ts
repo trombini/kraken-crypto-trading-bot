@@ -6,6 +6,7 @@ import { AssetWatcher } from './assetWatcher'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { setupDb } from '../test/test-setup'
 import { PositionsService } from './positions/positions.service'
+import PositionModel from './positions/position.model'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient
@@ -71,7 +72,7 @@ describe('BOT', () => {
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed' })
 
-    await bot.buy({ pair: 'ADAUSD' })
+    await bot.buyPosition({ pair: 'ADAUSD' })
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
@@ -79,24 +80,29 @@ describe('BOT', () => {
     })
   })
 
-  it('should update status, price and volumeExecuted after successful order', async () => {
 
-    const spy = jest.spyOn(positionsService, 'update')
+  it('should update position details with values from Kraken API', async () => {
 
-    jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
-    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
-    jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
 
-    await bot.buy({ pair: 'ADAUSD' })
+    const spy = jest.spyOn(positionsService, 'update')
+    const position = new PositionModel({
+      status: 'created',
+      buy: {
+        orderIds: [ 'a' ]
+      }
+    })
+
+    await bot.fetchOrderDetails(position)
 
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({
       status: 'created',
-      volume: 50
     }), expect.objectContaining({
       status: 'open',
       price: 0.95,
+      volume: 50,
       volumeExecuted: 50
     }))
+
   })
 })

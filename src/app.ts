@@ -11,6 +11,7 @@ import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { PositionsService } from './positions/positions.service'
 import connect from './common/db/connect'
+import { formatMoney } from './common/utils'
 
 // TODO: move into class
 const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, profitsRepo: ProfitsRepo, config: BotConfig): TrailingStopLossBot => {
@@ -67,9 +68,7 @@ const botFactory = (krakenService: KrakenService, positionsService: PositionsSer
       const profit = profits.reduce((acc, p) => acc + p.profit, 0)
       const totalProfit = config.goalStart + profit
       logger.info(
-        `Goal reached ${round((totalProfit / config.goal) * 100, 2)} %  (${
-          config.goalStart
-        } + ${profit}) 🚀`,
+        `Goal of ${formatMoney(config.goal)} reached by ${round((totalProfit / config.goal) * 100, 2)} %  (${config.goalStart} + ${round(profit, 0)}) 🚀`,
       )
     })
   }

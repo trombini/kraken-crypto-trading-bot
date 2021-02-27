@@ -49,7 +49,7 @@ describe('TrailingStopLossBot', () => {
   })
 
   it('should succeed successful as currentPrize in profit range for given position', () => {
-    const validBet = new PositionModel({ volume: 1000, price: 1 })
+    const validBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
     const currentBidPrize = 1.1
     const targetProfit = 50
     const result = bot.inWinZone(currentBidPrize, targetProfit, validBet)
@@ -59,7 +59,8 @@ describe('TrailingStopLossBot', () => {
   it('should throw error because expected profit would be negative', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
-    const position = new PositionModel({ volume: 1000, price: 1.1 })
+
+    const position = new PositionModel({ buy: { volume: 1000, price: 1.1 }})
     const currentBidPrice = 1.1
 
     bot.sellPosition(position, currentBidPrice)
@@ -73,9 +74,18 @@ describe('TrailingStopLossBot', () => {
   it('should mark the position as closed', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol:1000, vol_exec:1000, price:1.0 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
+
     const currentBidPrice = 1.2
     const spy = jest.spyOn(positionsService, 'update')
-    const positionA = new PositionModel({ date: 'xxx', pair: 'ADAUSD', status: 'xxx', volume: 1000, price: 1.1 })
+    const positionA = new PositionModel({
+      date: 'xxx',
+      pair: 'ADAUSD',
+      status: 'xxx',
+      buy: {
+        volume: 1000, price: 1.1
+      }
+    })
+
     await positionA.save()
 
     bot.sellPosition(positionA, currentBidPrice)
@@ -85,12 +95,12 @@ describe('TrailingStopLossBot', () => {
         // first call updates status to 'processing'
         expect(spy).toHaveBeenNthCalledWith(1,
           expect.objectContaining({ _id: positionA._id }),
-          expect.objectContaining({ status: 'processing' }))
+          expect.objectContaining({ status: 'selling' }))
 
         // first call updates status to 'closed'
         expect(spy).toHaveBeenNthCalledWith(2,
           expect.objectContaining({ _id: positionA._id }),
-          expect.objectContaining({ status: 'closed' }))
+          expect.objectContaining({ status: 'sold' }))
 
         done()
       })

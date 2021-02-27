@@ -13,16 +13,6 @@ beforeEach(() => {
 describe('PositionsService', () => {
 
   it('', async () => {
-
-
-
-    positionsService.average()
-
-
-
-
-
-
-
+    //positionsService.average()
   })
 })

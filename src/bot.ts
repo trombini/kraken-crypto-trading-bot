@@ -16,6 +16,7 @@ import moment from 'moment'
 // TODO: write test for this availableCurrency
 export const calculateRisk = (availableAmount: number, maxBet: number): number => {
   if(availableAmount < maxBet) {
+    logger.debug(`availableAmount is only ${availableAmount} and less than maxBet (${maxBet})`)
     return availableAmount < 1000 ? 0 : availableAmount
   }
   return maxBet
@@ -48,22 +49,26 @@ export class Bot {
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
-
     // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
       logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
+      return
     }
     else {
-      return this.buy(recommendation)
+      const position = await this.buyPosition(recommendation)
+      if(position) {
+        await await this.fetchOrderDetails(position)
+        return position
+      }
     }
   }
 
   // TODO: limit order (can it be killed automatically?)
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
-  async buy(recommendation: BuyRecommendation): Promise<any> {
+  async buyPosition(recommendation: BuyRecommendation): Promise<Position | undefined> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
     // determine correct buy order
@@ -74,51 +79,59 @@ export class Bot {
     const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
 
     try {
-      const position = await this.positionsService.create({ pair: 'ADAUSD', volume: volume })
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
+      const position = await this.positionsService.create({
+        pair: recommendation.pair,
+        volume: volume,
+        orderIds: orderIds.map(id => id.id)
+      })
 
       // make sure we keep track of trade to that we don't buy it again right away
       this.datastore.push({
         date: moment().unix(),
         pair: recommendation.pair,
-        orderIds: orderIds
       })
 
-      // load order details and log position
-      return Promise.all(
-        orderIds.map((orderId) => this.processOrderId(position, orderId))
-      )
+      return position
     }
     catch(err) {
-      logger.error(err)
+      logger.error(`Error BUY position: `, err)
+      logger.error(JSON.stringify(err))
     }
   }
 
   // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  async processOrderId(position: Position, orderId: OrderId) {
+  // TODO: what do we do if we got multiple orderIds?
+  async fetchOrderDetails(position: Position) {
     try {
-      const order = await this.kraken.getOrder(orderId)
-      if(order === undefined) {
-        throw new Error(`BUY order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally.`)
+       if(position.buy.orderIds && position.buy.orderIds.length > 0) {
+        const orderId = position.buy.orderIds[0]
+        const order = await this.kraken.getOrder({ id: orderId })
+
+        if(order === undefined) {
+          throw new Error(`BUY order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally.`)
+        }
+
+        logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)
+        if(order.price === undefined || order.vol === undefined) {
+          logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
+        }
+
+        // update position to watch for sell opportunity
+        this.positionsService.update(position, {
+          status: 'open',
+          volume: order?.vol ? parseFloat(order?.vol) : 0,
+          volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
+          price: order?.price ? parseFloat(order?.price) : 0,
+        })
+
+        // make sure we let Slack know
+        this.logSuccessfulExecution(order)
       }
-
-      logger.debug(`Processed BUY order: ${JSON.stringify(order)}`)
-      if(order.price === undefined || order.vol === undefined) {
-        logger.error(`Order doesn't provide all the required information. We need to fix it manually in the positions.json for now.`)
-      }
-
-      // update position to watch for sell opportunity
-      this.positionsService.update(position, {
-        status: 'open',
-        volumeExecuted: order?.vol_exec ? parseFloat(order?.vol_exec) : 0,
-        price: order?.price ? parseFloat(order?.price) : 0,
-      })
-
-      // make sure we let Slack know
-      this.logSuccessfulExecution(order)
     }
     catch(err) {
-      logger.error(err)
+      logger.error(`Error BUY position: `, err)
+      logger.error(JSON.stringify(err))
     }
   }
 
