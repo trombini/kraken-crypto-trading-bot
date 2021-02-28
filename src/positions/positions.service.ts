@@ -25,8 +25,12 @@ export class PositionsService {
     })
   }
 
+  async findById(id: string) {
+    return PositionModel.findOne({ _id: id })
+  }
+
   async update(position: Position, update: UpdateQuery<Position>) {
-    return PositionModel.findByIdAndUpdate(position._id, update, { upsert: true })
+    return PositionModel.findByIdAndUpdate(position._id, update, { new: true })
   }
 
   async save(position: Position) {

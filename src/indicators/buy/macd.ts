@@ -46,7 +46,7 @@ export const macdCrossesAboveSignal = (macd: MACDResult) => {
     const macdAboveSignal = head.MACD > head.signal
     const macdBelowZero = head.MACD < 0
     const delta = head.MACD - head.signal
-    logger.debug(`MACD BUY/MACD: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${delta}] -> ${macdAboveSignal}`)
+    logger.debug(`MACD BUY/MACD: [${round(head.MACD, 4)} | ${round(head.signal, 4)} | ${round(delta, 4)}] -> ${macdAboveSignal}`)
 
     return true
     return macdBelowZero && macdAboveSignal

@@ -69,7 +69,7 @@ export class Bot {
   // TODO: limit order (can it be killed automatically?)
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
-  async buyPosition(recommendation: BuyRecommendation): Promise<Position | undefined> {
+  async buyPosition(recommendation: BuyRecommendation): Promise<Position | null | undefined> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
     // determine correct buy order
@@ -93,7 +93,8 @@ export class Bot {
         pair: recommendation.pair,
       })
 
-      return position
+      // return latest version of the position
+      return this.positionsService.findById(position.id)
     }
     catch(err) {
       logger.error(`Error BUY position: `, err)
@@ -124,7 +125,7 @@ export class Bot {
         // update position to watch for sell opportunity
         const volumeExecuted = parseFloat(order.vol_exec) || 0
         const price = parseFloat(order?.price) || 0
-        await this.positionsService.update(position, {
+        const updatedPosition = await this.positionsService.update(position, {
           status: 'open',
           'buy.volume': volumeExecuted,
           'buy.volumeExecuted': volumeExecuted,
@@ -132,7 +133,9 @@ export class Bot {
         })
 
         // make sure we let Slack know
-        this.logSuccessfulExecution(position)
+        if(updatedPosition) {
+          this.logSuccessfulExecution(updatedPosition)
+        }
       }
     }
     catch(err) {

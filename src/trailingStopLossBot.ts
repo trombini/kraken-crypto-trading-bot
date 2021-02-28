@@ -69,14 +69,19 @@ export class TrailingStopLossBot {
     positions.forEach(async position => {
       if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        await this.sellPosition(position, currentBidPrice)
-        await this.evaluateProfit(position)
+        const p = await this.sellPosition(position, currentBidPrice)
+        if(p) {
+          await this.evaluateProfit(p)
+        }
       }
       else {
         logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
       }
     })
   }
+
+  //async takeProfit(position: Position)
+
 
   async sellPosition(position: Position, currentBidPrice: number) {
     if(position.buy.price && position.buy.volume) {
@@ -108,6 +113,9 @@ export class TrailingStopLossBot {
           'status': 'sold',
           'sell.orderIds': orderIds.map(id => id.id)
         })
+
+        // return latest version of the position
+        return this.positionService.findById(position.id)
       }
       catch(err) {
         logger.error(`Error SELL ${positionId(position)}:`, err)
@@ -119,6 +127,7 @@ export class TrailingStopLossBot {
   async evaluateProfit(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
+      logger.debug(JSON.stringify(position))
 
       if(position.sell.orderIds && position.sell.orderIds.length > 0) {
         const orderId = position.sell.orderIds[0]
