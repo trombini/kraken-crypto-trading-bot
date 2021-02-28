@@ -99,7 +99,7 @@ export class TrailingStopLossBot {
         logger.info(`Create SELL order for ${positionId(position)}. volume: ${volumeToSell}, price: ~ ${currentBidPrice}, keep: ${volumeToKeep}`)
 
         // update the status of the position so that we don't end up selling it multiple times
-        this.positionService.update(position, {
+        await this.positionService.update(position, {
           'status': 'selling',
           'sell.volumeToKeep': volumeToKeep
         })
@@ -141,7 +141,7 @@ export class TrailingStopLossBot {
         const price = parseFloat(order.price)
         const volumeSold = parseFloat(order.vol_exec) || 0
         const profit = (position.buy.volume || 0) - volumeSold
-        this.positionService.update(position, {
+        await this.positionService.update(position, {
           'sell.price': price,
           'sell.volume': volumeSold,
           'sell.profit': profit
@@ -150,8 +150,11 @@ export class TrailingStopLossBot {
         logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
-        await this.logProfit(order, position)
-        await this.sendSlackMessage(position, order)
+        this.logProfit(order, position)
+        this.sendSlackMessage(position, order)
+
+        // return latest version of the position
+        return this.positionService.findById(position.id)
       }
     }
     catch(err) {

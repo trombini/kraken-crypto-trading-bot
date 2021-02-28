@@ -51,6 +51,11 @@ const sellPosition = async (position: Position) : Promise<Position | null> => {
 
   console.log(u)
 
+  console.log('------')
+
+  const a = await positionsService.findById(position.id)
+  console.log(a)
+
 
   // const watcher = new AssetWatcher(5, krakenService, config)
   // const analyst = new DownswingAnalyst(watcher, config)

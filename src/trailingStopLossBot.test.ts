@@ -71,7 +71,7 @@ describe('TrailingStopLossBot', () => {
       })
   })
 
-  it('should mark the position as closed', async () => {
+  it(`should close position with status 'sold'`, async () => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
 
@@ -83,7 +83,9 @@ describe('TrailingStopLossBot', () => {
       }
     })
 
-    await bot.sellPosition(positionA, currentBidPrice)
+    await positionA.save()
+
+    const updatedPosition = await bot.sellPosition(positionA, currentBidPrice)
 
     expect(spy).toHaveBeenCalledTimes(2)
 
@@ -96,6 +98,10 @@ describe('TrailingStopLossBot', () => {
     expect(spy).toHaveBeenNthCalledWith(2,
       expect.objectContaining({ _id: positionA._id }),
       expect.objectContaining({ status: 'sold' }))
+
+    // check if we return the updated version
+    expect(updatedPosition).toBeDefined()
+    expect(updatedPosition?.status).toEqual('sold')
   })
 
   it('should update position with correct profit details', async () => {
