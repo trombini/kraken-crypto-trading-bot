@@ -36,5 +36,5 @@ export const config: BotConfig = {
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
   targetProfit: process.env.TARGET_PROFIT ? parseFloat(process.env.TARGET_PROFIT) : 30,
-  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0018,
+  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0016,
 }

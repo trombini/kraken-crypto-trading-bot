@@ -22,7 +22,6 @@ export class TrailingStopLossBot {
   constructor(
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
-    readonly profits: ProfitsRepo,
     readonly analyst: DownswingAnalyst,
     readonly config: BotConfig,
   ) {
@@ -150,7 +149,6 @@ export class TrailingStopLossBot {
         logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
-        this.logProfit(order, position)
         this.sendSlackMessage(position, order)
 
         // return latest version of the position
@@ -160,16 +158,6 @@ export class TrailingStopLossBot {
     catch(err) {
       logger.error(`Error evaluating profit for ${positionId(position)}:`, err)
     }
-  }
-
-  logProfit(order: any, position: Position) {
-    this.profits.add({
-      date: moment().format(),
-      soldFor: parseFloat(order.price),
-      volume: parseFloat(order.vol_exec),
-      profit: position.sell.volumeToKeep || 0,
-      position
-    })
   }
 
   sendSlackMessage(position: Position, order: any) {

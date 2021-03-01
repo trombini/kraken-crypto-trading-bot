@@ -1,7 +1,7 @@
-import connect from '../common/db/connect'
 import { PositionsService } from '../positions/positions.service'
-import { round, mapKeys } from 'lodash'
+import { round, mapKeys, flatMap, uniq } from 'lodash'
 import { Position } from '../positions/position.interface'
+import connect from '../common/db/connect'
 
 (async function() {
 
@@ -36,7 +36,7 @@ import { Position } from '../positions/position.interface'
   const createBuckets = (positions: Position[]) : { [key: string]: Position[] } => {
     return positions.reduce((acc, position) => {
       if(position.buy.price) {
-        const b = bucket(1, 0.02, position.buy.price)
+        const b = bucket(1, 0.03, position.buy.price)
         if(acc[b] === undefined) {
           acc[b] = []
         }
@@ -48,6 +48,7 @@ import { Position } from '../positions/position.interface'
   }
 
   const dollarCostAverage = (positions: Position[]) : { volume: number, price: number } => {
+
     const merged = positions.reduce((acc, position) => {
       const price = position.buy.price || 0
       const volume = position.buy.volumeExecuted || 0
@@ -68,22 +69,25 @@ import { Position } from '../positions/position.interface'
     const buckets = createBuckets(positions)
     mapKeys(buckets, async (positions, key) => {
       if(positions.length > 1) {
-
+        const orderIds = uniq(flatMap(positions.map(p => p.buy.orderIds)))
         const dca = dollarCostAverage(positions)
 
         console.log(dca)
         console.log(positions)
+        console.log(orderIds)
 
-        // positions.map(async pos => {
-        //   await service.update(pos, { status: 'merged' })
-        // })
+        positions.map(async pos => {
+          await service.update(pos, { status: 'merged' })
+        })
 
-        // await service.create({
-        //   status: 'open',
-        //   pair: 'ADAUSD',
-        //   volume: dca.volume,
-        //   price: dca.price
-        // })
+        await service.create({
+          pair: 'ADAUSD',
+          status: 'open',
+          price: dca.price,
+          volume: dca.volume,
+          orderIds: []
+          //orderIds: orderIds
+        })
       }
     })
   })

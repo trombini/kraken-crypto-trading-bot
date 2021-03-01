@@ -14,13 +14,12 @@ import { formatMoney } from './common/utils'
 import connect from './common/db/connect'
 
 // TODO: move into class
-const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, profitsRepo: ProfitsRepo, config: BotConfig): TrailingStopLossBot => {
+const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): TrailingStopLossBot => {
   const watcher = new AssetWatcher(5, krakenService, config)
   const analyst = new DownswingAnalyst(watcher, config)
   const bot = new TrailingStopLossBot(
     krakenService,
     positionsService,
-    profitsRepo,
     analyst,
     config,
   )
@@ -55,17 +54,17 @@ const botFactory = (krakenService: KrakenService, positionsService: PositionsSer
   await connect(config.mongoDb)
 
   const positionsService = new PositionsService()
-  const profitsRepo = new ProfitsRepo()
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
 
   botFactory(krakenService, positionsService, config)
-  trailingStopLossBotFactory(krakenService, positionsService, profitsRepo, config)
+  trailingStopLossBotFactory(krakenService, positionsService, config)
 
   //
   if (config.goal > 0) {
-    profitsRepo.findAll().then((profits) => {
-      const profit = profits.reduce((acc, p) => acc + p.profit, 0)
+
+    positionsService.findByStatus('sold').then(positions => {
+      const profit = positions.reduce((acc, p) => acc + (p?.sell?.profit || 0), 0)
       const totalProfit = config.goalStart + profit
       logger.info(
         `Goal of ${formatMoney(config.goal)} reached by ${round((totalProfit / config.goal) * 100, 2)} %  (${config.goalStart} + ${round(profit, 0)}) 🚀`,

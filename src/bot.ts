@@ -98,7 +98,7 @@ export class Bot {
     }
     catch(err) {
       logger.error(`Error BUY position: `, err)
-      logger.error(JSON.stringify(err))
+      logger.error(`Error BUY position: ${JSON.stringify(err)}`)
     }
   }
 
@@ -140,7 +140,7 @@ export class Bot {
     }
     catch(err) {
       logger.error(`Error BUY position: `, err)
-      logger.error(JSON.stringify(err))
+      logger.error(`Error BUY position: ${JSON.stringify(err)}`)
     }
   }
 

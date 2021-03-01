@@ -15,47 +15,33 @@ import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
 import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { Bot } from './bot'
-
-const positionsService = new PositionsService()
-
-const sellPosition = async (position: Position) : Promise<Position | null> => {
-
-  const u = await positionsService.update(position, {
-    status: 'sold',
-    'sell.orderIds': [ 'xxx', 'yyy' ]
-  })
-
-  return positionsService.findById(position.id)
-}
-
+import { flatMap } from 'lodash'
 
 (async function() {
 
-  await connect('mongodb://localhost:27017/kraken-test')
+  await connect('mongodb://localhost:27017/kraken-prod')
 
-  const profitsRepo = new ProfitsRepo()
-  const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret + 'd')
-  const krakenService = new KrakenService(krakenApi, config)
-
-  const position = await positionsService.create({
-    pair: 'test',
-    volume: 1000,
-    orderIds: [ 'a', 'b' ]
+  const positionsService = new PositionsService()
+  const position = positionsService.create({
+    status: 'open',
+    pair: 'ADAUSD',
+    price: 123,
+    volume: 123,
+    orderIds: []
   })
 
-  console.log(position)
+  // const profitsRepo = new ProfitsRepo()
+  // const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret + 'd')
+  // const krakenService = new KrakenService(krakenApi, config)
 
-  const u = await sellPosition(position)
+  // const position = await positionsService.create({
+  //   pair: 'test',
+  //   volume: 1000,
+  //   //price: 100,
+  //   orderIds: [ 'a', 'b' ]
+  // })
 
-  console.log(position)
-
-  console.log(u)
-
-  console.log('------')
-
-  const a = await positionsService.findById(position.id)
-  console.log(a)
-
+  // console.log(position)
 
   // const watcher = new AssetWatcher(5, krakenService, config)
   // const analyst = new DownswingAnalyst(watcher, config)

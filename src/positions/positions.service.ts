@@ -17,6 +17,7 @@ export class PositionsService {
       //price: input.price || undefined,
       buy: {
         volume: input.volume,
+        price: input.price,
         orderIds: input.orderIds
       }
     }).catch(err => {
