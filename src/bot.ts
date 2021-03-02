@@ -17,7 +17,7 @@ import moment from 'moment'
 export const calculateRisk = (availableAmount: number, maxBet: number): number => {
   if(availableAmount < maxBet) {
     logger.debug(`availableAmount is only ${availableAmount} and less than maxBet (${maxBet})`)
-    return availableAmount < 1000 ? 0 : availableAmount
+    return availableAmount < 1000 ? 0 : (availableAmount * 0.8)
   }
   return maxBet
 }

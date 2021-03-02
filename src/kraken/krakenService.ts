@@ -34,10 +34,11 @@ export class KrakenService {
       .then(response => response.result['ZUSD'])
   }
 
-  async getOHLCData(pair: string, interval: number): Promise<any> {
-    const since = moment().subtract(12, 'h').unix()
+  async getOHLCData(pair: string, period: number): Promise<any> {
+    const periods = 100
+    const since = moment().subtract(period * periods, 'm').unix()
     return this.krakenApi
-      .api('OHLC', { pair, interval, since }, () => {})
+      .api('OHLC', { pair, interval: period, since }, () => {})
       .then(response => response.result[this.config.pair])
       .then(result => {
         const blocks = result.map(mapOhlcResultToObject)

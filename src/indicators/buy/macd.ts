@@ -16,8 +16,9 @@ export const isUpSwing = (macd: MACDResult): Boolean => {
 
   // v0 oldest, v1 middel, v2 now
   const matured = maturedBlocks(macd)
-  const histogramOfMaturedBlocks = histogram(matured)
-  const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
+  const maturedTopBlocks = takeRight(matured, 3)
+  const histogramOfMaturedBlocks = histogram(maturedTopBlocks)
+  const b = histogramOfMaturedBlocks.map(value => round(value, 6))
   const result = allNegatives(b) && b[0] > b[1] && b[1] < b[2]
 
   logger.debug(`MACD BUY/HISTOGRAM: [${b[0]} | ${b[1]} | ${b[2]}] -> ${result}`)
@@ -26,7 +27,7 @@ export const isUpSwing = (macd: MACDResult): Boolean => {
 }
 
 export const isStrongSignal = (macd: MACDResult) => {
-  const sum = takeRight(macd.blocks, 10)
+  const sum = takeRight(macd.blocks, 12)
     .map(block => block.histogram || 0)
     .filter(historgram => historgram && historgram < 0)
     .reduce((acc, value) => acc - value, 0)

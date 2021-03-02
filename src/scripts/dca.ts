@@ -7,36 +7,43 @@ import connect from '../common/db/connect'
 
   await connect('mongodb://localhost:27017/kraken-prod')
 
-  const bucket = (base: number, deviation: number, number: number) => {
+  const bucket = (deviation: number, number: number) => {
     const input = round(number, 2)
     const percent = 100 * deviation
-    return Math.floor(input * (100 / base) / percent)
+    return Math.floor(input * 100 / percent)
   }
 
-  console.log(bucket(1, 0.02, 0.01))
-  console.log(bucket(1, 0.02, 1.01))
-  console.log(bucket(1, 0.02, 1.02))
-  console.log(bucket(1, 0.02, 1.03))
-  console.log(bucket(1, 0.02, 1.08))
-  console.log(bucket(1, 0.02, 1.09))
-  console.log(bucket(1, 0.02, 9.99))
+
+  console.log(bucket(0.02, 1.2130))
+  console.log(bucket(0.02, 1.2134))
+  console.log(bucket(0.02, 1.2183))
+
+  console.log('------')
+
+  console.log(bucket(0.02, 0.01))
+  console.log(bucket(0.02, 1.01))
+  console.log(bucket(0.02, 1.02))
+  console.log(bucket(0.02, 1.03))
+  console.log(bucket(0.02, 1.08))
+  console.log(bucket(0.02, 1.09))
+  console.log(bucket(0.02, 9.99))
 
 
   console.log('-----')
 
-  console.log(bucket(10, 0.02, 10))
-  console.log(bucket(10, 0.02, 19.9))
-  console.log(bucket(10, 0.02, 20))
-  console.log(bucket(10, 0.02, 20.1))
-  console.log(bucket(10, 0.02, 20.3))
-  console.log(bucket(10, 0.02, 99.90))
-  console.log(bucket(10, 0.02, 99.99))
+  console.log(bucket(0.02, 10))
+  console.log(bucket(0.02, 19.9))
+  console.log(bucket(0.02, 20))
+  console.log(bucket(0.02, 20.1))
+  console.log(bucket(0.02, 20.3))
+  console.log(bucket(0.02, 99.90))
+  console.log(bucket(0.02, 99.99))
 
 
   const createBuckets = (positions: Position[]) : { [key: string]: Position[] } => {
     return positions.reduce((acc, position) => {
       if(position.buy.price) {
-        const b = bucket(1, 0.03, position.buy.price)
+        const b = bucket(0.03, position.buy.price)
         if(acc[b] === undefined) {
           acc[b] = []
         }
@@ -48,10 +55,9 @@ import connect from '../common/db/connect'
   }
 
   const dollarCostAverage = (positions: Position[]) : { volume: number, price: number } => {
-
     const merged = positions.reduce((acc, position) => {
       const price = position.buy.price || 0
-      const volume = position.buy.volumeExecuted || 0
+      const volume = position.buy.volume || 0
       return {
         volume: acc.volume + volume,
         costs: acc.costs + (price * volume)
@@ -69,7 +75,8 @@ import connect from '../common/db/connect'
     const buckets = createBuckets(positions)
     mapKeys(buckets, async (positions, key) => {
       if(positions.length > 1) {
-        const orderIds = uniq(flatMap(positions.map(p => p.buy.orderIds)))
+
+        const orderIds = flatMap(positions.map(p => p.buy.orderIds)).map(id => id!)
         const dca = dollarCostAverage(positions)
 
         console.log(dca)
@@ -85,8 +92,7 @@ import connect from '../common/db/connect'
           status: 'open',
           price: dca.price,
           volume: dca.volume,
-          orderIds: []
-          //orderIds: orderIds
+          orderIds: orderIds
         })
       }
     })
