@@ -23,7 +23,10 @@ export const calculateRisk = (availableAmount: number, maxBet: number): number =
 }
 
 export const caluclateVolume = (availableAmount: number, maxBet: number, lastAskPrice: number) => {
-  return round(calculateRisk(availableAmount, maxBet) / lastAskPrice, 0)
+  const risk = calculateRisk(availableAmount, maxBet)
+  const volume = round(risk / lastAskPrice, 0)
+  logger.debug(`${risk} / ${volume}`)
+  return volume
 }
 
 export class Bot {
