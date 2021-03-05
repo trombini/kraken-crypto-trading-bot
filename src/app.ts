@@ -1,7 +1,6 @@
 import KrakenClient from 'kraken-api'
 import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
-import { ProfitsRepo } from './profit/profit.repo'
 import { BotConfig, config } from './common/config'
 import { Bot } from './bot'
 import { logger } from './common/logger'
