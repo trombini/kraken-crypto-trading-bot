@@ -11,7 +11,7 @@ export class UpswingAnalyst extends Analyst {
 
   constructor(readonly watcher: AssetWatcher, readonly config: BotConfig) {
     super(watcher, config)
-    //watcher.subscribe(this, 15)
+    watcher.subscribe(this, 15)
   }
 
   async analyseAssetData(data: AssetsWatcherUpdateEvent): Promise<void> {

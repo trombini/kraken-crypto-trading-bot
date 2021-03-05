@@ -58,26 +58,6 @@ export class AssetWatcher {
     this.observers[period].push(observer)
   }
 
-
-  // fetchData() {
-  //   this.kraken.getOHLCData(this.config.pair, this.period).then(result => {
-  //     this.emit(ASSETS_WATCHER_EVENTS.UPDATE, ({
-  //       period: this.period,
-  //       pair: this.config.pair,
-  //       head: result.head,
-  //       blocks: result.blocks
-  //     }) as AssetsWatcherUpdateEvent)
-  //   })
-  // }
-
-  // start() {
-  //   logger.info(`Start AssetWatcher for [${this.config.pair}] with period ${this.period} minutes`)
-  //   this.fetchData()
-  //   return this.interval = setInterval(() => {
-  //     this.fetchData()
-  //   }, 20 * 1000)
-  // }
-
   // stop() {
   //   if(this.interval) {
   //     clearInterval(this.interval)
