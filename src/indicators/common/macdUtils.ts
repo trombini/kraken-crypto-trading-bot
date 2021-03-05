@@ -12,8 +12,8 @@ export interface MACDResult {
   isHeadMatured: boolean
 }
 
-export const histogram = (macd: MACDOutput[]): number[] =>
-  macd.map(m => m.histogram ? m.histogram : 0)
+// export const histogram = (macd: MACDOutput[]): number[] =>
+//   macd.map(m => m.histogram ? m.histogram : 0)
 
 export const maturedBlocks = (input: MACDResult) => {
   const blocks = clone(input.blocks)

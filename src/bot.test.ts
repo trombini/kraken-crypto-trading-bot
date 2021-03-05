@@ -35,9 +35,10 @@ describe('BOT', () => {
     expect(risk).toBe(0)
   })
 
-  it('should calculate correct BET based on availableCurrency and the configured MAX_BET', async () => {
+  it('should calculate correct BET if availableCurrency is less than MAX_BET', async () => {
+    const factor = 0.8
     const risk = calculateRisk(1100, 2000)
-    expect(risk).toBe(1100)
+    expect(risk).toBe(1100 * factor)
   })
 
   it('should calculate correct BET based on availableCurrency and the configured MAX_BET', async () => {

@@ -3,7 +3,7 @@ import { OHLCBlock } from '../../common/interfaces/trade.interface'
 import { logger } from '../../common/logger'
 import { allPositives } from '../common/utils'
 import { round, every } from 'lodash'
-import { calculateMACD, histogram, MACDResult, maturedBlocks } from '../common/macdUtils'
+import { calculateMACD, MACDResult, maturedBlocks } from '../common/macdUtils'
 
 // TODO: Signal Line still below Zero. Then we might not sell
 
@@ -14,15 +14,22 @@ export const isDownSwing = (macd: MACDResult) => {
     throw Error('Not enough data')
   }
 
-  // v0 oldest, v1 middel, v2 now
   const matured = maturedBlocks(macd)
-  const histogramOfMaturedBlocks = histogram(matured)
-  const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
+  const b = takeRight(matured, 3)
+    .map(block => block.histogram || 0)
+    .map(histogram => round(histogram, 6))
+
   const result = allPositives(b) && b[0] < b[1] && b[1] > b[2]
 
   logger.debug(`MACD SELL/HISTOGRAM: [${b[0]} | ${b[1]} | ${b[2]}] -> ${result}`)
 
   return result
+
+  // v0 oldest, v1 middel, v2 now
+  // const matured = maturedBlocks(macd)
+  // const histogramOfMaturedBlocks = histogram(matured)
+  // const b = takeRight(histogramOfMaturedBlocks, 3).map(value => round(value, 6))
+
 }
 
 // and sell—or short—the security when the MACD crosses below the signal line.

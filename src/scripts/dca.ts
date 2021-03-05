@@ -83,17 +83,17 @@ import connect from '../common/db/connect'
         console.log(positions)
         console.log(orderIds)
 
-        // positions.map(async pos => {
-        //   await service.update(pos, { status: 'merged' })
-        // })
+        positions.map(async pos => {
+          await service.update(pos, { status: 'merged' })
+        })
 
-        // await service.create({
-        //   pair: 'ADAUSD',
-        //   status: 'open',
-        //   price: dca.price,
-        //   volume: dca.volume,
-        //   orderIds: orderIds
-        // })
+        await service.create({
+          pair: 'ADAUSD',
+          status: 'open',
+          price: dca.price,
+          volume: dca.volume,
+          orderIds: orderIds
+        })
       }
     })
   })

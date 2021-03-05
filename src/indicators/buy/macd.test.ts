@@ -1,5 +1,5 @@
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
-import { isUpSwing } from './macd'
+import { isUpSwing, isUpTrend } from './macd'
 
 const getFakeHistogram = (values: number[]): MACDOutput[] => {
   return values.map(value => {
@@ -11,7 +11,28 @@ const getFakeHistogram = (values: number[]): MACDOutput[] => {
 
 describe('MACD / Buy', () => {
 
-  describe('isUpSwing', () => {
+  describe('is up trend', () => {
+
+    it('should fail because it is not an up trend', () => {
+      expect(isUpTrend({
+        period: 1,
+        headMaturity: 0,
+        isHeadMatured: true,
+        blocks: getFakeHistogram([0, -1, 2]),
+      })).toBe(false)
+    })
+
+    it('should be true as it is an up trend', () => {
+      expect(isUpTrend({
+        period: 1,
+        headMaturity: 0,
+        isHeadMatured: true,
+        blocks: getFakeHistogram([0, 1, 2]),
+      })).toBe(true)
+    })
+  })
+
+  describe('is up swing', () => {
 
     it('should fail because not enough data', () => {
       expect(() => {
