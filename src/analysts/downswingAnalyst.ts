@@ -1,6 +1,6 @@
 import { OHLCBlock } from '../common/interfaces/trade.interface'
 import { Analyst, ANALYST_EVENTS } from './analyst'
-import { indicator as macdIndicator } from '../indicators/buy/macd'
+import { indicator as macdIndicator } from '../indicators/sell/macd'
 import { BotConfig } from '../common/config'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { AssetsWatcherUpdateEvent } from '../assetWatcher/assetWatcher.interface'

@@ -50,7 +50,9 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
 
   // start asset watcher
-  watcher.start([5, 15, 240])
+  //watcher.start([5, 15, 240])
+  watcher.start([5, 15])
+
 
   //
   if (config.goal > 0) {

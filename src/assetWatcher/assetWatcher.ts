@@ -27,18 +27,26 @@ export class AssetWatcher {
       })
   }
 
+  startWatcher(period: number) {
+    logger.info(`Start AssetWatcher for period ${period}`)
+    this.intervals[period] = setInterval(async () => {
+      const data = await this.fetchData(period)
+      const observers = this.observers[period]
+      if (observers) {
+        observers.forEach((observer: AssetWatcherObserver) => {
+          observer.analyseAssetData(data)
+        })
+      }
+    }, 15 * 1000)
+  }
+
   start(periods: number[]) {
+    logger.info(`Start AssetWatchers with delay (so we don't hit the API limit)`)
     periods.forEach((period) => {
-      console.log(`Start watcher for period ${period}`)
-      this.intervals[period] = setInterval(async () => {
-        const data = await this.fetchData(period)
-        const observers = this.observers[period]
-        if (observers) {
-          observers.forEach((observer: AssetWatcherObserver) => {
-            observer.analyseAssetData(data)
-          })
-        }
-      }, 10 * 1000)
+      const delay = Math.floor(Math.random() * (10 + 1))
+      setTimeout(() => {
+        this.startWatcher(period)
+      }, delay * 1000)
     })
   }
 
