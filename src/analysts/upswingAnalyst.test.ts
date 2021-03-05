@@ -32,35 +32,35 @@ beforeEach(() => {
 
 describe('UpswingAnalyst', () => {
 
-  it('should not trigger BUY event if part of the analysis was negative', () => {
-    const analyst = new UpswingAnalyst(watcher, config)
-    const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
-    const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true, false])
+  // it('should not trigger BUY event if part of the analysis was negative', () => {
+  //   const analyst = new UpswingAnalyst(watcher, config)
+  //   const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
+  //   const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true, false])
 
-    return analyst.analyseMarketData({
-      period: 5,
-      pair: 'foo',
-      head: blocks[0],
-      blocks: blocks
-    }).then(_ => {
-      expect(spy).toBeCalledTimes(0)
-    })
-  })
+  //   return analyst.analyseMarketData({
+  //     period: 5,
+  //     pair: 'foo',
+  //     head: blocks[0],
+  //     blocks: blocks
+  //   }).then(_ => {
+  //     expect(spy).toBeCalledTimes(0)
+  //   })
+  // })
 
-  it('should trigger BUY event if analysis was positive', () => {
-    const analyst = new UpswingAnalyst(watcher, config)
-    const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
-    const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true])
+  // it('should trigger BUY event if analysis was positive', () => {
+  //   const analyst = new UpswingAnalyst(watcher, config)
+  //   const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
+  //   const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true])
 
-    return analyst.analyseMarketData({
-      period: 5,
-      pair: 'foo',
-      head: blocks[0],
-      blocks: blocks
-    }).then(_ => {
-      expect(spy).toHaveBeenCalled()
-      expect(spy).toBeCalledTimes(1)
-    })
-  })
+  //   return analyst.analyseMarketData({
+  //     period: 5,
+  //     pair: 'foo',
+  //     head: blocks[0],
+  //     blocks: blocks
+  //   }).then(_ => {
+  //     expect(spy).toHaveBeenCalled()
+  //     expect(spy).toBeCalledTimes(1)
+  //   })
+  // })
 
 })

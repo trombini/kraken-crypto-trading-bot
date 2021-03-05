@@ -42,9 +42,9 @@ export class TrailingStopLossBot {
     })
 
     if (analyst) {
-      analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
-        this.handleSellRecommendation(data)
-      })
+      // analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
+      //   this.handleSellRecommendation(data)
+      // })
     }
   }
 

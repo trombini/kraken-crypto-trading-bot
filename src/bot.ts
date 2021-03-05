@@ -43,9 +43,9 @@ export class Bot {
     this.datastore = []
 
     if(this.analyst) {
-      this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
-        this.handleBuyRecommendation(recommendation)
-      })
+      // this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
+      //   this.handleBuyRecommendation(recommendation)
+      // })
     }
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions

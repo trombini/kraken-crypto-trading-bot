@@ -1,23 +1,21 @@
-import { AssetWatcher, AssetsWatcherUpdateEvent } from '../assetWatcher'
 import { BotConfig } from '../common/config'
 import { ASSETS_WATCHER_EVENTS } from '../assetWatcher'
 import events from 'events'
+import { AssetsWatcherUpdateEvent, AssetWatcherObserver } from '../assetWatcher/assetWatcher.interface'
+import { AssetWatcher } from '../assetWatcher/assetWatcher'
 
 export enum ANALYST_EVENTS {
   SELL = 'ANALYST:SELL',
   BUY = 'ANALYST:BUY'
 }
 
-export class Analyst extends events.EventEmitter {
+export class Analyst extends events.EventEmitter implements AssetWatcherObserver {
 
   constructor(readonly watcher: AssetWatcher, readonly config: BotConfig) {
     super()
-    watcher.on(ASSETS_WATCHER_EVENTS.UPDATE, (data: AssetsWatcherUpdateEvent) => {
-      this.analyseMarketData(data)
-    })
   }
 
-  analyseMarketData(data: AssetsWatcherUpdateEvent) {
-    // do nothing
+  analyseAssetData(data: AssetsWatcherUpdateEvent): Promise<void>  {
+    throw new Error('Method not implemented.')
   }
 }
