@@ -4,13 +4,11 @@ import { OrderId, SellRecommendation } from './common/interfaces/trade.interface
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
-import { ProfitsRepo } from './profit/profit.repo'
 import { slack } from './slack/slack.service'
 import { round } from 'lodash'
 import { PositionsService } from './positions/positions.service'
 import { Position } from './positions/position.interface'
 import { formatMoney, formatNumber } from './common/utils'
-import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -42,9 +40,9 @@ export class TrailingStopLossBot {
     })
 
     if (analyst) {
-      // analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
-      //   this.handleSellRecommendation(data)
-      // })
+      analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
+        this.handleSellRecommendation(data)
+      })
     }
   }
 

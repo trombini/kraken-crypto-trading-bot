@@ -1,7 +1,7 @@
 import KrakenClient from 'kraken-api'
 import { config } from './common/config'
 import { KrakenService } from './kraken/krakenService'
-import { AssetWatcher } from './assetWatcher'
+import { AssetWatcher } from '../archive/assetWatcher'
 
 let krakenApi: KrakenClient
 let krakenService: KrakenService
