@@ -47,6 +47,7 @@ export class Bot {
         this.handleBuyRecommendation(recommendation)
       })
     }
+
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
   }

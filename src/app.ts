@@ -47,10 +47,7 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   const krakenService = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(krakenService, config)
 
-
-
   const analyst = new BuyAnalyst(watcher, config)
-
 
   // start asset watcher
   watcher.start([5, 15, 1440])

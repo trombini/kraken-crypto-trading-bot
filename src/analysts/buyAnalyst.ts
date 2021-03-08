@@ -16,25 +16,37 @@ export class BuyAnalyst extends Analyst {
     super(watcher, config)
     this.data = {}
 
+    // subscribe to assets updates
     watcher.subscribe(this, 15)
     watcher.subscribe(this, 1440)
 
     // weight, period of interest, indicator
     this.indicators = [
-      [0.4, 1440, 'STOCHF', stochastic()],
-      [0.5, 15, 'UPSWING', upswing(15, 0.8)],
+      [0.1, 1440, 'STOCHF', stochastic()],
+      [0.8, 15, 'UPSWING', upswing(15, 0.8)],
     ]
+
+    // stoachastic => 0.8 => 0.8 * 0.2 => 0.16
+    // upswing => 1 => 1 * 0.8 => 0.8
+
+
+    // max bet = 4000
+    // risk = 4000 * 0.96 => 3800
+    // 0.96
   }
 
   // subscriber to updates from AssetWatcher
   async analyseAssetData(event: AssetsWatcherUpdateEvent): Promise<void> {
+
     // save data for later
     this.data[event.period] = event.blocks
 
     const result = this.indicators.map((currentIndicator) => {
-      const [weight, period, name, indicator] = currentIndicator
+      const [weight, period, name, func] = currentIndicator
       const confidence = this.data[period] !== undefined
-        ? indicator(this.data[period]) : 0
+        ? func(this.data[period])
+        : 0
+
       return {
         name,
         weight,
