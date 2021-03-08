@@ -3,7 +3,7 @@ import { BotConfig } from '../common/config'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { AssetsWatcherUpdateEvent } from '../assetWatcher/assetWatcher.interface'
 import { logger } from '../common/logger'
-import { upswing } from '../indicators/macd/macd'
+import { upswing } from '../indicators/macd/upswing'
 import { stochastic } from '../indicators/stoachastic/stochastic'
 import { round } from 'lodash'
 
