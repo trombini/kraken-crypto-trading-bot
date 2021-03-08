@@ -19,15 +19,6 @@ export const upswing = (period: number, requiredBlockMaturity: number) => (block
   return result ? 1 : 0
 }
 
-
-
-
-
-
-
-
-
-
 // export const downswingXX = (period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
 //   const macd = calculateMACD(period, requiredBlockMaturity, blocks)
 
