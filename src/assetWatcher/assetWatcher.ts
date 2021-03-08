@@ -15,16 +15,14 @@ export class AssetWatcher {
     this.observers = []
   }
 
-  fetchData(period: number): Promise<AssetsWatcherUpdateEvent> {
-    return this.kraken.getOHLCData(this.config.pair, period)
-      .then(result => {
-        return {
-          period,
-          pair: this.config.pair,
-          head: result.head,
-          blocks: result.blocks
-        }
-      })
+  async fetchData(period: number): Promise<AssetsWatcherUpdateEvent> {
+    const result = await this.kraken.getOHLCData(this.config.pair, period)
+    return {
+      period,
+      pair: this.config.pair,
+      head: result.head,
+      blocks: result.blocks
+    }
   }
 
   startWatcher(period: number) {
@@ -37,25 +35,24 @@ export class AssetWatcher {
           observer.analyseAssetData(data)
         })
       }
-    }, 15 * 1000)
+    }, 20 * 1000)
   }
 
   start(periods: number[]) {
-    logger.info(`Start AssetWatchers with delay (so we don't hit the API limit)`)
-    periods.forEach((period) => {
-      const delay = Math.floor(Math.random() * (10 + 1))
+    logger.info(`Start AssetWatchers with a delay (so we don't hit the API limit)`)
+    periods.forEach((period, index) => {
       setTimeout(() => {
         this.startWatcher(period)
-      }, delay * 1000)
+      }, (index * 2) * 1000)
     })
   }
 
   subscribe(observer: AssetWatcherObserver, period: number) {
-    logger.info(`Subscribe to period ${period}`)
     if(!this.observers[period]) {
       this.observers[period] = []
     }
     this.observers[period].push(observer)
+    logger.info(`Analyst subscribed to period ${period}`)
   }
 
   // stop() {

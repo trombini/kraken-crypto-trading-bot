@@ -85,11 +85,11 @@ export const macdCrossesAboveSignal = (macd: MACDResult) => {
   return true
 }
 
-export const indicator = (period: number, blockMaturity: number, head: OHLCBlock, blocks: OHLCBlock[]) => {
-  const macd = calculateMACD(period, blockMaturity, blocks)
+export const indicator = (period: number, requiredBlockMaturity: number, blocks: OHLCBlock[]) => {
+  const macd = calculateMACD(period, requiredBlockMaturity, blocks)
   return every([
     isUpSwing(macd),
-    isStrongSignal(macd),
-    macdCrossesAboveSignal(macd)
+    // isStrongSignal(macd),
+    // macdCrossesAboveSignal(macd)
   ], Boolean)
 }

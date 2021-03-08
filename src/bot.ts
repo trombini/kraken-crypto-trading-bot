@@ -75,14 +75,13 @@ export class Bot {
   async buyPosition(recommendation: BuyRecommendation): Promise<Position | null | undefined> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
-    // determine correct buy order
-    // TODO: make maxBet dependent on available balance. like only spend 30% of it OR maxBet
-    const maxBet = this.config.maxBet
-    const availableAmount = await this.kraken.balance()
-    const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
-    const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
-
     try {
+      // TODO: make maxBet dependent on available balance. like only spend 30% of it OR maxBet
+      const maxBet = this.config.maxBet
+      const availableAmount = await this.kraken.balance()
+      const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
+      const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
+
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
       const position = await this.positionsService.create({
         pair: recommendation.pair,

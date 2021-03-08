@@ -11,6 +11,7 @@ import { PositionsService } from './positions/positions.service'
 import { formatMoney } from './common/utils'
 import { AssetWatcher } from './assetWatcher/assetWatcher'
 import connect from './common/db/connect'
+import { BuyAnalyst } from './analysts/buyAnalyst'
 
 // TODO: move into class
 const trailingStopLossBotFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): TrailingStopLossBot => {
@@ -46,13 +47,18 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   const krakenService = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(krakenService, config)
 
-  botFactory(watcher, krakenService, positionsService, config)
-  trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
+
+
+  const analyst = new BuyAnalyst(watcher, config)
+
 
   // start asset watcher
-  //watcher.start([5, 15, 240])
-  watcher.start([5, 15])
+  watcher.start([5, 15, 1440])
+  //watcher.start([5, 15])
 
+  // Initiate Bots
+  botFactory(watcher, krakenService, positionsService, config)
+  trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
 
   //
   if (config.goal > 0) {

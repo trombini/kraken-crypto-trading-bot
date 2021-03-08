@@ -15,23 +15,22 @@ export class UpswingAnalyst extends Analyst {
   }
 
   async analyseAssetData(data: AssetsWatcherUpdateEvent): Promise<void> {
-    const results = await this.analyse(data.period, data.head, data.blocks)
+    const results = await this.analyse(data.period, data.blocks)
     if (every(results, Boolean)) {
       logger.info(`UPSWING detected for [${data.pair}]`)
-      this.sendRecommendationToBuyEvent(data.pair, data.head)
+      //this.sendRecommendationToBuyEvent(data.pair)
     }
   }
 
-  analyse(period: number, head: OHLCBlock, blocks: OHLCBlock[]): Promise<boolean[]> {
+  analyse(period: number, blocks: OHLCBlock[]): Promise<boolean[]> {
     return Promise.all([
-      macdIndicator(period, this.config.blockMaturity, head, blocks)
+      macdIndicator(period, this.config.blockMaturity, blocks)
     ])
   }
 
-  sendRecommendationToBuyEvent(pair: string, head: OHLCBlock) {
+  sendRecommendationToBuyEvent(pair: string) {
     this.emit(ANALYST_EVENTS.BUY, {
       pair: pair,
-      lastPrice: head.close,
       confidene: 1
     })
   }

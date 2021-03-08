@@ -1,19 +1,8 @@
 import { OHLCBlock } from '../../common/interfaces/trade.interface'
-import { getBlockMaturity } from './utils'
-import { logger } from '../../common/logger'
+import { getBlockMaturity } from '../common/utils'
 import { MACD } from 'technicalindicators'
-import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
 import { last, clone, takeRight, round } from 'lodash'
-
-export interface MACDResult {
-  blocks: MACDOutput[],
-  period: number,
-  headMaturity: number,
-  isHeadMatured: boolean
-}
-
-// export const histogram = (macd: MACDOutput[]): number[] =>
-//   macd.map(m => m.histogram ? m.histogram : 0)
+import { MACDResult } from './macd.interface'
 
 export const maturedBlocks = (input: MACDResult) => {
   const blocks = clone(input.blocks)
