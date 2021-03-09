@@ -18,21 +18,13 @@ export class BuyAnalyst extends Analyst {
 
     // subscribe to assets updates
     watcher.subscribe(this, 15)
-    watcher.subscribe(this, 1440)
+    watcher.subscribe(this, 240)
 
     // weight, period of interest, indicator
     this.indicators = [
-      [0.1, 1440, 'STOCHF', stochastic()],
-      [0.8, 15, 'UPSWING', upswing(15, 0.8)],
+      [0.1, 240, 'STOCHF', stochastic()],
+      [0.8, 15, 'UPSWING', upswing(15, config.blockMaturity)],
     ]
-
-    // stoachastic => 0.8 => 0.8 * 0.2 => 0.16
-    // upswing => 1 => 1 * 0.8 => 0.8
-
-
-    // max bet = 4000
-    // risk = 4000 * 0.96 => 3800
-    // 0.96
   }
 
   // subscriber to updates from AssetWatcher

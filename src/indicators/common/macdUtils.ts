@@ -30,9 +30,6 @@ export const getMaturedHistogram = (macd: MACDResult, size: number) => {
 }
 
 export const calculateMACD = (period: number, requiredBlockMaturity: number, blocks: OHLCBlock[]): MACDResult => {
-
-  console.log('calculateMACD')
-
   const macd = MACD.calculate({
     values: blocks.map(b => b.close),
     fastPeriod: 12,

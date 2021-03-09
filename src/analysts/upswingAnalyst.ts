@@ -18,7 +18,7 @@ export class UpswingAnalyst extends Analyst {
     const results = await this.analyse(data.period, data.blocks)
     if (every(results, Boolean)) {
       logger.info(`UPSWING detected for [${data.pair}]`)
-      //this.sendRecommendationToBuyEvent(data.pair)
+      this.sendRecommendationToBuyEvent(data.pair)
     }
   }
 

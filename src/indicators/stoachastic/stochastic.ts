@@ -3,6 +3,14 @@ import { Stochastic } from 'technicalindicators'
 import { OHLCBlock } from '../../common/interfaces/trade.interface'
 import { logger } from '../../common/logger'
 
+// Stochastic Fast
+export const stochastic = () => (blocks: OHLCBlock[]): number  => {
+  const config = flattenOhlcInput(blocks)
+  const stochf = Stochastic.calculate(config)
+  const { k, d } = takeRight(stochf, 1)[0]
+  return mapOutputToConfindence(k, d)
+}
+
 const flattenOhlcInput = (blocks: OHLCBlock[]) => {
   const flatOhlcBlocks = blocks.reduce((acc, block) => {
     acc.high.push(block.high)
@@ -24,12 +32,7 @@ const flattenOhlcInput = (blocks: OHLCBlock[]) => {
   }
 }
 
-// Stochastic Fast
-export const stochastic = () => (blocks: OHLCBlock[]): number  => {
-  const config = flattenOhlcInput(blocks)
-  const stochf = Stochastic.calculate(config)
-  const { k, d } = takeRight(stochf, 1)[0]
-
+export const mapOutputToConfindence = (k: number, d: number) => {
   let confidence = 0
   if(k > d) {
     confidence = 1
@@ -37,13 +40,13 @@ export const stochastic = () => (blocks: OHLCBlock[]): number  => {
   else if(k < d && (d - k) <= 2) {
     confidence = 0.8
   }
-  else if(k < d && (d - k) <= 5) {
+  else if(k < d && (d - k) <= 4) {
     confidence = 0.5
   }
   else {
     confidence = 0
   }
 
-  logger.debug(`STOCHF: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] -> ${confidence}`)
+  logger.debug(`STOCHASTIC FASR: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
   return confidence
 }
