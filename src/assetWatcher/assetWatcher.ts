@@ -1,11 +1,9 @@
-import events from 'events'
-import { BotConfig } from '../common/config'
-import { logger } from '../common/logger'
-import { KrakenService } from '../kraken/krakenService'
-import { OHLCBlock } from '../common/interfaces/trade.interface'
-import { random } from '../common/utils'
 import { AssetsWatcherUpdateEvent, AssetWatcherObserver } from './assetWatcher.interface'
+import { BotConfig } from '../common/config'
+import { KrakenService } from '../kraken/krakenService'
+import { logger } from '../common/logger'
 
+const delay = 5
 export class AssetWatcher {
   intervals: any[]
   observers: any[]
@@ -35,15 +33,15 @@ export class AssetWatcher {
           observer.analyseAssetData(data)
         })
       }
-    }, 20 * 1000)
+    }, 30 * 1000)
   }
 
   start(periods: number[]) {
-    logger.info(`Start AssetWatchers with a delay (so we don't hit the API limit)`)
+    logger.info(`Start AssetWatchers with a ${delay} second delay (so we don't hit the API limit)`)
     periods.forEach((period, index) => {
       setTimeout(() => {
         this.startWatcher(period)
-      }, (index * 2) * 1000)
+      }, (index * delay) * 1000)
     })
   }
 

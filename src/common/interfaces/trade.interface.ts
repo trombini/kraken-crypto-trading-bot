@@ -15,7 +15,7 @@ export interface OrderId {
 export interface BuyRecommendation {
   pair: string
   lastPrice?: number
-  confidene?: number
+  confidence: number
 }
 
 export interface SellRecommendation {

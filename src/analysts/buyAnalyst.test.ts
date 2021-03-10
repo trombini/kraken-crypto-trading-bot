@@ -34,7 +34,7 @@ describe('UpswingAnalyst', () => {
 
   it('should not trigger BUY event if part of the analysis was negative', () => {
     const analyst = new BuyAnalyst(watcher, config)
-    const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
+    const spy = jest.spyOn(analyst, 'sendRecommendationToBot')
     // const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true, false])
 
     // return analyst.analyseAssetData({
@@ -49,7 +49,7 @@ describe('UpswingAnalyst', () => {
 
   it('should trigger BUY event if analysis was positive', () => {
     const analyst = new BuyAnalyst(watcher, config)
-    const spy = jest.spyOn(analyst, 'sendRecommendationToBuyEvent')
+    const spy = jest.spyOn(analyst, 'sendRecommendationToBot')
     // const mock = jest.spyOn(analyst, 'analyse').mockResolvedValue([true, true])
 
     // return analyst.analyseAssetData({

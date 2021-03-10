@@ -47,6 +47,6 @@ export const mapOutputToConfindence = (k: number, d: number) => {
     confidence = 0
   }
 
-  logger.debug(`STOCHASTIC FAST: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
+  logger.debug(`STOCHASTIC: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
   return confidence
 }
