@@ -1,5 +1,5 @@
 import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
-import { SellRecommendation } from './common/interfaces/trade.interface'
+import { Recommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
@@ -39,7 +39,7 @@ export class TrailingStopLossBot {
     })
 
     if (analyst) {
-      analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
+      analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
         this.handleSellRecommendation(data)
       })
     }
@@ -59,7 +59,7 @@ export class TrailingStopLossBot {
     return false
   }
 
-  async handleSellRecommendation(recommendation: SellRecommendation) {
+  async handleSellRecommendation(recommendation: Recommendation) {
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
     const positions = await this.positionService.findByStatus('open')
     positions.forEach(async position => {
@@ -75,9 +75,6 @@ export class TrailingStopLossBot {
       }
     })
   }
-
-  //async takeProfit(position: Position)
-
 
   async sellPosition(position: Position, currentBidPrice: number) {
     if(position.buy.price && position.buy.volume) {

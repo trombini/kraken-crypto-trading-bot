@@ -1,4 +1,4 @@
-import { BuyRecommendation } from './common/interfaces/trade.interface'
+import { Recommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
@@ -45,7 +45,7 @@ export class Bot {
     this.datastore = []
 
     if(this.analyst) {
-      this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
+      this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: Recommendation) => {
         this.handleBuyRecommendation(recommendation)
       })
     }
@@ -54,7 +54,7 @@ export class Bot {
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
   }
 
-  async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<any> {
+  async handleBuyRecommendation(recommendation: Recommendation): Promise<any> {
     // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
@@ -76,7 +76,7 @@ export class Bot {
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
 
-  async buyPosition(recommendation: BuyRecommendation): Promise<Position | null | undefined> {
+  async buyPosition(recommendation: Recommendation): Promise<Position | null | undefined> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
     try {

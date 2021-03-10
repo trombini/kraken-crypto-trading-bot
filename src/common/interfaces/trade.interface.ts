@@ -1,4 +1,3 @@
-
 export interface OHLCBlock {
   time: number
   close: number
@@ -12,14 +11,10 @@ export interface OrderId {
   id: string
 }
 
-export interface BuyRecommendation {
+export interface Recommendation {
   pair: string
   lastPrice?: number
   confidence: number
-}
-
-export interface SellRecommendation {
-  pair: string
 }
 
 export interface Order {
