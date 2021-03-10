@@ -6,23 +6,18 @@ import { logger } from '../common/logger'
 import { upswing } from '../indicators/macd/upswing'
 import { stochastic } from '../indicators/stoachastic/stochastic'
 import { round } from 'lodash'
+import { downswing } from 'src/indicators/macd/downswing'
 
-export class BuyAnalyst extends Analyst {
+export class SellAnalyst extends Analyst {
 
   constructor(readonly watcher: AssetWatcher, readonly config: BotConfig) {
     super(watcher, config)
 
     // subscribe to assets updates
-    watcher.subscribe(this, 15)
-    watcher.subscribe(this, 240)
+    watcher.subscribe(this, 5)
 
     // register indicators
-    this.registerIndicator(0.5, 240, 'STOCHF', stochastic())
-    this.registerIndicator(0.5, 15, 'UPSWING', upswing(15, config.blockMaturity))
-    
-    // daily is on an uptrend
-    //this.registerIndicator(0.5, 15, 'UPSWING', upswing(15, config.blockMaturity))
-
+    this.registerIndicator(1, 5, 'UPSWING', downswing(5, 0.5))
   }
 
   // TODO: move to parent

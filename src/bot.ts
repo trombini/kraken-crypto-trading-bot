@@ -6,8 +6,7 @@ import { BotConfig } from './common/config'
 import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { PositionsService } from './positions/positions.service'
 import { slack } from './slack/slack.service'
-import { ANALYST_EVENTS } from './analysts/analyst'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
 import { Position } from './positions/position.interface'
 import moment from 'moment'
 
@@ -32,12 +31,12 @@ export const caluclateVolume = (availableAmount: number, maxBet: number, lastAsk
 export class Bot {
   datastore: any[]
   watcher: AssetWatcher | undefined
-  upswingAnalyst: UpswingAnalyst | undefined
+  upswingAnalyst: Analyst | undefined
 
   constructor(
     readonly kraken: KrakenService,
     readonly positionsService: PositionsService,
-    readonly analyst: UpswingAnalyst,
+    readonly analyst: Analyst,
     readonly config: BotConfig
   ) {
     this.datastore = []

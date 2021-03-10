@@ -17,8 +17,9 @@ export const analyse = (macd: MACDResult): number => {
   // v0 oldest, v1 middel, v2 now
   const b = getMaturedHistogram(macd, 3)
   const result = allPositives(b) && b[0] < b[1] && b[1] > b[2]
+  const confidence = result ? 1 : 0
 
-  logger.debug(`DOWNSWING: [ ${b[0]} | ${b[1]} | ${b[2]} ] -> ${result}`)
+  logger.debug(`DOWNSWING: [ ${b[0]} | ${b[1]} | ${b[2]} ] -> ${confidence}`)
 
-  return result ? 1 : 0
+  return confidence
 }

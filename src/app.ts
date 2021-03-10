@@ -5,7 +5,6 @@ import { BotConfig, config } from './common/config'
 import { Bot } from './bot'
 import { logger } from './common/logger'
 import { round } from 'lodash'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { PositionsService } from './positions/positions.service'
 import { formatMoney } from './common/utils'
@@ -26,11 +25,11 @@ const trailingStopLossBotFactory = (watcher: AssetWatcher, krakenService: Kraken
 
 // TODO: move into class
 const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): Bot => {
-  const upswingAnalyst = new UpswingAnalyst(watcher, config)
+  const analyst = new BuyAnalyst(watcher, config)
   return new Bot(
     krakenService,
     positionsService,
-    upswingAnalyst,
+    analyst,
     config,
   )
 }
@@ -46,8 +45,6 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(krakenService, config)
-
-  const analyst = new BuyAnalyst(watcher, config)
 
   // start asset watcher
   watcher.start([5, 15, 240])

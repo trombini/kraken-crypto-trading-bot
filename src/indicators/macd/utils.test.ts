@@ -1,4 +1,3 @@
-import moment from 'moment'
 import { maturedBlocks } from './utils'
 
 describe('MACD utils', () => {

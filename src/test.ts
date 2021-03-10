@@ -12,7 +12,6 @@ import { ProfitsRepo } from './profit/profit.repo'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { Bot } from './bot'
 import { flatMap } from 'lodash'
 import { AssetWatcher } from './assetWatcher/assetWatcher'
@@ -21,23 +20,11 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
 
   await connect('mongodb://localhost:27017/kraken-prod')
 
-
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
 
-
   const assetWatcher = new AssetWatcher(krakenService, config)
   assetWatcher.start([5, 15, 240])
-
-  const analyst = new UpswingAnalyst(assetWatcher, config)
-
-
-
-
-
-
-
-
 
   // const positionsService = new PositionsService()
   // const position = positionsService.create({
@@ -87,11 +74,6 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
   // })
 
 })()
-
-
-
-
-
 
 // if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
 //   logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
