@@ -24,7 +24,7 @@ export interface BotConfig {
 
 export const config: BotConfig = {
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,
-  blockMaturity: process.env.BLOCK_MATURITY ? parseFloat(process.env.BLOCK_MATURITY) : 0.75,
+  blockMaturity: process.env.BLOCK_MATURITY ? parseFloat(process.env.BLOCK_MATURITY) : 0.5,
   bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
   goal: process.env.GOAL ? parseFloat(process.env.GOAL) : 0,
   goalStart: process.env.GOAL_START ? parseFloat(process.env.GOAL_START) : 0,

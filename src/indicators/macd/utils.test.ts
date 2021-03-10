@@ -1,5 +1,4 @@
-import moment from 'moment'
-import { maturedBlocks } from './macdUtils'
+import { maturedBlocks } from './utils'
 
 describe('MACD utils', () => {
 

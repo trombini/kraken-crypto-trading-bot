@@ -9,26 +9,31 @@ import { Position } from './positions/position.interface'
 import moment from 'moment'
 import { config } from './common/config'
 import { ProfitsRepo } from './profit/profit.repo'
-import { AssetWatcher } from './assetWatcher'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
 import { KrakenService } from './kraken/krakenService'
 import { TrailingStopLossBot } from './trailingStopLossBot'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
 import { Bot } from './bot'
 import { flatMap } from 'lodash'
+import { AssetWatcher } from './assetWatcher/assetWatcher'
 
 (async function() {
 
   await connect('mongodb://localhost:27017/kraken-prod')
 
-  const positionsService = new PositionsService()
-  const position = positionsService.create({
-    status: 'open',
-    pair: 'ADAUSD',
-    price: 123,
-    volume: 123,
-    orderIds: []
-  })
+  const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
+  const krakenService = new KrakenService(krakenApi, config)
+
+  const assetWatcher = new AssetWatcher(krakenService, config)
+  assetWatcher.start([5, 15, 240])
+
+  // const positionsService = new PositionsService()
+  // const position = positionsService.create({
+  //   status: 'open',
+  //   pair: 'ADAUSD',
+  //   price: 123,
+  //   volume: 123,
+  //   orderIds: []
+  // })
 
   // const profitsRepo = new ProfitsRepo()
   // const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret + 'd')
@@ -69,11 +74,6 @@ import { flatMap } from 'lodash'
   // })
 
 })()
-
-
-
-
-
 
 // if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
 //   logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)

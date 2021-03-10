@@ -1,16 +1,13 @@
-import { DownswingAnalyst } from './analysts/downswingAnalyst'
-import { ANALYST_EVENTS } from './analysts/analyst'
-import { OrderId, SellRecommendation } from './common/interfaces/trade.interface'
+import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
+import { SellRecommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { BotConfig } from './common/config'
-import { ProfitsRepo } from './profit/profit.repo'
 import { slack } from './slack/slack.service'
 import { round } from 'lodash'
 import { PositionsService } from './positions/positions.service'
 import { Position } from './positions/position.interface'
 import { formatMoney, formatNumber } from './common/utils'
-import moment from 'moment'
 
 // TODO: this should look for 5 minutes blocks and not 15 minutes
 
@@ -22,7 +19,7 @@ export class TrailingStopLossBot {
   constructor(
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
-    readonly analyst: DownswingAnalyst,
+    readonly analyst: Analyst,
     readonly config: BotConfig,
   ) {
 

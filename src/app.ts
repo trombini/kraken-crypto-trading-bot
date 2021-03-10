@@ -1,50 +1,39 @@
-import KrakenClient from 'kraken-api'
-import { KrakenService } from './kraken/krakenService'
-import { TrailingStopLossBot } from './trailingStopLossBot'
-import { ProfitsRepo } from './profit/profit.repo'
-import { BotConfig, config } from './common/config'
+import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { Bot } from './bot'
-import { logger } from './common/logger'
-import { round } from 'lodash'
-import { AssetWatcher } from './assetWatcher'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
-import { DownswingAnalyst } from './analysts/downswingAnalyst'
-import { PositionsService } from './positions/positions.service'
+import { BotConfig, config } from './common/config'
+import { BuyAnalyst } from './analysts/buyAnalyst'
 import { formatMoney } from './common/utils'
+import { KrakenService } from './kraken/krakenService'
+import { logger } from './common/logger'
+import { PositionsService } from './positions/positions.service'
+import { round } from 'lodash'
+import { SellAnalyst } from './analysts/sellAnalyst'
+import { TrailingStopLossBot } from './trailingStopLossBot'
 import connect from './common/db/connect'
+import KrakenClient from 'kraken-api'
 
 // TODO: move into class
-const trailingStopLossBotFactory = (krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): TrailingStopLossBot => {
-  const watcher = new AssetWatcher(5, krakenService, config)
-  const analyst = new DownswingAnalyst(watcher, config)
-  const bot = new TrailingStopLossBot(
+const trailingStopLossBotFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): TrailingStopLossBot => {
+  //const analyst = new DownswingAnalyst(watcher, config)
+  const analyst = new SellAnalyst(watcher, config)
+  return new TrailingStopLossBot(
     krakenService,
     positionsService,
     analyst,
     config,
   )
-
-  watcher.start()
-
-  return bot
 }
 
 // TODO: move into class
-const botFactory = (krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): Bot => {
-  const watcher = new AssetWatcher(15, krakenService, config)
-  const upswingAnalyst = new UpswingAnalyst(watcher, config)
-  const bot = new Bot(
+const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): Bot => {
+  const analyst = new BuyAnalyst(watcher, config)
+  return new Bot(
     krakenService,
     positionsService,
-    upswingAnalyst,
+    analyst,
     config,
   )
-
-  watcher.start()
-
-  return bot
 }
-
 
 (async function() {
   console.log(config)
@@ -56,9 +45,15 @@ const botFactory = (krakenService: KrakenService, positionsService: PositionsSer
   const positionsService = new PositionsService()
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
+  const watcher = new AssetWatcher(krakenService, config)
 
-  botFactory(krakenService, positionsService, config)
-  trailingStopLossBotFactory(krakenService, positionsService, config)
+  // start asset watcher
+  watcher.start([5, 15, 240, 1440])
+  //watcher.start([5, 15])
+
+  // Initiate Bots
+  botFactory(watcher, krakenService, positionsService, config)
+  trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
 
   //
   if (config.goal > 0) {

@@ -1,9 +1,9 @@
 import events from 'events'
-import { BotConfig } from './common/config'
-import { logger } from './common/logger'
-import { KrakenService } from './kraken/krakenService'
-import { OHLCBlock } from './common/interfaces/trade.interface'
-import { random } from './common/utils'
+import { BotConfig } from '../src/common/config'
+import { logger } from '../src/common/logger'
+import { KrakenService } from '../src/kraken/krakenService'
+import { OHLCBlock } from '../src/common/interfaces/trade.interface'
+import { random } from '../src/common/utils'
 
 export interface AssetsWatcherUpdateEvent {
   period: number

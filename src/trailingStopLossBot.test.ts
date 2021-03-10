@@ -4,9 +4,9 @@ import { KrakenService } from './kraken/krakenService'
 import { PositionsService } from './positions/positions.service'
 import { TrailingStopLossBot } from './trailingStopLossBot'
 import { DownswingAnalyst } from './analysts/downswingAnalyst'
-import { AssetWatcher } from './assetWatcher'
 import { setupDb } from '../test/test-setup'
 import PositionModel from './positions/position.model'
+import { AssetWatcher } from './assetWatcher/assetWatcher'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient
@@ -22,7 +22,7 @@ beforeEach(() => {
   positionsService = new PositionsService()
   krakenApi = new KrakenClient('key', 'secret')
   krakenService = new KrakenService(krakenApi, config)
-  watcher = new AssetWatcher(15, krakenService, config)
+  watcher = new AssetWatcher(krakenService, config)
   analyst = new DownswingAnalyst(watcher, config)
   bot = new TrailingStopLossBot(krakenService, positionsService, analyst, config)
 })

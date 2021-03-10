@@ -110,8 +110,6 @@ export class KrakenService {
    * @param order
    */
   async createBuyOrder(order: Order): Promise<OrderId[]> {
-    logger.debug(`New BUY order: ${order.volume} for market price`)
-
     if (!order.volume || order.volume <= 0) {
       throw new Error('Volume is less than 1.')
     }

@@ -1,29 +1,31 @@
-import { BuyRecommendation, OrderId } from './common/interfaces/trade.interface'
+import { BuyRecommendation } from './common/interfaces/trade.interface'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { filter, round } from 'lodash'
 import { BotConfig } from './common/config'
+import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { PositionsService } from './positions/positions.service'
 import { slack } from './slack/slack.service'
-import { AssetWatcher } from './assetWatcher'
-import { ANALYST_EVENTS } from './analysts/analyst'
-import { UpswingAnalyst } from './analysts/upswingAnalyst'
+import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
 import { Position } from './positions/position.interface'
 import moment from 'moment'
+import { formatMoney } from './common/utils'
 
-// TODO: combine results of different AssetWatchers like 15 Min upswing + 5 min uptrend
+export const calculateRisk = (availableAmount: number, maxBet: number, confidence: number): number => {
+  if(availableAmount < 1000) {
+    return 0
+  }
 
-// TODO: write test for this availableCurrency
-export const calculateRisk = (availableAmount: number, maxBet: number): number => {
+  let realMaxBet = maxBet
   if(availableAmount < maxBet) {
     logger.debug(`availableAmount is only ${availableAmount} and less than maxBet (${maxBet})`)
-    return availableAmount < 1000 ? 0 : (availableAmount * 0.8)
+    realMaxBet = availableAmount * 0.8
   }
-  return maxBet
+
+  return round(realMaxBet * confidence, 2)
 }
 
-export const caluclateVolume = (availableAmount: number, maxBet: number, lastAskPrice: number) => {
-  const risk = calculateRisk(availableAmount, maxBet)
+export const caluclateVolume = (risk: number, lastAskPrice: number) => {
   const volume = round(risk / lastAskPrice, 0)
   logger.debug(`${risk} / ${volume}`)
   return volume
@@ -32,12 +34,12 @@ export const caluclateVolume = (availableAmount: number, maxBet: number, lastAsk
 export class Bot {
   datastore: any[]
   watcher: AssetWatcher | undefined
-  upswingAnalyst: UpswingAnalyst | undefined
+  upswingAnalyst: Analyst | undefined
 
   constructor(
     readonly kraken: KrakenService,
     readonly positionsService: PositionsService,
-    readonly analyst: UpswingAnalyst,
+    readonly analyst: Analyst,
     readonly config: BotConfig
   ) {
     this.datastore = []
@@ -47,6 +49,7 @@ export class Bot {
         this.handleBuyRecommendation(recommendation)
       })
     }
+
     // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
     // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
   }
@@ -72,17 +75,21 @@ export class Bot {
   // TODO: limit order (can it be killed automatically?)
   // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
   // TODO: orders might not be completed right away. so we don't really know what the AVG price is
+
   async buyPosition(recommendation: BuyRecommendation): Promise<Position | null | undefined> {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
-    // determine correct buy order
-    // TODO: make maxBet dependent on available balance. like only spend 30% of it OR maxBet
-    const maxBet = this.config.maxBet
-    const availableAmount = await this.kraken.balance()
-    const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
-    const volume = caluclateVolume(availableAmount, maxBet, lastAskPrice)
-
     try {
+
+      const maxBet = this.config.maxBet
+      const availableAmount = await this.kraken.balance()
+      const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
+
+      const risk = calculateRisk(availableAmount, maxBet, recommendation.confidence)
+      const volume = caluclateVolume(risk, lastAskPrice)
+
+      logger.debug(`Create BUY order. confidence: ${recommendation.confidence}, risk: ${formatMoney(risk)}, volume: ${volume}`)
+
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
       const position = await this.positionsService.create({
         pair: recommendation.pair,
@@ -101,7 +108,6 @@ export class Bot {
     }
     catch(err) {
       logger.error(`Error BUY position: `, err)
-      logger.error(`Error BUY position: ${JSON.stringify(err)}`)
     }
   }
 
