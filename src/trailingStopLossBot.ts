@@ -9,8 +9,6 @@ import { PositionsService } from './positions/positions.service'
 import { Position } from './positions/position.interface'
 import { formatMoney, formatNumber } from './common/utils'
 
-// TODO: this should look for 5 minutes blocks and not 15 minutes
-
 const positionId = (position: Position) => `[${position.pair}_${round(position.buy.price || 0, 4) }_${round(position.buy.volume || 0, 0)}]`
 
 // Trailing Stop/Stop-Loss

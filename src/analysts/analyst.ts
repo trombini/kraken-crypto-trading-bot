@@ -47,7 +47,7 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
       return acc + (result.weight * result.confidence)
     }, 0)
 
-    logger.info(`${this.constructor.name} confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result)}`)
+    logger.debug(`${this.constructor.name} confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result)}`)
 
     if (confidence >= 0.6) {
       this.sendRecommendationToBot(event.pair, confidence)

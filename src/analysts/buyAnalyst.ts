@@ -5,7 +5,6 @@ import { logger } from '../common/logger'
 import { upswing } from '../indicators/macd/upswing'
 import { stochastic } from '../indicators/stoachastic/stochastic'
 import { uptrend } from '../indicators/macd/uptrend'
-import { round } from 'lodash'
 
 export class BuyAnalyst extends Analyst {
 
