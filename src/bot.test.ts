@@ -31,28 +31,28 @@ beforeEach(() => {
 describe('BOT', () => {
 
   it('should fallback to zero if available amount is less than 1000 $', async () => {
-    const risk = calculateRisk(500, 2000, 1)
+    const risk = calculateRisk(1000, 500, 2000, 1)
     expect(risk).toBe(0)
   })
 
   it('should calculate correct RISK if availableCurrency is less than MAX_BET', async () => {
     const factor = 0.8
-    const risk = calculateRisk(1100, 2000, 1)
+    const risk = calculateRisk(0, 1100, 2000, 1)
     expect(risk).toBe(1100 * factor)
   })
 
   it('should calculate correct RISK based on availableCurrency and the configured MAX_BET', async () => {
-    const risk = calculateRisk(3000, 2000, 1)
+    const risk = calculateRisk(0, 3000, 2000, 1)
     expect(risk).toBe(2000)
   })
 
   it('should calculate correct RISK based on the reduced conficence', async () => {
-    const risk = calculateRisk(1000, 1000, 0.6)
+    const risk = calculateRisk(0, 1000, 1000, 0.6)
     expect(risk).toBe(600)
   })
 
   it('should calculate correct RISK based on the reduced availableAmount and conficence', async () => {
-    const risk = calculateRisk(2000, 3000, 0.6)
+    const risk = calculateRisk(0, 2000, 3000, 0.6)
     expect(risk).toBe(2000 * 0.8 * 0.6) // 0.8 is the penalty for having not enough money
   })
 

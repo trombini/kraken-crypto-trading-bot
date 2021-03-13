@@ -53,6 +53,7 @@ $ npm run test:cov
 | MAX_BET | 500 | How much are you willing to loose **each** bet? |
 | MONGO | mongodb://localhost:27017/kraken-prod | URI for MongoDB |
 | PAIR | ADAUSD | Coind to watch |
+| RESERVE | 0 | Amount of money which will not be touched |
 | SLACK_BOT_TOKEN || Slack Bot Token for Oauth |
 | SLACK_CHANNEL || Slack Channel ID for updates |
 | TARGET_PROFIT | 30 | Threshold to sell position |

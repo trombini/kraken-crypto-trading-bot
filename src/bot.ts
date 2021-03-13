@@ -8,11 +8,11 @@ import { PositionsService } from './positions/positions.service'
 import { slack } from './slack/slack.service'
 import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
 import { Position } from './positions/position.interface'
-import moment from 'moment'
 import { formatMoney } from './common/utils'
+import moment from 'moment'
 
-export const calculateRisk = (availableAmount: number, maxBet: number, confidence: number): number => {
-  if(availableAmount < 1000) {
+export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
+  if(availableAmount < reserve) {
     return 0
   }
 
@@ -65,7 +65,6 @@ export class Bot {
     else {
       const position = await this.buyPosition(recommendation)
       if(position) {
-        logger.debug('Good, now fetch Position details')
         await this.fetchOrderDetails(position)
         return position
       }
@@ -81,11 +80,12 @@ export class Bot {
 
     try {
 
+      const reserve = this.config.reserve
       const maxBet = this.config.maxBet
       const availableAmount = await this.kraken.balance()
       const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
 
-      const risk = calculateRisk(availableAmount, maxBet, recommendation.confidence)
+      const risk = calculateRisk(reserve, availableAmount, maxBet, recommendation.confidence)
       const volume = caluclateVolume(risk, lastAskPrice)
 
       logger.debug(`Create BUY order. confidence: ${recommendation.confidence}, risk: ${formatMoney(risk)}, volume: ${volume}`)
