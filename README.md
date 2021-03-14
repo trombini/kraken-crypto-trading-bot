@@ -51,6 +51,7 @@ $ npm run test:cov
 | KRAKEN_API_KEY || API Key for Kraken |
 | KRAKEN_API_SECRET || API Secret for Kraken |
 | MAX_BET | 500 | How much are you willing to loose **each** bet? |
+| MIN_CONFIDENCE | 0.6 | Minimum confidence before a Signal is triggered |
 | MONGO | mongodb://localhost:27017/kraken-prod | URI for MongoDB |
 | PAIR | ADAUSD | Coind to watch |
 | RESERVE | 0 | Amount of money which will not be touched |

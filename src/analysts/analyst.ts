@@ -54,10 +54,10 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
 
     logger.debug(`${this.constructor.name} confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 0)}`)
 
-    if (confidence >= 0.6) {
+    if (confidence >= this.config.minConfidence) {
       const now = moment().unix()
       // make sure we don't trigger multiple signals simultaniously
-      if(this.lastSignal === undefined || (this.lastSignal - now) > 10) {
+      if(this.lastSignal === undefined || (now - this.lastSignal) > 10) {
         this.lastSignal = moment().unix()
         this.sendRecommendationToBot(event.pair, confidence)
       }

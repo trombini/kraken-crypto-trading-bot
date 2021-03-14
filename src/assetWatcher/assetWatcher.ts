@@ -26,12 +26,17 @@ export class AssetWatcher {
   startWatcher(period: number) {
     logger.info(`Start AssetWatcher for period ${period}`)
     this.intervals[period] = setInterval(async () => {
-      const data = await this.fetchData(period)
-      const observers = this.observers[period]
-      if (observers) {
-        observers.forEach((observer: AssetWatcherObserver) => {
-          observer.analyseAssetData(data)
-        })
+      try {
+        const data = await this.fetchData(period)
+        const observers = this.observers[period]
+        if (observers) {
+          observers.forEach((observer: AssetWatcherObserver) => {
+            observer.analyseAssetData(data)
+          })
+        }
+      }
+      catch(err) {
+        logger.error(err)
       }
     }, 30 * 1000)
   }

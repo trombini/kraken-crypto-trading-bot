@@ -12,23 +12,25 @@ import { formatMoney } from './common/utils'
 import moment from 'moment'
 
 export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
-  if(availableAmount < reserve) {
+  logger.debug(`Calculate risk with availableAmount: ${availableAmount}, reserve: ${reserve}, maxBet: ${maxBet}`)
+
+  const realAvailableAmount = availableAmount - reserve
+  if(realAvailableAmount < 0) {
+    logger.debug(`availableAmount (${round(availableAmount, 2)}) is less than reserve (${reserve})`)
     return 0
   }
 
-  let realMaxBet = maxBet
-  if(availableAmount < maxBet) {
-    logger.debug(`availableAmount is only ${availableAmount} and less than maxBet (${maxBet})`)
-    realMaxBet = availableAmount * 0.8
+  let bet = maxBet
+  if(realAvailableAmount < maxBet) {
+    logger.debug(`availableAmount is only ${round(realAvailableAmount, 2)} and less than maxBet (${maxBet})`)
+    bet = realAvailableAmount * 0.8
   }
 
-  return round(realMaxBet * confidence, 2)
+  return round(bet * confidence, 2)
 }
 
 export const caluclateVolume = (risk: number, lastAskPrice: number) => {
-  const volume = round(risk / lastAskPrice, 0)
-  logger.debug(`${risk} / ${volume}`)
-  return volume
+  return round(risk / lastAskPrice, 0)
 }
 
 export class Bot {
@@ -137,7 +139,6 @@ export class Bot {
         const updatedPosition = await this.positionsService.update(position, {
           status: 'open',
           'buy.volume': volumeExecuted,
-          'buy.volumeExecuted': volumeExecuted,
           'buy.price': price,
         })
 
