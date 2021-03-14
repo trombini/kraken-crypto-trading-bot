@@ -7,9 +7,7 @@ import { slack } from './slack/slack.service'
 import { round } from 'lodash'
 import { PositionsService } from './positions/positions.service'
 import { Position } from './positions/position.interface'
-import { formatMoney, formatNumber } from './common/utils'
-
-const positionId = (position: Position) => `[${position.pair}_${round(position.buy.price || 0, 4) }_${round(position.buy.volume || 0, 0)}]`
+import { formatMoney, formatNumber, positionId } from './common/utils'
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
@@ -20,41 +18,11 @@ export class TrailingStopLossBot {
     readonly analyst: Analyst,
     readonly config: BotConfig,
   ) {
-
-    // load positions and start watching for sell opporunities
-    this.positionService.findByStatus('open').then(positions => {
-      const risk = positions.reduce((acc, position) => {
-        if(position.buy.price && position.buy.volume) {
-          logger.info(`Start watching sell opportunity for ${positionId(position)}`)
-          return {
-            costs: acc.costs + (position.buy.price * position.buy.volume),
-            volume: acc.volume + position.buy.volume
-          }
-        }
-        return acc
-      }, { costs: 0, volume: 0 })
-      logger.info(`Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(risk.volume)} ADA)`)
-    })
-
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
         this.handleSellRecommendation(data)
       })
     }
-  }
-
-  inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
-    if(position.buy.price && position.buy.volume) {
-      const costs = position.buy.price * position.buy.volume
-      const fee = costs * this.config.tax * 2
-      const totalCosts = fee + costs
-      const volumeToSell = round((totalCosts / currentBidPrice), 0)
-      const expectedProfit = position.buy.volume - volumeToSell
-
-      logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
-      return expectedProfit > 0 && expectedProfit >= targetProfit
-    }
-    return false
   }
 
   async handleSellRecommendation(recommendation: Recommendation) {
@@ -74,8 +42,25 @@ export class TrailingStopLossBot {
     })
   }
 
+  inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
+    if(!position.buy.price || !position.buy.volume) {
+      throw new Error(`Not enough data to estimate win zone`)
+    }
+
+    const costs = position.buy.price * position.buy.volume
+    const fee = costs * this.config.tax * 2
+    const totalCosts = fee + costs
+
+    const volumeToSell = round((totalCosts / currentBidPrice), 0)
+    const expectedProfit = position.buy.volume - volumeToSell
+    logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
+
+    return expectedProfit > 0 && expectedProfit >= targetProfit
+  }
+
   async sellPosition(position: Position, currentBidPrice: number) {
     if(position.buy.price && position.buy.volume) {
+
       const costs = position.buy.price * position.buy.volume
       const fee = costs * this.config.tax * 2
       const totalCosts = fee + costs

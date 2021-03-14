@@ -30,15 +30,14 @@ beforeEach(() => {
 describe('TrailingStopLossBot', () => {
 
   it('should fail because position doesnt have a price set yet', () => {
-    const invalidBet = new PositionModel({ volume: 1000 })
-    const currentBidPrize = 1.05
-    const targetProfit = 50
-    const result = bot.inWinZone(currentBidPrize, targetProfit, invalidBet)
-    expect(result).toBe(false)
+    const invalidBet = new PositionModel({ buy: { volume: 1000 }})
+    expect(() => {
+      bot.inWinZone(1, 1, invalidBet)
+    }).toThrow()
   })
 
   it('should fail because currentBidPrize not yet be in profit range for given position', () => {
-    const highPricedBet = new PositionModel({ volume: 1000, price: 1 })
+    const highPricedBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
     const currentBidPrize = 1.05
     const targetProfit = 50
     const result = bot.inWinZone(currentBidPrize, targetProfit, highPricedBet)
