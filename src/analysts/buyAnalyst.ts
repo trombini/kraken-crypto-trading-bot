@@ -5,6 +5,7 @@ import { AssetsWatcherUpdateEvent } from '../assetWatcher/assetWatcher.interface
 import { logger } from '../common/logger'
 import { upswing } from '../indicators/macd/macd'
 import { stochastic } from '../indicators/stoachastic/stochastic'
+import { priceMoveCredibility } from '../indicators/priceMoveCredibility/priceMoveCredibility'
 import { round } from 'lodash'
 
 export class BuyAnalyst extends Analyst {
@@ -24,6 +25,7 @@ export class BuyAnalyst extends Analyst {
     this.indicators = [
       [0.1, 1440, 'STOCHF', stochastic()],
       [0.8, 15, 'UPSWING', upswing(15, 0.8)],
+      [0.8, 15, 'PRICEMOVECRED', priceMoveCredibility(20)],
     ]
 
     // stoachastic => 0.8 => 0.8 * 0.2 => 0.16
