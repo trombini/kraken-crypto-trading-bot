@@ -1,10 +1,10 @@
+const dotenv = require('dotenv')
 
-// load correct config file
-const env = process.env.NODE_ENV || 'prod'
-require('dotenv').config({ path: `.env.${env}` })
+dotenv.config({
+  path: process.env.DOTENV || '.env.prod'
+})
 
 // TODO: what is interval for again?
-
 export interface BotConfig {
   interval: number
   blockMaturity: number

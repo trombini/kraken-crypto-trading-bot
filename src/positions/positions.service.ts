@@ -26,10 +26,6 @@ export class PositionsService {
     })
   }
 
-  async findById(id: string) {
-    return PositionModel.findOne({ _id: id })
-  }
-
   async update(position: Position, update: UpdateQuery<Position>) {
     return PositionModel.findByIdAndUpdate(position._id, update, { new: true })
   }
@@ -42,7 +38,15 @@ export class PositionsService {
     return PositionModel.findByIdAndDelete(position._id)
   }
 
+  async findById(id: string) {
+    return PositionModel.findOne({ _id: id })
+  }
+
   async findByStatus(status: string) {
     return PositionModel.find({ status })
+  }
+
+  async find(filter: any) {
+    return PositionModel.find(filter)
   }
 }

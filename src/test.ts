@@ -19,11 +19,19 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
 
   await connect('mongodb://localhost:27017/kraken-prod')
 
+  const positionsService = new PositionsService()
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
 
-  const assetWatcher = new AssetWatcher(krakenService, config)
-  assetWatcher.start([5, 15, 240])
+  // const assetWatcher = new AssetWatcher(krakenService, config)
+  // assetWatcher.start([5, 15, 240])
+
+  positionsService.find({ pair: 'ETHUSD', status: 'open' }).then(pos => {
+    console.log(pos)
+  })
+
+
+
 
   // const positionsService = new PositionsService()
   // const position = positionsService.create({

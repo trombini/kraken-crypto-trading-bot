@@ -29,6 +29,9 @@ $ npm run dev:debug
 
 # run
 $ npm run start
+
+# run with different config
+$ DOTENV=.env.adausd npm run start
 ```
 
 ## Test

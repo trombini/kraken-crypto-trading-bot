@@ -54,17 +54,19 @@ import connect from '../common/db/connect'
     }, {})
   }
 
-  const dollarCostAverage = (positions: Position[]) : { volume: number, price: number } => {
+  const dollarCostAverage = (positions: Position[]) : { pair: string, volume: number, price: number } => {
     const merged = positions.reduce((acc, position) => {
       const price = position.buy.price || 0
       const volume = position.buy.volume || 0
       return {
+        pair: position.pair,
         volume: acc.volume + volume,
         costs: acc.costs + (price * volume)
       }
-    }, { volume: 0, costs: 0 })
+    }, { pair: '', volume: 0, costs: 0 })
 
     return {
+      pair: merged.pair,
       volume: merged.volume,
       price: merged.costs / merged.volume
     }
@@ -88,7 +90,7 @@ import connect from '../common/db/connect'
         })
 
         await service.create({
-          pair: 'ADAUSD',
+          pair: dca.pair,
           status: 'open',
           price: dca.price,
           volume: dca.volume,
