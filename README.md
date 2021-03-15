@@ -3,7 +3,7 @@
 
 ```bash
 $ npm install
-$ cp .env.dist .env.prod
+$ cp env.dist .env.prod
 ```
 
 Create a Mongodb Docker container
