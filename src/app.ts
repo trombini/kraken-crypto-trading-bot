@@ -14,19 +14,24 @@ import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
 
 // TODO: move into class
-const fullProfitBotFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): FullProfitBot => {
+const fullProfitBotFactory = (
+  watcher: AssetWatcher,
+  krakenService: KrakenService,
+  positionsService: PositionsService,
+  config: BotConfig,
+): FullProfitBot => {
   //const analyst = new DownswingAnalyst(watcher, config)
   const analyst = new SellAnalyst(watcher, config)
-  return new FullProfitBot(
-    krakenService,
-    positionsService,
-    analyst,
-    config,
-  )
+  return new FullProfitBot(krakenService, positionsService, analyst, config)
 }
 
 // TODO: move into class
-const trailingStopLossBotFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): TrailingStopLossBot => {
+const trailingStopLossBotFactory = (
+  watcher: AssetWatcher,
+  krakenService: KrakenService,
+  positionsService: PositionsService,
+  config: BotConfig,
+): TrailingStopLossBot => {
   //const analyst = new DownswingAnalyst(watcher, config)
   const analyst = new SellAnalyst(watcher, config)
   return new TrailingStopLossBot(
@@ -38,17 +43,17 @@ const trailingStopLossBotFactory = (watcher: AssetWatcher, krakenService: Kraken
 }
 
 // TODO: move into class
-const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positionsService: PositionsService, config: BotConfig): Bot => {
+const botFactory = (
+  watcher: AssetWatcher,
+  krakenService: KrakenService,
+  positionsService: PositionsService,
+  config: BotConfig,
+): Bot => {
   const analyst = new BuyAnalyst(watcher, config)
-  return new Bot(
-    krakenService,
-    positionsService,
-    analyst,
-    config,
-  )
+  return new Bot(krakenService, positionsService, analyst, config)
 }
 
-(async function() {
+;(async function () {
   console.log(config)
 
   setInterval(() => {}, 10000)
@@ -56,18 +61,31 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   await connect(config.mongoDb)
 
   const positionsService = new PositionsService()
-  const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
+  const krakenApi = new KrakenClient(
+    config.krakenApiKey,
+    config.krakenApiSecret,
+  )
   const krakenService = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(krakenService, config)
 
   //
   if (config.goal > 0) {
-    await positionsService.findByStatus('sold')
-      .then(positions => {
-        const profit = positions.reduce((acc, p) => acc + (p?.sell?.profit || 0), 0)
+    await positionsService
+      .find({
+        pair: config.pair,
+        status: 'sold',
+      })
+      .then((positions) => {
+        const profit = positions.reduce(
+          (acc, p) => acc + (p?.sell?.profit || 0),
+          0,
+        )
         const totalProfit = config.goalStart + profit
         logger.info(
-          `Goal of ${formatMoney(config.goal)} reached by ${round((totalProfit / config.goal) * 100, 2)} %  (${config.goalStart} + ${round(profit, 0)}) 🚀`,
+          `Goal of ${formatMoney(config.goal)} reached by ${round(
+            (totalProfit / config.goal) * 100,
+            2,
+          )} %  (${config.goalStart} + ${round(profit, 0)}) 🚀`,
         )
       })
   }
@@ -76,30 +94,38 @@ const botFactory = (watcher: AssetWatcher, krakenService: KrakenService, positio
   await positionsService
     .find({
       pair: config.pair,
-      status: 'open'
+      status: 'open',
     })
-    .then(positions => {
-      const risk = positions.reduce((acc, position) => {
-        if(position.buy.price && position.buy.volume) {
-          logger.info(`Start watching sell opportunity for ${positionId(position)}`)
-          return {
-            costs: acc.costs + (position.buy.price * position.buy.volume),
-            volume: acc.volume + position.buy.volume
+    .then((positions) => {
+      const risk = positions.reduce(
+        (acc, position) => {
+          if (position.buy.price && position.buy.volume) {
+            logger.info(
+              `Start watching sell opportunity for ${positionId(position)}`,
+            )
+            return {
+              costs: acc.costs + position.buy.price * position.buy.volume,
+              volume: acc.volume + position.buy.volume,
+            }
           }
-        }
-        return acc
-      }, { costs: 0, volume: 0 })
-      logger.info(`Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(risk.volume)})`)
+          return acc
+        },
+        { costs: 0, volume: 0 },
+      )
+      logger.info(
+        `Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(
+          risk.volume,
+        )})`,
+      )
     })
 
   //
-    // start asset watcher
-    watcher.start([5, 15, 240, 1440])
-    //watcher.start([5, 15])
+  // start asset watcher
+  watcher.start([5, 15, 240, 1440])
+  //watcher.start([5, 15])
 
-    // Initiate Bots
-    botFactory(watcher, krakenService, positionsService, config)
-    trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
-    fullProfitBotFactory(watcher, krakenService, positionsService, config)
-
+  // Initiate Bots
+  botFactory(watcher, krakenService, positionsService, config)
+  trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
+  fullProfitBotFactory(watcher, krakenService, positionsService, config)
 })()

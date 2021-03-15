@@ -39,7 +39,9 @@ export class KrakenService {
     const since = moment().subtract(period * periods, 'm').unix()
     return this.krakenApi
       .api('OHLC', { pair, interval: period, since }, () => {})
-      .then(response => response.result[this.config.pair])
+      .then(response => {
+        return response.result[this.config.pair]
+      })
       .then(result => {
         const blocks = result.map(mapOhlcResultToObject)
         const head = last(blocks)

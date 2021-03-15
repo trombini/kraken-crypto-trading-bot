@@ -27,7 +27,11 @@ export class FullProfitBot {
 
   async handleSellRecommendation(recommendation: Recommendation) {
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-    const positions = await this.positionService.findByStatus('open')
+    const positions = await this.positionService.find({
+      pair: this.config.pair,
+      status: 'open'
+    })
+
     positions.forEach(async position => {
       if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)

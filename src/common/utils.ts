@@ -16,7 +16,7 @@ export const formatMoney = (number: number) => {
 }
 
 export const positionId = (position: Position) =>
-  `[${position.pair}_${round(position.buy.price || 0, 4)}_${round(position.buy.volume || 0, 0)}]`
+  `[${position.pair}_${round(position.buy.price || 0, 4)}_${round(position.buy.volume || 0, 2)}]`
 
 // export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Order => {
 //   // TODO should TAX be configuration?
