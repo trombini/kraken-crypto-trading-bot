@@ -1,14 +1,13 @@
 import KrakenClient from 'kraken-api'
-import { Bot, calculateRisk, caluclateVolume } from './bot'
-import { config } from './common/config'
-import { KrakenService } from './kraken/krakenService'
-import { setupDb } from '../test/test-setup'
-import { PositionsService } from './positions/positions.service'
-import PositionModel from './positions/position.model'
-import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { BuyAnalyst } from './analysts/buyAnalyst'
+import { config } from '../common/config'
+import { KrakenService } from '../kraken/krakenService'
+import { setupDb } from '../../test/test-setup'
+import { PositionsService } from '../positions/positions.service'
+import PositionModel from '../positions/position.model'
+import { AssetWatcher } from '../assetWatcher/assetWatcher'
+import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { FullProfitBot } from './fullProfitBot'
-import { SellAnalyst } from './analysts/sellAnalyst'
+import { SellAnalyst } from '../analysts/sellAnalyst'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient
@@ -33,8 +32,6 @@ beforeEach(() => {
 describe('FullProfitBot', () => {
 
   it('should fallback to zero if available amount is less than 1000 $', async () => {
-    const position = new PositionModel({ buy: { volume: 100, price: 1850 }})
-    const result = bot.inWinZone(1850, 0.01, position)
-    expect(result).toBe(false)
+
   })
 })

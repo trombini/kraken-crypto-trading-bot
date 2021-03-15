@@ -1,13 +1,14 @@
-import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
-import { Recommendation } from './common/interfaces/trade.interface'
-import { KrakenService } from './kraken/krakenService'
-import { logger } from './common/logger'
-import { BotConfig } from './common/config'
-import { slack } from './slack/slack.service'
+import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
+import { Recommendation } from '../common/interfaces/trade.interface'
+import { KrakenService } from '../kraken/krakenService'
+import { logger } from '../common/logger'
+import { BotConfig } from '../common/config'
+import { slack } from '../slack/slack.service'
 import { round } from 'lodash'
-import { PositionsService } from './positions/positions.service'
-import { Position } from './positions/position.interface'
-import { formatMoney, formatNumber, positionId } from './common/utils'
+import { PositionsService } from '../positions/positions.service'
+import { Position } from '../positions/position.interface'
+import { formatMoney, formatNumber, positionId } from '../common/utils'
+import { inWinZone } from './utils'
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
@@ -33,7 +34,7 @@ export class TrailingStopLossBot {
     })
 
     positions.forEach(async position => {
-      if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
+      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
         const p = await this.sellPosition(position, currentBidPrice)
         if(p) {
@@ -46,21 +47,21 @@ export class TrailingStopLossBot {
     })
   }
 
-  inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
-    if(!position.buy.price || !position.buy.volume) {
-      throw new Error(`Not enough data to estimate win zone`)
-    }
+  // inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
+  //   if(!position.buy.price || !position.buy.volume) {
+  //     throw new Error(`Not enough data to estimate win zone`)
+  //   }
 
-    const costs = position.buy.price * position.buy.volume
-    const fee = costs * this.config.tax * 2
-    const totalCosts = fee + costs
+  //   const costs = position.buy.price * position.buy.volume
+  //   const fee = costs * this.config.tax * 2
+  //   const totalCosts = fee + costs
 
-    const volumeToSell = round((totalCosts / currentBidPrice), 0)
-    const expectedProfit = position.buy.volume - volumeToSell
-    logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
+  //   const volumeToSell = round((totalCosts / currentBidPrice), 0)
+  //   const expectedProfit = position.buy.volume - volumeToSell
+  //   logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
 
-    return expectedProfit > 0 && expectedProfit >= targetProfit
-  }
+  //   return expectedProfit > 0 && expectedProfit >= targetProfit
+  // }
 
   async sellPosition(position: Position, currentBidPrice: number) {
     if(position.buy.price && position.buy.volume) {
