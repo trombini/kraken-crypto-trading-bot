@@ -13,8 +13,6 @@ export class PositionsService {
       date: moment().format(),
       pair: input.pair,
       status: input.status || 'created',
-      //volume: input.volume,
-      //price: input.price || undefined,
       buy: {
         volume: input.volume,
         price: input.price,
