@@ -40,7 +40,7 @@ export class TrailingStopLossBot {
         if(soldPosition) {
           let evaluatedPosition = await this.evaluateProfit(soldPosition)
 
-          // lazy retriy. how can we do that better?
+          // lazy retry. how can we do that better?
           if(!evaluatedPosition) {
             evaluatedPosition = await this.evaluateProfit(soldPosition)
           }
