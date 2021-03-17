@@ -20,7 +20,7 @@ export const inWinZoneByPercentage = (currentBidPrice: number, targetProfit: num
   const profit = currentBidPrice * volume * (1 - tax)
   const percentage = 100 * profit / costs
 
-  logger.debug(`FullProfitBot: ${costs} -- ${profit} -- ${percentage}`)
+  logger.debug(`[WIN ZONE / Percentage]: ${costs} -- ${profit} -- ${percentage}`)
   return percentage > (100 + targetProfit)
 }
 

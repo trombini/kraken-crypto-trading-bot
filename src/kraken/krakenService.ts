@@ -38,7 +38,11 @@ export class KrakenService {
     const periods = 100
     const since = moment().subtract(period * periods, 'm').unix()
     return this.krakenApi
-      .api('OHLC', { pair, interval: period, since }, () => {})
+      .api('OHLC', {
+        pair,
+        since,
+        interval: period
+      }, () => {})
       .then(response => {
         return response.result[this.config.pair]
       })
@@ -98,7 +102,7 @@ export class KrakenService {
       pair: order.pair,
       volume: order.volume,
       type: 'sell',
-      ordertype: 'market',
+      ordertype: 'market'
     }).then(orderIds => {
       logger.debug(`Created SELL orderIds: ${JSON.stringify(orderIds)}`)
       return orderIds

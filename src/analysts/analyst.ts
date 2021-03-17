@@ -38,7 +38,6 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
     this.data[event.period] = event.blocks
 
     const result = this.indicators.map((currentIndicator) => {
-      //const [weight, period, name, indicator] = currentIndicator
       const { weight, period, name, indicator } = currentIndicator
       const confidence = this.data[period] === undefined ? 0 : indicator(this.data[period])
       return {

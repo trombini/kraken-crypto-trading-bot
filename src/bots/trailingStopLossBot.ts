@@ -36,9 +36,16 @@ export class TrailingStopLossBot {
     positions.forEach(async position => {
       if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        const p = await this.sellPosition(position, currentBidPrice)
-        if(p) {
-          await this.evaluateProfit(p)
+        let soldPosition = await this.sellPosition(position, currentBidPrice)
+        if(soldPosition) {
+          let evaluatedPosition = await this.evaluateProfit(soldPosition)
+
+          // lazy retriy. how can we do that better?
+          if(!evaluatedPosition) {
+            evaluatedPosition = await this.evaluateProfit(soldPosition)
+          }
+
+          this.sendSlackMessage(evaluatedPosition)
         }
       }
       else {
@@ -47,23 +54,7 @@ export class TrailingStopLossBot {
     })
   }
 
-  // inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
-  //   if(!position.buy.price || !position.buy.volume) {
-  //     throw new Error(`Not enough data to estimate win zone`)
-  //   }
-
-  //   const costs = position.buy.price * position.buy.volume
-  //   const fee = costs * this.config.tax * 2
-  //   const totalCosts = fee + costs
-
-  //   const volumeToSell = round((totalCosts / currentBidPrice), 0)
-  //   const expectedProfit = position.buy.volume - volumeToSell
-  //   logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
-
-  //   return expectedProfit > 0 && expectedProfit >= targetProfit
-  // }
-
-  async sellPosition(position: Position, currentBidPrice: number) {
+  async sellPosition(position: Position, currentBidPrice: number): Promise<Position | undefined> {
     if(position.buy.price && position.buy.volume) {
 
       const costs = position.buy.price * position.buy.volume
@@ -108,7 +99,6 @@ export class TrailingStopLossBot {
   async evaluateProfit(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
-      logger.debug(JSON.stringify(position))
 
       if(position.sell.orderIds && position.sell.orderIds.length > 0) {
         const orderId = position.sell.orderIds[0]
@@ -131,8 +121,6 @@ export class TrailingStopLossBot {
         logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
-        this.sendSlackMessage(position, order)
-
         // return latest version of the position
         return this.positionService.findById(position.id)
       }
@@ -142,8 +130,12 @@ export class TrailingStopLossBot {
     }
   }
 
-  sendSlackMessage(position: Position, order: any) {
-    const msg = `Successfully SOLD ${positionId(position)} volume ${round(order.vol_exec, 0)} for ${formatMoney(order.price)}. Keeping ${position.sell.profit}.`
-    slack(this.config).send(msg)
+  sendSlackMessage(position?: Position) {
+    if(position) {
+      const msg = `
+        Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}.
+        Keeping ${position.sell.profit}.`
+      slack(this.config).send(msg)
+    }
   }
 }

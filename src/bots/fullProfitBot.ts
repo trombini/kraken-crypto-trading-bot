@@ -35,14 +35,47 @@ export class FullProfitBot {
     positions.forEach(async position => {
       if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        // const p = await this.sellPosition(position, currentBidPrice)
-        // if(p) {
-        //   await this.evaluateProfit(p)
-        // }
+        const soldPosition = await this.sellPosition(position, currentBidPrice)
+        if(soldPosition) {
+          // await this.evaluateProfit(p)
+        }
       }
       else {
         logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
       }
     })
+  }
+
+  async sellPosition(position: Position, currentBidPrice: number) {
+    if(position.buy.price && position.buy.volume) {
+      try {
+        logger.info(`Create SELL order for ${positionId(position)}. volume: ${position.buy.volume}, price: ~ ${currentBidPrice}, keep: 0`)
+
+        // update the status of the position so that we don't end up selling it multiple times
+        await this.positionService.update(position, {
+          'status': 'selling'
+        })
+
+        // create SELL order with Kraken
+        const orderIds = await this.kraken.createSellOrder({
+          pair: position.pair,
+          volume: position.buy.volume
+        })
+        logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
+
+        // mark position as sold and keep track of the orderIds
+        await this.positionService.update(position, {
+          'status': 'sold',
+          'sell.orderIds': orderIds.map(id => id.id)
+        })
+
+        // return latest version of the position
+        return this.positionService.findById(position.id)
+      }
+      catch(err) {
+        logger.error(`Error SELL ${positionId(position)}:`, err)
+        logger.error(JSON.stringify(err))
+      }
+    }
   }
 }

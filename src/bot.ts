@@ -12,7 +12,7 @@ import { formatMoney } from './common/utils'
 import moment from 'moment'
 
 export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
-  logger.debug(`Calculate risk with availableAmount: ${availableAmount}, reserve: ${reserve}, maxBet: ${maxBet}`)
+  logger.debug(`Calculate risk with availableAmount: ${round(availableAmount, 2)}, reserve: ${reserve}, maxBet: ${maxBet}`)
 
   const realAvailableAmount = availableAmount - reserve
   if(realAvailableAmount < 0) {
@@ -81,7 +81,6 @@ export class Bot {
     logger.info(`Create new BUY order for ${recommendation.pair}`)
 
     try {
-
       const reserve = this.config.reserve
       const maxBet = this.config.maxBet
       const availableAmount = await this.kraken.balance()
@@ -118,8 +117,7 @@ export class Bot {
   async fetchOrderDetails(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.buy.orderIds?.join(',')}'`)
-       if(position.buy.orderIds && position.buy.orderIds.length > 0) {
-
+      if(position.buy.orderIds && position.buy.orderIds.length > 0) {
         const orderId = position.buy.orderIds[0]
         const order = await this.kraken.getOrder({ id: orderId })
         logger.debug(`Fetch order details for order '${orderId}'`)

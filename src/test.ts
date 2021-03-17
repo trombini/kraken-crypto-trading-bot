@@ -26,10 +26,12 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
   // const assetWatcher = new AssetWatcher(krakenService, config)
   // assetWatcher.start([5, 15, 240])
 
-  positionsService.find({ pair: 'ETHUSD', status: 'open' }).then(pos => {
-    console.log(pos)
-  })
+  // positionsService.find({ pair: 'ETHUSD', status: 'open' }).then(pos => {
+  //   console.log(pos)
+  // })
 
+  const test = await positionsService.findById('105154bfeb81bdc3ada053fa')
+  console.log(test)
 
 
 

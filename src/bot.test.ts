@@ -78,6 +78,7 @@ describe('BOT', () => {
   })
 
   it('should order correct volume based on MAX_BET and last ask price', async () => {
+    // max bet is 500
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
     jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
@@ -87,13 +88,13 @@ describe('BOT', () => {
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
-      volume: 50
+      volume: 500
     })
   })
 
   it('should update position details with values from Kraken API', async () => {
 
-    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '100', vol_exec: '90', price: '0.95' })
 
     const spy = jest.spyOn(positionsService, 'update')
     const position = new PositionModel({
@@ -110,8 +111,7 @@ describe('BOT', () => {
     }), expect.objectContaining({
       status: 'open',
       'buy.price': 0.95,
-      'buy.volume': 50,
-      'buy.volumeExecuted': 50
+      'buy.volume': 90
     }))
 
   })
