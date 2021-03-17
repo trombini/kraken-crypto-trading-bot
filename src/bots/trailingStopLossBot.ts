@@ -81,13 +81,13 @@ export class TrailingStopLossBot {
         logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds
-        await this.positionService.update(position, {
+        const updatedPosition = await this.positionService.update(position, {
           'status': 'sold',
           'sell.orderIds': orderIds.map(id => id.id)
         })
 
         // return latest version of the position
-        return this.positionService.findById(position.id)
+        return updatedPosition
       }
       catch(err) {
         logger.error(`Error SELL ${positionId(position)}:`, err)
@@ -112,7 +112,7 @@ export class TrailingStopLossBot {
         const price = parseFloat(order.price)
         const volumeSold = parseFloat(order.vol_exec) || 0
         const profit = (position.buy.volume || 0) - volumeSold
-        await this.positionService.update(position, {
+        const updatedPosition = await this.positionService.update(position, {
           'sell.price': price,
           'sell.volume': volumeSold,
           'sell.profit': profit
@@ -122,7 +122,7 @@ export class TrailingStopLossBot {
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
         // return latest version of the position
-        return this.positionService.findById(position.id)
+        return updatedPosition
       }
     }
     catch(err) {

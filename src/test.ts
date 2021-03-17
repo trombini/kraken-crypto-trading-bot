@@ -17,7 +17,7 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
 
 (async function() {
 
-  await connect('mongodb://localhost:27017/kraken-prod')
+  await connect('mongodb://localhost:27017/kraken-test')
 
   const positionsService = new PositionsService()
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
@@ -30,8 +30,24 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
   //   console.log(pos)
   // })
 
-  const test = await positionsService.findById('105154bfeb81bdc3ada053fa')
-  console.log(test)
+
+
+
+
+  const position = await positionsService.create({
+    pair: 'test',
+    volume: 100,
+    orderIds: ['test']
+  })
+
+
+  const updatedPosition = await positionsService.update(position, {
+    status: 'open',
+    'buy.volume': 200,
+    'buy.price': 3,
+  })
+
+  console.log(updatedPosition)
 
 
 

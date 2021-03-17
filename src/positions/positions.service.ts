@@ -27,7 +27,8 @@ export class PositionsService {
   }
 
   async update(position: Position, update: UpdateQuery<Position>) {
-    return PositionModel.findByIdAndUpdate(position._id, update, { new: true })
+    const pos = await PositionModel.findByIdAndUpdate(position._id, update, { new: true })
+    return pos !== null ? pos : undefined
   }
 
   async save(position: Position) {
