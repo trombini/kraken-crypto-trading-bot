@@ -52,29 +52,4 @@ export class PositionsService {
   async find(filter: any): Promise<Position[]> {
     return PositionModel.find(filter)
   }
-
-  async printSummary(pair: string) {
-    const risk = await this
-      .find({ pair, status: 'open' })
-      .then((positions) => {
-        return positions.reduce(
-          (acc, position) => {
-            if (position.buy.price && position.buy.volume) {
-              logger.info(
-                `Start watching sell opportunity for ${positionId(position)}`,
-              )
-              return {
-                costs: acc.costs + position.buy.price * position.buy.volume,
-                volume: acc.volume + position.buy.volume,
-              }
-            }
-            return acc
-          },
-          { costs: 0, volume: 0 },
-        )
-      })
-    logger.info(
-      `Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(risk.volume)})`,
-    )
-  }
 }
