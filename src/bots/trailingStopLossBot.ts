@@ -33,28 +33,30 @@ export class TrailingStopLossBot {
       status: 'open'
     })
 
-    positions.forEach(async position => {
+    for (const position of positions) {
       if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        let soldPosition = await this.sellPosition(position, currentBidPrice)
-        if(soldPosition) {
-          let evaluatedPosition = await this.evaluateProfit(soldPosition)
-
-          // lazy retry. how can we do that better?
-          if(!evaluatedPosition) {
-            evaluatedPosition = await this.evaluateProfit(soldPosition)
-          }
-
-          this.sendSlackMessage(evaluatedPosition)
-        }
+        await this.sellPosition(position, currentBidPrice)
       }
       else {
         logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
       }
-    })
+    }
   }
 
-  async sellPosition(position: Position, currentBidPrice: number): Promise<Position | undefined> {
+  async sellPosition(position: Position, currentBidPrice: number): Promise<void> {
+    let soldPosition = await this.createSellOrder(position, currentBidPrice)
+    if(soldPosition) {
+      let evaluatedPosition = await this.evaluateProfit(soldPosition)
+      // lazy retry. how can we do that better?
+      if(!evaluatedPosition) {
+        evaluatedPosition = await this.evaluateProfit(soldPosition)
+      }
+      this.sendSlackMessage(evaluatedPosition)
+    }
+  }
+
+  async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
     if(position.buy.price && position.buy.volume) {
 
       const costs = position.buy.price * position.buy.volume

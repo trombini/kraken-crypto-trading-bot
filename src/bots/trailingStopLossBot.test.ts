@@ -29,32 +29,6 @@ beforeEach(() => {
 
 describe('TrailingStopLossBot', () => {
 
-  // TODO: fix test
-  // it('should fail because position doesnt have a price set yet', () => {
-  //   const invalidBet = new PositionModel({ buy: { volume: 1000 }})
-  //   expect(() => {
-  //     bot.inWinZone(1, 1, invalidBet)
-  //   }).toThrow()
-  // })
-
-  // TODO: fix test
-  // it('should fail because currentBidPrize not yet be in profit range for given position', () => {
-  //   const highPricedBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
-  //   const currentBidPrize = 1.05
-  //   const targetProfit = 50
-  //   const result = bot.inWinZone(currentBidPrize, targetProfit, highPricedBet)
-  //   expect(result).toBe(false)
-  // })
-
-  // TODO: fix test
-  // it('should succeed successful as currentPrize in profit range for given position', () => {
-  //   const validBet = new PositionModel({ buy: { volume: 1000, price: 1 }})
-  //   const currentBidPrize = 1.1
-  //   const targetProfit = 50
-  //   const result = bot.inWinZone(currentBidPrize, targetProfit, validBet)
-  //   expect(result).toBe(true)
-  // })
-
   it('should throw error because expected profit would be negative', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )
     jest.spyOn(krakenService, 'createSellOrder').mockResolvedValue([{ id: 'SOME-SELL-ORDER'} ])
@@ -84,7 +58,7 @@ describe('TrailingStopLossBot', () => {
 
     await positionA.save()
 
-    const updatedPosition = await bot.sellPosition(positionA, currentBidPrice)
+    const updatedPosition = await bot.createSellOrder(positionA, currentBidPrice)
 
     expect(spy).toHaveBeenCalledTimes(2)
 

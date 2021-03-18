@@ -62,7 +62,7 @@ export class KrakenService {
     return this.getTicker(pair)
       .then((response) => {
         const ask = response['a'][0]
-        logger.info(`Current ASK price for ${pair} is '${ask}'`)
+        logger.debug(`Current ASK price for ${pair} is '${ask}'`)
         return ask
       })
   }
@@ -72,7 +72,7 @@ export class KrakenService {
     return this.getTicker(pair)
       .then((response) => {
         const bid = response['b'][0]
-        logger.info(`Current BID price for ${pair} is '${bid}'`)
+        logger.debug(`Current BID price for ${pair} is '${bid}'`)
         return bid
       })
   }
@@ -118,7 +118,7 @@ export class KrakenService {
       pair: order.pair,
       volume: order.volume,
       type: 'buy',
-      ordertype: 'market',
+      ordertype: 'market'
     }).then(orderIds => {
       logger.debug(`Created BUY orderIds: ${JSON.stringify(orderIds)}`)
       return orderIds

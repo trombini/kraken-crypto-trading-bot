@@ -47,9 +47,9 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
       }
     })
 
-    const confidence = result.reduce((acc, result) => {
+    const confidence = round(result.reduce((acc, result) => {
       return acc + (result.weight * result.confidence)
-    }, 0)
+    }, 0), 2)
 
     logger.debug(`${this.constructor.name} confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 0)}`)
 

@@ -22,8 +22,8 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
 
   let bet = maxBet
   if(realAvailableAmount < maxBet) {
-    logger.debug(`availableAmount is only ${round(realAvailableAmount, 2)} and less than maxBet (${maxBet})`)
-    bet = realAvailableAmount * 0.8
+    logger.debug(`realAvailableAmount is only ${round(realAvailableAmount, 2)} and less than maxBet (${maxBet})`)
+    bet = realAvailableAmount
   }
 
   return round(bet * confidence, 2)
@@ -51,9 +51,6 @@ export class Bot {
         this.handleBuyRecommendation(recommendation)
       })
     }
-
-    // TODO: should the bot be in charge of initiating the analysts? There might be multiple signals that need to be combined
-    // TODO: keep track here to keep track of all analysts to determine if they might have different oppinions
   }
 
   async handleBuyRecommendation(recommendation: Recommendation): Promise<any> {
@@ -61,7 +58,7 @@ export class Bot {
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
     if (recentTrades.length > 0) {
-      logger.info(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
+      logger.warn(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
       return
     }
     else {
@@ -73,12 +70,8 @@ export class Bot {
     }
   }
 
-  // TODO: limit order (can it be killed automatically?)
-  // TODO: difference between input order and a "KrakenOrder" (ProcessedOrder?)
-  // TODO: orders might not be completed right away. so we don't really know what the AVG price is
-
   async buyPosition(recommendation: Recommendation): Promise<Position | null | undefined> {
-    logger.info(`Create new BUY order for ${recommendation.pair}`)
+    logger.debug(`Create new BUY order for ${recommendation.pair}`)
 
     try {
       const reserve = this.config.reserve
@@ -89,7 +82,7 @@ export class Bot {
       const risk = calculateRisk(reserve, availableAmount, maxBet, recommendation.confidence)
       const volume = caluclateVolume(risk, lastAskPrice)
 
-      logger.debug(`Create BUY order. confidence: ${recommendation.confidence}, risk: ${formatMoney(risk)}, volume: ${volume}`)
+      logger.info(`Create BUY order. confidence: ${recommendation.confidence}, risk: ${formatMoney(risk)}, volume: ${volume}`)
 
       const orderIds = await this.kraken.createBuyOrder({ pair: recommendation.pair, volume })
       const position = await this.positionsService.create({
@@ -112,8 +105,6 @@ export class Bot {
     }
   }
 
-  // TODO: that order might be undefined, we need to handle this case to not have multiple buy orders for the same upswing
-  // TODO: what do we do if we got multiple orderIds?
   async fetchOrderDetails(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.buy.orderIds?.join(',')}'`)

@@ -33,21 +33,55 @@ import { AssetWatcher } from './assetWatcher/assetWatcher'
 
 
 
+  const doSomething = (input: string) => {
+    return new Promise((resolve) => {
+      console.log(`${input} start`)
+      setTimeout(() => {
+        console.log(`${input} resolve`)
+        resolve(input)
+      }, 2000)
+    })
+  }
 
-  const position = await positionsService.create({
-    pair: 'test',
-    volume: 100,
-    orderIds: ['test']
-  })
+
+  for (const i of ['a', 'b']) {
+    await doSomething(i)
+  }
 
 
-  const updatedPosition = await positionsService.update(position, {
-    status: 'open',
-    'buy.volume': 200,
-    'buy.price': 3,
-  })
+  // ['a', 'b'].forEach(async i => {
+  //   await doSomething(i)
+  // })
 
-  console.log(updatedPosition)
+
+
+
+
+
+  // const order = await krakenService.createBuyOrder({
+  //   pair: 'ADAUSD',
+  //   volume: 25
+  // }).catch(err => {
+  //   console.log(err)
+  // })
+  // console.log(order)
+
+
+
+  // const position = await positionsService.create({
+  //   pair: 'test',
+  //   volume: 100,
+  //   orderIds: ['test']
+  // })
+
+
+  // const updatedPosition = await positionsService.update(position, {
+  //   status: 'open',
+  //   'buy.volume': 200,
+  //   'buy.price': 3,
+  // })
+
+  // console.log(updatedPosition)
 
 
 

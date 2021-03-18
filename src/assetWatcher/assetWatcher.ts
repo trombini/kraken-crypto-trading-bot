@@ -3,7 +3,7 @@ import { BotConfig } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { logger } from '../common/logger'
 
-const delay = 5
+const delay = 6
 export class AssetWatcher {
   intervals: any[]
   observers: any[]
