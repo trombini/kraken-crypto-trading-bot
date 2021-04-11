@@ -23,9 +23,9 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
     this.data = {}
   }
 
-  registerIndicator(weight: number, period: number, name: string, indicator: any) {
+  registerIndicator(required: boolean, weight: number, period: number, name: string, indicator: any) {
     this.indicators.push({
-      weight, period, name, indicator
+      weight, required, period, name, indicator
     })
   }
 
@@ -38,23 +38,32 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
     this.data[event.period] = event.blocks
 
     const result = this.indicators.map((currentIndicator) => {
-      //const [weight, period, name, indicator] = currentIndicator
-      const { weight, period, name, indicator } = currentIndicator
+      const { required, weight, period, name, indicator } = currentIndicator
       const confidence = this.data[period] === undefined ? 0 : indicator(this.data[period])
       return {
+        required,
         name,
         weight,
         confidence
       }
     })
 
-    const confidence = result.reduce((acc, result) => {
+    // check if the mandatory signals are positive
+    const mandatorySignals = result.filter(signal => signal.required)
+    const positiveMandatorySignals = mandatorySignals.filter(signal => signal.confidence > 0)
+    const mandatorySignalsPositive = positiveMandatorySignals.length === mandatorySignals.length
+
+    // console.log(mandatorySignals)
+    // console.log(positiveMandatorySignals)
+    // console.log(mandatorySignalsPositive)
+
+    const confidence = round(result.reduce((acc, result) => {
       return acc + (result.weight * result.confidence)
-    }, 0)
+    }, 0), 2)
 
-    logger.debug(`${this.constructor.name} confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 0)}`)
+    logger.debug(`${this.constructor.name}, required signals: ${mandatorySignalsPositive}, confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 0)}`)
 
-    if (confidence >= this.config.minConfidence) {
+    if (mandatorySignalsPositive && confidence >= this.config.minConfidence) {
       const now = moment().unix()
       // make sure we don't trigger multiple signals simultaniously
       if(this.lastSignal === undefined || (now - this.lastSignal) > 10) {

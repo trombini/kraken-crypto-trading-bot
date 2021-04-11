@@ -19,10 +19,10 @@ export interface Position extends mongoose.Document {
     volumeExecuted?: number
   }
   sell: {
+    strategy: string,
     orderIds?: string[]
     price?: number
     volume?: number
     volumeToKeep?: number
-    profit?: number
   }
 }

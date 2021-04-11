@@ -1,15 +1,14 @@
-import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
-import { Recommendation } from './common/interfaces/trade.interface'
-import { KrakenService } from './kraken/krakenService'
-import { logger } from './common/logger'
-import { BotConfig } from './common/config'
-import { slack } from './slack/slack.service'
+import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
+import { Recommendation } from '../common/interfaces/trade.interface'
+import { KrakenService } from '../kraken/krakenService'
+import { logger } from '../common/logger'
+import { BotConfig } from '../common/config'
+import { slack } from '../slack/slack.service'
 import { round } from 'lodash'
-import { PositionsService } from './positions/positions.service'
-import { Position } from './positions/position.interface'
-import { formatMoney, formatNumber } from './common/utils'
-
-const positionId = (position: Position) => `[${position.pair}_${round(position.buy.price || 0, 4) }_${round(position.buy.volume || 0, 0)}]`
+import { PositionsService } from '../positions/positions.service'
+import { Position } from '../positions/position.interface'
+import { formatMoney, formatNumber, positionId } from '../common/utils'
+import { inWinZone } from './utils'
 
 // Trailing Stop/Stop-Loss
 export class TrailingStopLossBot {
@@ -20,22 +19,6 @@ export class TrailingStopLossBot {
     readonly analyst: Analyst,
     readonly config: BotConfig,
   ) {
-
-    // load positions and start watching for sell opporunities
-    this.positionService.findByStatus('open').then(positions => {
-      const risk = positions.reduce((acc, position) => {
-        if(position.buy.price && position.buy.volume) {
-          logger.info(`Start watching sell opportunity for ${positionId(position)}`)
-          return {
-            costs: acc.costs + (position.buy.price * position.buy.volume),
-            volume: acc.volume + position.buy.volume
-          }
-        }
-        return acc
-      }, { costs: 0, volume: 0 })
-      logger.info(`Currently at risk: ${formatMoney(risk.costs)} $ (${formatNumber(risk.volume)} ADA)`)
-    })
-
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
         this.handleSellRecommendation(data)
@@ -43,39 +26,39 @@ export class TrailingStopLossBot {
     }
   }
 
-  inWinZone(currentBidPrice: number, targetProfit: number, position: Position): boolean {
-    if(position.buy.price && position.buy.volume) {
-      const costs = position.buy.price * position.buy.volume
-      const fee = costs * this.config.tax * 2
-      const totalCosts = fee + costs
-      const volumeToSell = round((totalCosts / currentBidPrice), 0)
-      const expectedProfit = position.buy.volume - volumeToSell
-
-      logger.debug(`Expected profit for ${positionId(position)}: ${expectedProfit}`)
-      return expectedProfit > 0 && expectedProfit >= targetProfit
-    }
-    return false
-  }
-
   async handleSellRecommendation(recommendation: Recommendation) {
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-    const positions = await this.positionService.findByStatus('open')
-    positions.forEach(async position => {
-      if(this.inWinZone(currentBidPrice, this.config.targetProfit, position)) {
+    const positions = await this.positionService.find({
+      pair: this.config.pair,
+      status: 'open'
+    })
+
+    for (const position of positions) {
+      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        const p = await this.sellPosition(position, currentBidPrice)
-        if(p) {
-          await this.evaluateProfit(p)
-        }
+        await this.sellPosition(position, currentBidPrice)
       }
       else {
         logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
       }
-    })
+    }
   }
 
-  async sellPosition(position: Position, currentBidPrice: number) {
+  async sellPosition(position: Position, currentBidPrice: number): Promise<void> {
+    let soldPosition = await this.createSellOrder(position, currentBidPrice)
+    if(soldPosition) {
+      let evaluatedPosition = await this.evaluateProfit(soldPosition)
+      // lazy retry. how can we do that better?
+      if(!evaluatedPosition) {
+        evaluatedPosition = await this.evaluateProfit(soldPosition)
+      }
+      this.sendSlackMessage(evaluatedPosition)
+    }
+  }
+
+  async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
     if(position.buy.price && position.buy.volume) {
+
       const costs = position.buy.price * position.buy.volume
       const fee = costs * this.config.tax * 2
       const totalCosts = fee + costs
@@ -100,13 +83,13 @@ export class TrailingStopLossBot {
         logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds
-        await this.positionService.update(position, {
+        const updatedPosition = await this.positionService.update(position, {
           'status': 'sold',
           'sell.orderIds': orderIds.map(id => id.id)
         })
 
         // return latest version of the position
-        return this.positionService.findById(position.id)
+        return updatedPosition
       }
       catch(err) {
         logger.error(`Error SELL ${positionId(position)}:`, err)
@@ -118,7 +101,6 @@ export class TrailingStopLossBot {
   async evaluateProfit(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
-      logger.debug(JSON.stringify(position))
 
       if(position.sell.orderIds && position.sell.orderIds.length > 0) {
         const orderId = position.sell.orderIds[0]
@@ -131,20 +113,17 @@ export class TrailingStopLossBot {
         // update position to keep track of profit
         const price = parseFloat(order.price)
         const volumeSold = parseFloat(order.vol_exec) || 0
-        const profit = (position.buy.volume || 0) - volumeSold
-        await this.positionService.update(position, {
+        const updatedPosition = await this.positionService.update(position, {
+          'sell.strategy': 'partial',
           'sell.price': price,
           'sell.volume': volumeSold,
-          'sell.profit': profit
         })
 
         logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
         logger.debug(`SELL order: ${JSON.stringify(order)}`)
 
-        this.sendSlackMessage(position, order)
-
         // return latest version of the position
-        return this.positionService.findById(position.id)
+        return updatedPosition
       }
     }
     catch(err) {
@@ -152,8 +131,10 @@ export class TrailingStopLossBot {
     }
   }
 
-  sendSlackMessage(position: Position, order: any) {
-    const msg = `Successfully SOLD ${positionId(position)} volume ${round(order.vol_exec, 0)} for ${formatMoney(order.price)}. Keeping ${position.sell.profit}.`
-    slack(this.config).send(msg)
+  sendSlackMessage(position?: Position) {
+    if(position) {
+      const msg = `Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}`
+      slack(this.config).send(msg)
+    }
   }
 }

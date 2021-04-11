@@ -1,10 +1,10 @@
+const dotenv = require('dotenv')
 
-// load correct config file
-const env = process.env.NODE_ENV || 'prod'
-require('dotenv').config({ path: `.env.${env}` })
+dotenv.config({
+  path: process.env.DOTENV || '.env.prod'
+})
 
 // TODO: what is interval for again?
-
 export interface BotConfig {
   interval: number
   blockMaturity: number
@@ -33,7 +33,7 @@ export const config: BotConfig = {
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
-  minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.6,
+  minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.5,
   mongoDb: process.env.MONGO || 'mongodb://localhost:27017/kraken-prod',
   pair: process.env.PAIR || '',
   reserve: process.env.RESERVE ? parseFloat(process.env.RESERVE) : 0,

@@ -12,7 +12,8 @@
     "test": "jest",
     "test:dev": "jest --watchAll",
     "test:cov": "jest --coverage=true",
-    "dca": "node ./dist/src/scripts/dca.js"
+    "dca": "node ./dist/src/scripts/dca.js",
+    "profits": "node ./dist/src/scripts/profits.js"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +35,7 @@
     "@slack/web-api": "^6.0.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
+    "global-agent": "^2.1.12",
     "kraken-api": "^1.0.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",

@@ -1,5 +1,5 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { botFactory, trailingStopLossBotFactory } from './bots/factory'
+import { botFactory, fullProfitBotFactory, trailingStopLossBotFactory } from './bots/factory'
 import { config } from './common/config'
 import { formatMoney, formatNumber, positionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
@@ -76,6 +76,6 @@ import { DcaService } from './common/dca'
 
   // Initiate Bots
   botFactory(watcher, krakenService, positionsService, dcaService, config)
-  trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
-  //fullProfitBotFactory(watcher, krakenService, positionsService, config)
+  //trailingStopLossBotFactory(watcher, krakenService, positionsService, config)
+  fullProfitBotFactory(watcher, krakenService, positionsService, config)
 })()

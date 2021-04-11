@@ -1,6 +1,4 @@
 import { PositionsService } from '../positions/positions.service'
-import { round, mapKeys, flatMap, uniq } from 'lodash'
-import { Position } from '../positions/position.interface'
 import connect from '../common/db/connect'
 
 (async function() {
@@ -8,10 +6,12 @@ import connect from '../common/db/connect'
   await connect('mongodb://localhost:27017/kraken-prod')
 
   const service = new PositionsService()
-  service.findByStatus('sold').then(positions => {
+  service.find({ pair: 'ADAUSD', status: 'sold' }).then(positions => {
     const result = positions.reduce((acc, pos) => {
+      // console.log(`${pos.id} ${pos?.buy?.volume} - ${pos?.sell?.volume}`)
+      const profit = (pos?.buy?.volume || 0) - (pos?.sell?.volume || 0)
       return {
-        total: acc.total + (pos.sell?.profit || 0),
+        total: acc.total + profit,
         positions: acc.positions++
       }
     }, { total: 0, positions: 0 })

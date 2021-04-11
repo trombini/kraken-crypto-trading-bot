@@ -3,7 +3,7 @@
 
 ```bash
 $ npm install
-$ cp .env.dist .env.prod
+$ cp env.dist .env.prod
 ```
 
 Create a Mongodb Docker container
@@ -29,6 +29,9 @@ $ npm run dev:debug
 
 # run
 $ npm run start
+
+# run with different config
+$ DOTENV=.env.adausd npm run start
 ```
 
 ## Test

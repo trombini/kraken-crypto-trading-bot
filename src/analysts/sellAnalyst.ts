@@ -13,7 +13,7 @@ export class SellAnalyst extends Analyst {
     watcher.subscribe(this, 5)
 
     // register indicators
-    this.registerIndicator(1, 5, 'DOWNSWING', downswing(5, 0.5))
+    this.registerIndicator(true, 1, 5, 'DOWNSWING', downswing(5, 0.5))
   }
 
   sendRecommendationToBot(pair: string, confidence: number) {

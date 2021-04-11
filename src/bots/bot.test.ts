@@ -1,13 +1,15 @@
 import KrakenClient from 'kraken-api'
 import { Bot, calculateRisk, caluclateVolume } from './bot'
-import { config } from './common/config'
-import { KrakenService } from './kraken/krakenService'
-import { setupDb } from '../test/test-setup'
-import { PositionsService } from './positions/positions.service'
-import PositionModel from './positions/position.model'
-import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { BuyAnalyst } from './analysts/buyAnalyst'
+import { config } from '../common/config'
+import { KrakenService } from '../kraken/krakenService'
+import { setupDb } from '../../test/test-setup'
+import { PositionsService } from '../positions/positions.service'
+import PositionModel from '../positions/position.model'
+import { AssetWatcher } from '../assetWatcher/assetWatcher'
+import { BuyAnalyst } from '../analysts/buyAnalyst'
+import { DcaService } from 'src/common/dca'
 
+let dcaService: DcaService
 let positionsService: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
@@ -20,18 +22,24 @@ setupDb('bot')
 
 beforeEach(() => {
   positionsService = new PositionsService()
+  dcaService = new DcaService(positionsService)
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, positionsService, analyst, config)
+  bot = new Bot(krakenService, positionsService, analyst, dcaService, config)
 })
 
 describe('BOT', () => {
 
-  it('should fallback to zero if available amount is less than 1000 $', async () => {
+  it('should fallback to zero if available amount is less than RESERVE', async () => {
     const risk = calculateRisk(1000, 500, 2000, 1)
+    expect(risk).toBe(0)
+  })
+
+  it('should fallback to zero if available amount is less than MIN_BET', async () => {
+    const risk = calculateRisk(1000, 1500, 2000, 1)
     expect(risk).toBe(0)
   })
 
@@ -78,6 +86,7 @@ describe('BOT', () => {
   })
 
   it('should order correct volume based on MAX_BET and last ask price', async () => {
+    // max bet is 500
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
     jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
     jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
@@ -87,13 +96,13 @@ describe('BOT', () => {
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
-      volume: 50
+      volume: 500
     })
   })
 
   it('should update position details with values from Kraken API', async () => {
 
-    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '50', vol_exec: '50', price: '0.95' })
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '100', vol_exec: '90', price: '0.95' })
 
     const spy = jest.spyOn(positionsService, 'update')
     const position = new PositionModel({
@@ -110,8 +119,7 @@ describe('BOT', () => {
     }), expect.objectContaining({
       status: 'open',
       'buy.price': 0.95,
-      'buy.volume': 50,
-      'buy.volumeExecuted': 50
+      'buy.volume': 90
     }))
 
   })
