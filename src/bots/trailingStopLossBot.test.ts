@@ -79,7 +79,11 @@ describe('TrailingStopLossBot', () => {
 
   it('should update position with correct profit details', async () => {
     const updatePositionSpy = jest.spyOn(positionsService, 'update')
-    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 80, vol_exec: 80, price: 1.2 } )
+    const getOrderSpy = jest.spyOn(krakenService, 'getOrder').mockResolvedValue({
+      vol: 80,
+      vol_exec: 80,
+      price: 1.2
+    })
     const positionA = new PositionModel({
       pair: 'ADAUSD',
       status: 'sold',
@@ -95,8 +99,7 @@ describe('TrailingStopLossBot', () => {
       expect.objectContaining({ _id: positionA._id }),
       expect.objectContaining({
         'sell.price': 1.2,
-        'sell.volume': 80,
-        'sell.profit': 20
+        'sell.volume': 80
       }))
   })
 

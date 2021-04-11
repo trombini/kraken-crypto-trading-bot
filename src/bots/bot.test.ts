@@ -1,13 +1,15 @@
 import KrakenClient from 'kraken-api'
 import { Bot, calculateRisk, caluclateVolume } from './bot'
-import { config } from './common/config'
-import { KrakenService } from './kraken/krakenService'
-import { setupDb } from '../test/test-setup'
-import { PositionsService } from './positions/positions.service'
-import PositionModel from './positions/position.model'
-import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { BuyAnalyst } from './analysts/buyAnalyst'
+import { config } from '../common/config'
+import { KrakenService } from '../kraken/krakenService'
+import { setupDb } from '../../test/test-setup'
+import { PositionsService } from '../positions/positions.service'
+import PositionModel from '../positions/position.model'
+import { AssetWatcher } from '../assetWatcher/assetWatcher'
+import { BuyAnalyst } from '../analysts/buyAnalyst'
+import { DcaService } from 'src/common/dca'
 
+let dcaService: DcaService
 let positionsService: PositionsService
 let krakenApi: KrakenClient
 let krakenService: KrakenService
@@ -20,18 +22,24 @@ setupDb('bot')
 
 beforeEach(() => {
   positionsService = new PositionsService()
+  dcaService = new DcaService(positionsService)
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, positionsService, analyst, config)
+  bot = new Bot(krakenService, positionsService, analyst, dcaService, config)
 })
 
 describe('BOT', () => {
 
-  it('should fallback to zero if available amount is less than 1000 $', async () => {
+  it('should fallback to zero if available amount is less than RESERVE', async () => {
     const risk = calculateRisk(1000, 500, 2000, 1)
+    expect(risk).toBe(0)
+  })
+
+  it('should fallback to zero if available amount is less than MIN_BET', async () => {
+    const risk = calculateRisk(1000, 1500, 2000, 1)
     expect(risk).toBe(0)
   })
 

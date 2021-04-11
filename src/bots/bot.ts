@@ -1,15 +1,16 @@
-import { Recommendation } from './common/interfaces/trade.interface'
-import { KrakenService } from './kraken/krakenService'
-import { logger } from './common/logger'
+import { Recommendation } from '../common/interfaces/trade.interface'
+import { KrakenService } from '../kraken/krakenService'
+import { logger } from '../common/logger'
 import { filter, round } from 'lodash'
-import { BotConfig } from './common/config'
-import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { PositionsService } from './positions/positions.service'
-import { slack } from './slack/slack.service'
-import { Analyst, ANALYST_EVENTS } from './analysts/analyst'
-import { Position } from './positions/position.interface'
-import { formatMoney } from './common/utils'
+import { BotConfig } from '../common/config'
+import { AssetWatcher } from '../assetWatcher/assetWatcher'
+import { PositionsService } from '../positions/positions.service'
+import { slack } from '../slack/slack.service'
+import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
+import { Position } from '../positions/position.interface'
+import { formatMoney } from '../common/utils'
 import moment from 'moment'
+import { DcaService } from 'src/common/dca'
 
 export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
   logger.debug(`Calculate risk with availableAmount: ${round(availableAmount, 2)}, reserve: ${reserve}, maxBet: ${maxBet}`)
@@ -20,10 +21,16 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
     return 0
   }
 
+  const minBet = 1000
+  if(realAvailableAmount < minBet) {
+    logger.debug(`availableAmount (${round(availableAmount, 2)}) is less than minBet (${minBet})`)
+    return 0
+  }
+
   let bet = maxBet
   if(realAvailableAmount < maxBet) {
     logger.debug(`realAvailableAmount is only ${round(realAvailableAmount, 2)} and less than maxBet (${maxBet})`)
-    bet = realAvailableAmount
+    bet = realAvailableAmount * 0.8
   }
 
   return round(bet * confidence, 2)
@@ -42,6 +49,7 @@ export class Bot {
     readonly kraken: KrakenService,
     readonly positionsService: PositionsService,
     readonly analyst: Analyst,
+    readonly dcaService: DcaService,
     readonly config: BotConfig
   ) {
     this.datastore = []
@@ -53,7 +61,7 @@ export class Bot {
     }
   }
 
-  async handleBuyRecommendation(recommendation: Recommendation): Promise<any> {
+  async handleBuyRecommendation(recommendation: Recommendation): Promise<void> {
     // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
@@ -65,7 +73,7 @@ export class Bot {
       const position = await this.buyPosition(recommendation)
       if(position) {
         await this.fetchOrderDetails(position)
-        return position
+        await this.dcaService.dcaOpenPositions()
       }
     }
   }

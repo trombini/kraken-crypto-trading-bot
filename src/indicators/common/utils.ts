@@ -21,3 +21,24 @@ export const getMaturedBlocks = (interval: number, maturity: number, blocks: OHL
   const threshold = now - margin
   return filter(blocks, o => o.time < threshold)
 }
+
+export const flattenOhlcInput = (blocks: OHLCBlock[]) => {
+  const flatOhlcBlocks = blocks.reduce((acc, block) => {
+    acc.high.push(block.high)
+    acc.low.push(block.low)
+    acc.close.push(block.close)
+    return acc
+  }, { high:[], low: [], close: [] } as {
+    high: any[]
+    low: any[]
+    close: any[]
+  })
+
+  return {
+    high: flatOhlcBlocks.high,
+    low: flatOhlcBlocks.low,
+    close: flatOhlcBlocks.close,
+    period: 14,
+    signalPeriod: 3
+  }
+}

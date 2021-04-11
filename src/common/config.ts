@@ -33,7 +33,7 @@ export const config: BotConfig = {
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
-  minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.6,
+  minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.5,
   mongoDb: process.env.MONGO || 'mongodb://localhost:27017/kraken-prod',
   pair: process.env.PAIR || '',
   reserve: process.env.RESERVE ? parseFloat(process.env.RESERVE) : 0,

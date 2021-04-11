@@ -15,6 +15,7 @@ export const analyse = (macd: MACDResult): number => {
 
   // v0 oldest, v1 middel, v2 now
   const b = getMaturedHistogram(macd, 3)
+  // OR b1 === b2
   const result = b[0] < b[1] && b[1] < b[2]
   const confidence = result ? 1 : 0
 

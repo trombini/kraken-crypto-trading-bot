@@ -12,7 +12,8 @@
     "test": "jest",
     "test:dev": "jest --watchAll",
     "test:cov": "jest --coverage=true",
-    "dca": "node ./dist/src/scripts/dca.js"
+    "dca": "node ./dist/src/scripts/dca.js",
+    "profits": "node ./dist/src/scripts/profits.js"
   },
   "keywords": [],
   "author": "",

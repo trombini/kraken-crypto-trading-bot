@@ -113,11 +113,10 @@ export class TrailingStopLossBot {
         // update position to keep track of profit
         const price = parseFloat(order.price)
         const volumeSold = parseFloat(order.vol_exec) || 0
-        const profit = (position.buy.volume || 0) - volumeSold
         const updatedPosition = await this.positionService.update(position, {
+          'sell.strategy': 'partial',
           'sell.price': price,
           'sell.volume': volumeSold,
-          'sell.profit': profit
         })
 
         logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
@@ -134,9 +133,7 @@ export class TrailingStopLossBot {
 
   sendSlackMessage(position?: Position) {
     if(position) {
-      const msg = `
-        Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}.
-        Keeping ${position.sell.profit}.`
+      const msg = `Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}`
       slack(this.config).send(msg)
     }
   }

@@ -2,6 +2,7 @@ import { round, takeRight } from 'lodash'
 import { Stochastic } from 'technicalindicators'
 import { OHLCBlock } from '../../common/interfaces/trade.interface'
 import { logger } from '../../common/logger'
+import { flattenOhlcInput } from '../common/utils'
 
 // Stochastic Fast
 export const stochastic = () => (blocks: OHLCBlock[]): number  => {
@@ -9,27 +10,6 @@ export const stochastic = () => (blocks: OHLCBlock[]): number  => {
   const stochf = Stochastic.calculate(config)
   const { k, d } = takeRight(stochf, 1)[0]
   return mapOutputToConfindence(k, d)
-}
-
-const flattenOhlcInput = (blocks: OHLCBlock[]) => {
-  const flatOhlcBlocks = blocks.reduce((acc, block) => {
-    acc.high.push(block.high)
-    acc.low.push(block.low)
-    acc.close.push(block.close)
-    return acc
-  }, { high:[], low: [], close: [] } as {
-    high: any[]
-    low: any[]
-    close: any[]
-  })
-
-  return {
-    high: flatOhlcBlocks.high,
-    low: flatOhlcBlocks.low,
-    close: flatOhlcBlocks.close,
-    period: 14,
-    signalPeriod: 3
-  }
 }
 
 export const mapOutputToConfindence = (k: number, d: number) => {
