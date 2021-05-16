@@ -9,8 +9,9 @@ import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { formatMoney, formatNumber, positionId } from '../common/utils'
 import { inWinZone } from './utils'
+import { ProfitBot } from './profitBot'
 
-export class FullProfitBot {
+export class FullProfitBot extends ProfitBot {
 
   constructor(
     readonly kraken: KrakenService,
@@ -18,6 +19,8 @@ export class FullProfitBot {
     readonly analyst: Analyst,
     readonly config: BotConfig,
   ) {
+    super(kraken, positionService, analyst, config)
+
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
         this.handleSellRecommendation(data)
@@ -25,35 +28,15 @@ export class FullProfitBot {
     }
   }
 
-  async handleSellRecommendation(recommendation: Recommendation) {
-    const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-    const positions = await this.positionService.find({
-      pair: this.config.pair,
-      status: 'open'
-    })
-
-    positions.forEach(async position => {
-      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
-        logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        const soldPosition = await this.sellPosition(position, currentBidPrice)
-        if(soldPosition) {
-          // await this.evaluateProfit(p)
-        }
-      }
-      else {
-        logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
-      }
-    })
-  }
-
-  async sellPosition(position: Position, currentBidPrice: number) {
+  async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
     if(position.buy.price && position.buy.volume) {
       try {
         logger.info(`Create SELL order for ${positionId(position)}. volume: ${position.buy.volume}, price: ~ ${currentBidPrice}, keep: 0`)
 
         // update the status of the position so that we don't end up selling it multiple times
         await this.positionService.update(position, {
-          'status': 'selling'
+          'status': 'selling',
+          'sell.volumeToKeep': 0
         })
 
         // create SELL order with Kraken
@@ -61,6 +44,7 @@ export class FullProfitBot {
           pair: position.pair,
           volume: position.buy.volume
         })
+
         logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds

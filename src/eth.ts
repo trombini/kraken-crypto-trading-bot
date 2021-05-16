@@ -6,9 +6,9 @@ import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
+import { DcaService } from './common/dca'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
-import { DcaService } from './common/dca'
 
 (async function () {
   console.log(config)

@@ -18,10 +18,10 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 1440)
 
     // register indicators
-    this.registerIndicator(true, 0.40, 15, 'UPSWING 15m', upswing(15, config.blockMaturity))
-    this.registerIndicator(false, 0.40, 240, 'UPTREND 4h', uptrend(240, 0.5))
-    this.registerIndicator(true, 0.10, 240, 'RSI 4h', rsi())
-    this.registerIndicator(false, 0.10, 240, 'STOCHF 4h', stochastic())
+    this.registerIndicator(true, 0, 15, 'UPSWING 15m', upswing(15, config.blockMaturity))
+    this.registerIndicator(false, 0.45, 240, 'RSI 4h', rsi())
+    this.registerIndicator(false, 0.45, 240, 'UPTREND 4h', uptrend(240, 0.5))
+    this.registerIndicator(false, 0.1, 240, 'STOCHF 4h', stochastic())
 
     // explanation:
     // upswing is the main driver. if this is positive, we want to buy
@@ -35,7 +35,13 @@ export class BuyAnalyst extends Analyst {
   }
 
   sendRecommendationToBot(pair: string, confidence: number) {
-    logger.info(`BUY SIGNAL detected for [${pair}] with confidence ${confidence}`)
-    this.emit(ANALYST_EVENTS.BUY, { pair, confidence })
+    const threshold = 0
+    if(confidence <= threshold) {
+      logger.warn(`BUY SIGNAl detected but confidence is too low (threshold: ${threshold})`)
+    }
+    else {
+      logger.info(`BUY SIGNAL detected for [${pair}] with confidence ${confidence}`)
+      this.emit(ANALYST_EVENTS.BUY, { pair, confidence })
+    }
   }
 }

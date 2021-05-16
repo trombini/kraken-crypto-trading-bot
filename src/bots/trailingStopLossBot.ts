@@ -9,9 +9,10 @@ import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { formatMoney, formatNumber, positionId } from '../common/utils'
 import { inWinZone } from './utils'
+import { ProfitBot } from './profitBot'
 
 // Trailing Stop/Stop-Loss
-export class TrailingStopLossBot {
+export class TrailingStopLossBot extends ProfitBot {
 
   constructor(
     readonly kraken: KrakenService,
@@ -19,40 +20,12 @@ export class TrailingStopLossBot {
     readonly analyst: Analyst,
     readonly config: BotConfig,
   ) {
+    super(kraken, positionService, analyst, config)
+
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
         this.handleSellRecommendation(data)
       })
-    }
-  }
-
-  async handleSellRecommendation(recommendation: Recommendation) {
-    const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
-    const positions = await this.positionService.find({
-      pair: this.config.pair,
-      status: 'open'
-    })
-
-    for (const position of positions) {
-      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
-        logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
-        await this.sellPosition(position, currentBidPrice)
-      }
-      else {
-        logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
-      }
-    }
-  }
-
-  async sellPosition(position: Position, currentBidPrice: number): Promise<void> {
-    let soldPosition = await this.createSellOrder(position, currentBidPrice)
-    if(soldPosition) {
-      let evaluatedPosition = await this.evaluateProfit(soldPosition)
-      // lazy retry. how can we do that better?
-      if(!evaluatedPosition) {
-        evaluatedPosition = await this.evaluateProfit(soldPosition)
-      }
-      this.sendSlackMessage(evaluatedPosition)
     }
   }
 
@@ -95,46 +68,6 @@ export class TrailingStopLossBot {
         logger.error(`Error SELL ${positionId(position)}:`, err)
         logger.error(JSON.stringify(err))
       }
-    }
-  }
-
-  async evaluateProfit(position: Position) {
-    try {
-      logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
-
-      if(position.sell.orderIds && position.sell.orderIds.length > 0) {
-        const orderId = position.sell.orderIds[0]
-        const order = await this.kraken.getOrder({ id: orderId })
-
-        if(order === undefined) {
-          throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${positionId(position)}`)
-        }
-
-        // update position to keep track of profit
-        const price = parseFloat(order.price)
-        const volumeSold = parseFloat(order.vol_exec) || 0
-        const updatedPosition = await this.positionService.update(position, {
-          'sell.strategy': 'partial',
-          'sell.price': price,
-          'sell.volume': volumeSold,
-        })
-
-        logger.info(`Successfully executed SELL order of ${round(volumeSold, 0)} for ${price}`)
-        logger.debug(`SELL order: ${JSON.stringify(order)}`)
-
-        // return latest version of the position
-        return updatedPosition
-      }
-    }
-    catch(err) {
-      logger.error(`Error evaluating profit for ${positionId(position)}:`, err)
-    }
-  }
-
-  sendSlackMessage(position?: Position) {
-    if(position) {
-      const msg = `Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}`
-      slack(this.config).send(msg)
     }
   }
 }

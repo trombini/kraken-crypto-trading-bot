@@ -9,8 +9,8 @@ import { slack } from '../slack/slack.service'
 import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
 import { Position } from '../positions/position.interface'
 import { formatMoney } from '../common/utils'
-import moment from 'moment'
 import { DcaService } from 'src/common/dca'
+import moment from 'moment'
 
 export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
   logger.debug(`Calculate risk with availableAmount: ${round(availableAmount, 2)}, reserve: ${reserve}, maxBet: ${maxBet}`)
@@ -23,7 +23,7 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
 
   const minBet = 1000
   if(realAvailableAmount < minBet) {
-    logger.debug(`availableAmount (${round(availableAmount, 2)}) is less than minBet (${minBet})`)
+    logger.debug(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
     return 0
   }
 
@@ -109,7 +109,9 @@ export class Bot {
       return this.positionsService.findById(position.id)
     }
     catch(err) {
-      logger.error(`Error BUY position: `, err)
+      console.log(err)
+      console.log(err.message)
+      logger.error(`Error BUY position: ${err.message}`)
     }
   }
 
@@ -146,8 +148,8 @@ export class Bot {
       }
     }
     catch(err) {
-      logger.error(`Error BUY position: `, err)
-      logger.error(`Error BUY position: ${JSON.stringify(err)}`)
+      logger.error(`Cannot fetch order details for BUY order: ${JSON.stringify(err)}`)
+      slack(this.config).send(`Cannot fetch order details for BUY order: ${JSON.stringify(err)}`)
     }
   }
 

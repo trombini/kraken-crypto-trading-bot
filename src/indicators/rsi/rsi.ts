@@ -14,7 +14,7 @@ export const rsi = () => (blocks: OHLCBlock[]): number  => {
   })
 
   const rsi = takeRight(history, 1)[0]
-  const confidence = rsi < 70 ? 1 : 0
+  const confidence = rsi < 65 ? 1 : 0
 
   logger.debug(`RSI: [ ${round(rsi, 2)} ] => ${confidence}`)
 

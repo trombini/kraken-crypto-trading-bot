@@ -39,7 +39,12 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
 
     const result = this.indicators.map((currentIndicator) => {
       const { required, weight, period, name, indicator } = currentIndicator
-      const confidence = this.data[period] === undefined ? 0 : indicator(this.data[period])
+
+      if(this.data[period] === undefined) {
+        logger.warn(`Not enough data for indicator ${currentIndicator.name}`)
+      }
+
+      const confidence = this.data[period] === undefined ? -1 : indicator(this.data[period])
       return {
         required,
         name,
@@ -53,17 +58,14 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
     const positiveMandatorySignals = mandatorySignals.filter(signal => signal.confidence > 0)
     const mandatorySignalsPositive = positiveMandatorySignals.length === mandatorySignals.length
 
-    // console.log(mandatorySignals)
-    // console.log(positiveMandatorySignals)
-    // console.log(mandatorySignalsPositive)
-
     const confidence = round(result.reduce((acc, result) => {
       return acc + (result.weight * result.confidence)
     }, 0), 2)
 
     logger.debug(`${this.constructor.name}, required signals: ${mandatorySignalsPositive}, confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 0)}`)
 
-    if (mandatorySignalsPositive && confidence >= this.config.minConfidence) {
+    if (mandatorySignalsPositive && confidence >= 0) {
+    //if (mandatorySignalsPositive && confidence >= this.config.minConfidence) {
       const now = moment().unix()
       // make sure we don't trigger multiple signals simultaniously
       if(this.lastSignal === undefined || (now - this.lastSignal) > 10) {
