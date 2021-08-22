@@ -18,7 +18,7 @@ docker run -d --name mongodb \
   mongo:latest
 ```
 
-## Running the app
+## Running the bot
 
 ```bash
 # development
