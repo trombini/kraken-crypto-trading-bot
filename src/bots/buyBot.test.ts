@@ -1,5 +1,5 @@
 import KrakenClient from 'kraken-api'
-import { Bot, calculateRisk, caluclateVolume } from './bot'
+import { BuyBot, calculateRisk, caluclateVolume } from './buyBot'
 import { config } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { setupDb } from '../../test/test-setup'
@@ -15,10 +15,10 @@ let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: BuyAnalyst
-let bot: Bot
+let bot: BuyBot
 
 // setup db
-setupDb('bot')
+setupDb('buyBot')
 
 beforeEach(() => {
   positionsService = new PositionsService()
@@ -28,10 +28,10 @@ beforeEach(() => {
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
 
-  bot = new Bot(krakenService, positionsService, analyst, dcaService, config)
+  bot = new BuyBot(krakenService, positionsService, analyst, dcaService, config)
 })
 
-describe('BOT', () => {
+describe('BuyBot', () => {
 
   it('should fallback to zero if available amount is less than RESERVE', async () => {
     const risk = calculateRisk(1000, 500, 2000, 1)

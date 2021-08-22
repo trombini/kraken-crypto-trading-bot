@@ -8,7 +8,7 @@ import { Position } from '../positions/position.interface'
 import { positionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
 
-export class FullProfitBot extends ProfitBot {
+export class TakeFullProfitBot extends ProfitBot {
 
   constructor(
     readonly kraken: KrakenService,

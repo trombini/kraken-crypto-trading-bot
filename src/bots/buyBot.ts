@@ -42,7 +42,7 @@ export const caluclateVolume = (risk: number, lastAskPrice: number) => {
   return round(risk / lastAskPrice, 0)
 }
 
-export class Bot {
+export class BuyBot {
   datastore: any[]
   watcher: AssetWatcher | undefined
   upswingAnalyst: Analyst | undefined

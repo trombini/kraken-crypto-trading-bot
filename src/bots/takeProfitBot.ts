@@ -3,18 +3,12 @@ import { BuyRecommendation } from '../common/interfaces/interfaces'
 import { KrakenService } from '../kraken/krakenService'
 import { logger } from '../common/logger'
 import { BotConfig } from '../common/config'
-import { slack } from '../slack/slack.service'
 import { round } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
-import { formatMoney, formatNumber, positionId } from '../common/utils'
-import { inWinZone } from './utils'
+import { positionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
 
-// Trailing Stop/Stop-Loss
-
-
-// TakeProfitBot
 export class TakeProfitBot extends ProfitBot {
 
   constructor(

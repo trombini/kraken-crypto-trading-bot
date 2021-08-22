@@ -1,22 +1,22 @@
 import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { SellAnalyst } from '../analysts/sellAnalyst'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
-import { Bot } from './bot'
+import { BuyBot } from './buyBot'
 import { BotConfig } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { PositionsService } from '../positions/positions.service'
-import { FullProfitBot } from './fullProfitBot'
+import { TakeFullProfitBot } from './takeFullProfitBot'
 import { TakeProfitBot } from './takeProfitBot'
 import { DcaService } from 'src/common/dca'
 
-export const fullProfitBotFactory = (
+export const takeFullProfitBotFactory = (
   watcher: AssetWatcher,
   krakenService: KrakenService,
   positionsService: PositionsService,
   config: BotConfig,
-): FullProfitBot => {
+): TakeFullProfitBot => {
   const analyst = new SellAnalyst(watcher, config)
-  return new FullProfitBot(krakenService, positionsService, analyst, config)
+  return new TakeFullProfitBot(krakenService, positionsService, analyst, config)
 }
 
 export const takeProfitBotFactory = (
@@ -35,13 +35,13 @@ export const takeProfitBotFactory = (
   )
 }
 
-export const botFactory = (
+export const buyBotFactory = (
   watcher: AssetWatcher,
   krakenService: KrakenService,
   positionsService: PositionsService,
   dcaService: DcaService,
   config: BotConfig,
-): Bot => {
+): BuyBot => {
   const analyst = new BuyAnalyst(watcher, config)
-  return new Bot(krakenService, positionsService, analyst, dcaService, config)
+  return new BuyBot(krakenService, positionsService, analyst, dcaService, config)
 }

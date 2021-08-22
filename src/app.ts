@@ -1,5 +1,5 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { botFactory, takeProfitBotFactory } from './bots/factory'
+import { buyBotFactory, takeProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
 import { formatMoney, formatNumber, positionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
@@ -98,7 +98,7 @@ import KrakenClient from 'kraken-api'
   //watcher.start([5, 15])
 
   // Initiate Bots
-  botFactory(watcher, krakenService, positionsService, dcaService, config)
+  buyBotFactory(watcher, krakenService, positionsService, dcaService, config)
   takeProfitBotFactory(watcher, krakenService, positionsService, config)
   //fullProfitBotFactory(watcher, krakenService, positionsService, config)
 })()

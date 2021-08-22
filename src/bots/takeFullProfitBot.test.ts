@@ -6,7 +6,7 @@ import { PositionsService } from '../positions/positions.service'
 import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
-import { FullProfitBot } from './fullProfitBot'
+import { TakeFullProfitBot } from './takeFullProfitBot'
 import { SellAnalyst } from '../analysts/sellAnalyst'
 
 let positionsService: PositionsService
@@ -14,10 +14,10 @@ let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
-let bot: FullProfitBot
+let bot: TakeFullProfitBot
 
 // setup db
-setupDb('fullProfitBot')
+setupDb('takeFullProfitBot')
 
 beforeEach(() => {
   positionsService = new PositionsService()
@@ -26,10 +26,10 @@ beforeEach(() => {
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
 
-  bot = new FullProfitBot(krakenService, positionsService, analyst, config)
+  bot = new TakeFullProfitBot(krakenService, positionsService, analyst, config)
 })
 
-describe('FullProfitBot', () => {
+describe('TakeFullProfitBot', () => {
 
   it('should fallback to zero if available amount is less than 1000 $', async () => {
 
