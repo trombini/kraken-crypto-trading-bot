@@ -1,14 +1,11 @@
 import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
-import { Recommendation } from '../common/interfaces/trade.interface'
+import { SellRecommendation } from '../common/interfaces/interfaces'
 import { KrakenService } from '../kraken/krakenService'
 import { logger } from '../common/logger'
 import { BotConfig } from '../common/config'
-import { slack } from '../slack/slack.service'
-import { round } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
-import { formatMoney, formatNumber, positionId } from '../common/utils'
-import { inWinZone } from './utils'
+import { positionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
 
 export class FullProfitBot extends ProfitBot {
@@ -22,7 +19,7 @@ export class FullProfitBot extends ProfitBot {
     super(kraken, positionService, analyst, config)
 
     if (analyst) {
-      analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
+      analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {
         this.handleSellRecommendation(data)
       })
     }

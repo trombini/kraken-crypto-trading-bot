@@ -9,6 +9,7 @@ export interface BotConfig {
   interval: number
   blockMaturity: number
   bypassKrakenApi: boolean
+  cashSource: string
   goal: number
   goalStart: number
   krakenApiKey: string
@@ -27,6 +28,7 @@ export interface BotConfig {
 export const config: BotConfig = {
   blockMaturity: process.env.BLOCK_MATURITY ? parseFloat(process.env.BLOCK_MATURITY) : 0.5,
   bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
+  cashSource: process.env.CASH_SOURCE || 'ZUSD', // USDF
   goal: process.env.GOAL ? parseFloat(process.env.GOAL) : 0,
   goalStart: process.env.GOAL_START ? parseFloat(process.env.GOAL_START) : 0,
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,

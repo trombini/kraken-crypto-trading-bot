@@ -11,11 +11,13 @@ export interface OrderId {
   id: string
 }
 
-export interface Recommendation {
+export interface BuyRecommendation {
   pair: string
   lastPrice?: number
   confidence: number
 }
+
+export type SellRecommendation = BuyRecommendation
 
 export interface Order {
   pair: string

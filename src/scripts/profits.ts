@@ -1,4 +1,5 @@
 import { PositionsService } from '../positions/positions.service'
+import { config } from '../common/config'
 import connect from '../common/db/connect'
 
 (async function() {
@@ -6,7 +7,7 @@ import connect from '../common/db/connect'
   await connect('mongodb://localhost:27017/kraken-prod')
 
   const service = new PositionsService()
-  service.find({ pair: 'ADAUSD', status: 'sold' }).then(positions => {
+  service.find({ pair: config.pair, status: 'sold' }).then(positions => {
     const result = positions.reduce((acc, pos) => {
       console.log(`${pos.id} ${pos?.buy?.volume} - ${pos?.sell?.volume} => ${pos?.sell?.volumeToKeep}`)
       const profit = (pos?.buy?.volume || 0) - (pos?.sell?.volume || 0)

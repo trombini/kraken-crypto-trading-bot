@@ -1,4 +1,4 @@
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { getBlockMaturity } from '../common/utils'
 import { MACD } from 'technicalindicators'
 import { last, clone, takeRight, round } from 'lodash'

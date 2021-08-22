@@ -1,6 +1,6 @@
 import { round, takeRight } from 'lodash'
 import { Stochastic } from 'technicalindicators'
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { logger } from '../../common/logger'
 import { flattenOhlcInput } from '../common/utils'
 

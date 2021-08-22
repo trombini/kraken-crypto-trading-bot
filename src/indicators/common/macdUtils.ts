@@ -1,6 +1,5 @@
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { getBlockMaturity } from './utils'
-import { logger } from '../../common/logger'
 import { MACD } from 'technicalindicators'
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
 import { last, clone, takeRight, round } from 'lodash'

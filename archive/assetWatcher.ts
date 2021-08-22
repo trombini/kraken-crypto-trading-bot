@@ -2,7 +2,7 @@ import events from 'events'
 import { BotConfig } from '../src/common/config'
 import { logger } from '../src/common/logger'
 import { KrakenService } from '../src/kraken/krakenService'
-import { OHLCBlock } from '../src/common/interfaces/trade.interface'
+import { OHLCBlock } from '../src/common/interfaces/interfaces'
 import { random } from '../src/common/utils'
 
 export interface AssetsWatcherUpdateEvent {

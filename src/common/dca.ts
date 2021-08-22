@@ -15,7 +15,7 @@ const createBuckets = (
 ): { [key: string]: Position[] } => {
   return positions.reduce((acc, position) => {
     if (position.buy.price) {
-      const b = bucket(0.04, position.buy.price)
+      const b = bucket(0.1, position.buy.price)
 
       console.log(`${b}: ${position.buy.price}`)
 

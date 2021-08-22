@@ -1,4 +1,4 @@
-import { Recommendation } from '../common/interfaces/trade.interface'
+import { BuyRecommendation } from '../common/interfaces/interfaces'
 import { KrakenService } from '../kraken/krakenService'
 import { logger } from '../common/logger'
 import { filter, round } from 'lodash'
@@ -17,14 +17,16 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
 
   const realAvailableAmount = availableAmount - reserve
   if(realAvailableAmount < 0) {
-    logger.debug(`availableAmount (${round(availableAmount, 2)}) is less than reserve (${reserve})`)
-    return 0
+    throw new Error(`availableAmount (${round(availableAmount, 2)}) is less than reserve (${reserve})`)
+    // logger.debug(`availableAmount (${round(availableAmount, 2)}) is less than reserve (${reserve})`)
+    // return 0
   }
 
   const minBet = 1000
   if(realAvailableAmount < minBet) {
-    logger.debug(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
-    return 0
+    throw new Error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    // logger.debug(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    // return 0
   }
 
   let bet = maxBet
@@ -55,13 +57,13 @@ export class Bot {
     this.datastore = []
 
     if(this.analyst) {
-      this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: Recommendation) => {
+      this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
         this.handleBuyRecommendation(recommendation)
       })
     }
   }
 
-  async handleBuyRecommendation(recommendation: Recommendation): Promise<void> {
+  async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<void> {
     // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)
@@ -78,7 +80,7 @@ export class Bot {
     }
   }
 
-  async buyPosition(recommendation: Recommendation): Promise<Position | null | undefined> {
+  async buyPosition(recommendation: BuyRecommendation): Promise<Position | null | undefined> {
     logger.debug(`Create new BUY order for ${recommendation.pair}`)
 
     try {
@@ -109,8 +111,6 @@ export class Bot {
       return this.positionsService.findById(position.id)
     }
     catch(err) {
-      console.log(err)
-      console.log(err.message)
       logger.error(`Error BUY position: ${err.message}`)
     }
   }

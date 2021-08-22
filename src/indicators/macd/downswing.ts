@@ -1,4 +1,4 @@
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { logger } from '../../common/logger'
 import { allPositives } from '../common/utils'
 import { MACDResult } from './macd.interface'

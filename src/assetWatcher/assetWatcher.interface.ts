@@ -1,4 +1,4 @@
-import { OHLCBlock } from '../common/interfaces/trade.interface'
+import { OHLCBlock } from '../common/interfaces/interfaces'
 
 // TODO: rename interface
 export interface AssetsWatcherUpdateEvent {

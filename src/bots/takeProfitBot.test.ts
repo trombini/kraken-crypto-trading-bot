@@ -2,7 +2,7 @@ import KrakenClient from 'kraken-api'
 import { config } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { PositionsService } from '../positions/positions.service'
-import { TrailingStopLossBot } from './trailingStopLossBot'
+import { TakeProfitBot } from './takeProfitBot'
 import { setupDb } from '../../test/test-setup'
 import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
@@ -13,10 +13,10 @@ let krakenApi: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
-let bot: TrailingStopLossBot
+let bot: TakeProfitBot
 
 // setup db
-setupDb('trailingStopLossBot')
+setupDb('takeProfitBot')
 
 beforeEach(() => {
   positionsService = new PositionsService()
@@ -24,10 +24,10 @@ beforeEach(() => {
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new SellAnalyst(watcher, config)
-  bot = new TrailingStopLossBot(krakenService, positionsService, analyst, config)
+  bot = new TakeProfitBot(krakenService, positionsService, analyst, config)
 })
 
-describe('TrailingStopLossBot', () => {
+describe('TakeProfitBot', () => {
 
   it('should throw error because expected profit would be negative', async (done) => {
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ vol: 1000, vol_exec: 1000, price: 1.0 } )

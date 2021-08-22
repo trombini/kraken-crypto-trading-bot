@@ -6,7 +6,7 @@ import { BotConfig } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { PositionsService } from '../positions/positions.service'
 import { FullProfitBot } from './fullProfitBot'
-import { TrailingStopLossBot } from './trailingStopLossBot'
+import { TakeProfitBot } from './takeProfitBot'
 import { DcaService } from 'src/common/dca'
 
 export const fullProfitBotFactory = (
@@ -19,15 +19,15 @@ export const fullProfitBotFactory = (
   return new FullProfitBot(krakenService, positionsService, analyst, config)
 }
 
-export const trailingStopLossBotFactory = (
+export const takeProfitBotFactory = (
   watcher: AssetWatcher,
   krakenService: KrakenService,
   positionsService: PositionsService,
   config: BotConfig,
-): TrailingStopLossBot => {
+): TakeProfitBot => {
   //const analyst = new DownswingAnalyst(watcher, config)
   const analyst = new SellAnalyst(watcher, config)
-  return new TrailingStopLossBot(
+  return new TakeProfitBot(
     krakenService,
     positionsService,
     analyst,

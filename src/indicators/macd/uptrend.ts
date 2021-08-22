@@ -1,4 +1,4 @@
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { calculateMACD, getMaturedHistogram } from './utils'
 import { logger } from '../../common/logger'
 import { MACDResult } from './macd.interface'

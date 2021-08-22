@@ -7,7 +7,7 @@ import { logger } from '../common/logger'
 import { KrakenService } from "../kraken/krakenService"
 import { PositionsService } from "src/positions/positions.service"
 import { Analyst } from "../analysts/analyst"
-import { Recommendation } from "../common/interfaces/trade.interface"
+import { BuyRecommendation } from "../common/interfaces/interfaces"
 import { inWinZone } from "./utils"
 
 export class ProfitBot {
@@ -21,7 +21,11 @@ export class ProfitBot {
 
   }
 
-  async handleSellRecommendation(recommendation: Recommendation) {
+  async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
+    throw new Error('This method has to be implemented')
+  }
+
+  async handleSellRecommendation(recommendation: BuyRecommendation) {
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
     const positions = await this.positionService.find({
       pair: this.config.pair,
@@ -40,19 +44,15 @@ export class ProfitBot {
   }
 
   async sellPosition(position: Position, currentBidPrice: number): Promise<void> {
-    let soldPosition = await this.createSellOrder(position, currentBidPrice)
-    if(soldPosition) {
-      let evaluatedPosition = await this.evaluateProfit(soldPosition)
+    let sellPosition = await this.createSellOrder(position, currentBidPrice)
+    if(sellPosition) {
+      let evaluatedPosition = await this.evaluateProfit(sellPosition)
       // lazy retry. how can we do that better?
       if(!evaluatedPosition) {
-        evaluatedPosition = await this.evaluateProfit(soldPosition)
+        evaluatedPosition = await this.evaluateProfit(sellPosition)
       }
       this.sendSlackMessage(evaluatedPosition)
     }
-  }
-
-  async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
-    throw new Error('This method has to be implemented')
   }
 
   sendSlackMessage(position?: Position) {

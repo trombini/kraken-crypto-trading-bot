@@ -1,8 +1,8 @@
 import { last } from 'lodash'
 import { BotConfig } from '../common/config'
 import { logger } from '../common/logger'
-import { Order, OrderId } from '../common/interfaces/trade.interface'
-import { OHLCBlock } from '../common/interfaces/trade.interface'
+import { Order, OrderId } from '../common/interfaces/interfaces'
+import { OHLCBlock } from '../common/interfaces/interfaces'
 import { KrakenAddOrderApiResponse } from './kraken.interface'
 import { v4 as uuidv4 } from 'uuid'
 import KrakenClient from 'kraken-api'
@@ -31,7 +31,7 @@ export class KrakenService {
   async balance(): Promise<any> {
     return this.krakenApi
       .api('Balance', {}, () => {})
-      .then(response => response.result['ZUSD'])
+      .then(response => response.result[this.config.cashSource])
   }
 
   async getOHLCData(pair: string, period: number): Promise<any> {
@@ -110,8 +110,8 @@ export class KrakenService {
    * @param order
    */
   async createBuyOrder(order: Order): Promise<OrderId[]> {
-    if (!order.volume || order.volume <= 0) {
-      throw new Error('Volume is less than 1.')
+    if (!order.volume || order.volume == 0) {
+      throw new Error('Requested volume to buy is zero. Nothing to buy.')
     }
 
     return this.createBuySellOrder({

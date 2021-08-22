@@ -1,5 +1,5 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
-import { botFactory, fullProfitBotFactory, trailingStopLossBotFactory } from './bots/factory'
+import { botFactory, fullProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
 import { formatMoney, formatNumber, positionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'

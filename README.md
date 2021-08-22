@@ -51,6 +51,7 @@ $ npm run test:cov
 | ------------- |:-------------:| -----:|
 | BLOCK_MATURITY | 0.75 | The relative age in % of a block to be considered in the indicators (e.g. MACD) |
 | BYPASS_KRAKEN_API | false | You will f*** up. Might be a good idea to have a kill switch |
+| CASH_SOURCE | ZUSD | Source of funds to monitor and keep reserve. Doesn't match the pair unfortunately. |
 | KRAKEN_API_KEY || API Key for Kraken |
 | KRAKEN_API_SECRET || API Secret for Kraken |
 | MAX_BET | 500 | How much are you willing to loose **each** bet? |

@@ -1,4 +1,4 @@
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { flattenOhlcInput } from '../common/utils'
 import { RSI } from 'technicalindicators'
 import { round, takeRight } from 'lodash'

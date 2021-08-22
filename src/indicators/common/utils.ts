@@ -1,5 +1,5 @@
 import { filter, round } from 'lodash'
-import { OHLCBlock } from '../../common/interfaces/trade.interface'
+import { OHLCBlock } from '../../common/interfaces/interfaces'
 import moment from 'moment'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length

@@ -1,5 +1,5 @@
 import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
-import { Recommendation } from '../common/interfaces/trade.interface'
+import { BuyRecommendation } from '../common/interfaces/interfaces'
 import { KrakenService } from '../kraken/krakenService'
 import { logger } from '../common/logger'
 import { BotConfig } from '../common/config'
@@ -12,7 +12,10 @@ import { inWinZone } from './utils'
 import { ProfitBot } from './profitBot'
 
 // Trailing Stop/Stop-Loss
-export class TrailingStopLossBot extends ProfitBot {
+
+
+// TakeProfitBot
+export class TakeProfitBot extends ProfitBot {
 
   constructor(
     readonly kraken: KrakenService,
@@ -23,7 +26,7 @@ export class TrailingStopLossBot extends ProfitBot {
     super(kraken, positionService, analyst, config)
 
     if (analyst) {
-      analyst.on(ANALYST_EVENTS.SELL, (data: Recommendation) => {
+      analyst.on(ANALYST_EVENTS.SELL, (data: BuyRecommendation) => {
         this.handleSellRecommendation(data)
       })
     }
