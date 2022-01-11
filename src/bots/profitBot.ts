@@ -1,14 +1,15 @@
-import { round } from "lodash"
-import { Position } from "../positions/position.interface"
-import { BotConfig } from "../common/config"
-import { formatMoney, positionId } from "../common/utils"
-import { slack } from "../slack/slack.service"
+import { round } from 'lodash'
+import { Position } from '../positions/position.interface'
+import { BotConfig } from '../common/config'
+import { formatMoney, positionId } from '../common/utils'
+import { slack } from '../slack/slack.service'
 import { logger } from '../common/logger'
-import { KrakenService } from "../kraken/krakenService"
-import { PositionsService } from "src/positions/positions.service"
-import { Analyst } from "../analysts/analyst"
-import { BuyRecommendation } from "../common/interfaces/interfaces"
-import { inWinZone } from "./utils"
+import { KrakenService } from '../kraken/krakenService'
+import { PositionsService } from '../positions/positions.service'
+import { Analyst } from '../analysts/analyst'
+import { BuyRecommendation } from '../common/interfaces/interfaces'
+import { inWinZone } from './utils'
+import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 
 export class ProfitBot {
 
@@ -16,6 +17,7 @@ export class ProfitBot {
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
     readonly analyst: Analyst,
+    readonly killswitch: LaunchDarklyService,
     readonly config: BotConfig
   ) {
 
@@ -26,6 +28,14 @@ export class ProfitBot {
   }
 
   async handleSellRecommendation(recommendation: BuyRecommendation) {
+
+    // Make sure we don't sell if Killswitch is tripped
+    if(await this.killswitch.tripped()) {
+      logger.debug('CANT SELL BECAUSE OF KILLSWITCH')
+      slack(this.config).send(`I wanted to SELL at ${recommendation.lastPrice} but Killswitch is active.`)
+      return
+    }
+
     const currentBidPrice = await this.kraken.getBidPrice(recommendation.pair)
     const positions = await this.positionService.find({
       pair: this.config.pair,

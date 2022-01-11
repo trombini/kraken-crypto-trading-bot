@@ -9,6 +9,7 @@ import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
+import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
 
 (async function () {
   console.log(config)
@@ -22,6 +23,7 @@ import KrakenClient from 'kraken-api'
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(krakenService, config)
+  const killswitch = createLaunchDarklyService()
 
   //
   if (config.goal > 0) {
@@ -75,6 +77,6 @@ import KrakenClient from 'kraken-api'
   //watcher.start([5, 15])
 
   // Initiate Bots
-  buyBotFactory(watcher, krakenService, positionsService, dcaService, config)
-  takeFullProfitBotFactory(watcher, krakenService, positionsService, config)
+  buyBotFactory(watcher, krakenService, positionsService, dcaService, killswitch, config)
+  takeFullProfitBotFactory(watcher, krakenService, positionsService, killswitch, config)
 })()

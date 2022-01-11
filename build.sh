@@ -14,13 +14,12 @@ npm version 'minor' -m "Bump version to %s"
 #git push --follow-tags --set-upstream origin dddd
 VERSION=$(node -p "require('./package.json').version")
 
-
 # Login to AWS
 echo "| Login to AWS"
 aws ecr get-login-password --region $REGION --profile $PROFILE | docker login --username AWS --password-stdin $REPO
 
 echo "| Build docker container"
-docker build -t $IMAE:$VERSION --platform=linux/amd64 .
+docker build -t $IMAGE:$VERSION --platform=linux/amd64 .
 
 echo "| Push docker image to repository"
 docker tag $IMAGE:$VERSION $REPO/$IMAGE:$VERSION

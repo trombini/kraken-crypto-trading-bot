@@ -31,7 +31,9 @@ export class KrakenService {
   async balance(): Promise<any> {
     return this.krakenApi
       .api('Balance', {}, () => {})
-      .then(response => response.result[this.config.cashSource])
+      .then(response => {
+        return response.result[this.config.cashSource]
+      })
   }
 
   async getOHLCData(pair: string, period: number): Promise<any> {

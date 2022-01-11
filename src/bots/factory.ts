@@ -8,31 +8,29 @@ import { PositionsService } from '../positions/positions.service'
 import { TakeFullProfitBot } from './takeFullProfitBot'
 import { TakeProfitBot } from './takeProfitBot'
 import { DcaService } from 'src/common/dca'
+import { LaunchDarklyService } from 'src/launchDarkly/launchdarkly.service'
 
 export const takeFullProfitBotFactory = (
   watcher: AssetWatcher,
   krakenService: KrakenService,
   positionsService: PositionsService,
+  killswitch: LaunchDarklyService,
   config: BotConfig,
 ): TakeFullProfitBot => {
   const analyst = new SellAnalyst(watcher, config)
-  return new TakeFullProfitBot(krakenService, positionsService, analyst, config)
+  return new TakeFullProfitBot(krakenService, positionsService, analyst, killswitch, config)
 }
 
 export const takeProfitBotFactory = (
   watcher: AssetWatcher,
   krakenService: KrakenService,
   positionsService: PositionsService,
+  killswitch: LaunchDarklyService,
   config: BotConfig,
 ): TakeProfitBot => {
   //const analyst = new DownswingAnalyst(watcher, config)
   const analyst = new SellAnalyst(watcher, config)
-  return new TakeProfitBot(
-    krakenService,
-    positionsService,
-    analyst,
-    config,
-  )
+  return new TakeProfitBot(krakenService, positionsService, analyst, killswitch, config)
 }
 
 export const buyBotFactory = (
@@ -40,8 +38,9 @@ export const buyBotFactory = (
   krakenService: KrakenService,
   positionsService: PositionsService,
   dcaService: DcaService,
+  killswitch: LaunchDarklyService,
   config: BotConfig,
 ): BuyBot => {
   const analyst = new BuyAnalyst(watcher, config)
-  return new BuyBot(krakenService, positionsService, analyst, dcaService, config)
+  return new BuyBot(krakenService, positionsService, analyst, dcaService, killswitch, config)
 }

@@ -10,6 +10,7 @@ import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
 import { Position } from '../positions/position.interface'
 import { formatMoney } from '../common/utils'
 import { DcaService } from 'src/common/dca'
+import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 import moment from 'moment'
 
 export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
@@ -52,6 +53,7 @@ export class BuyBot {
     readonly positionsService: PositionsService,
     readonly analyst: Analyst,
     readonly dcaService: DcaService,
+    readonly killswitch: LaunchDarklyService,
     readonly config: BotConfig
   ) {
     this.datastore = []
@@ -64,6 +66,14 @@ export class BuyBot {
   }
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<void> {
+
+    // Make sure we don't buy if Killswitch is tripped
+    if(await this.killswitch.tripped()) {
+      logger.debug('CANT BUY BECAUSE OF KILLSWITCH')
+      slack(this.config).send(`I wanted to BUY at ${recommendation.lastPrice} but Killswitch is active.`)
+      return
+    }
+
     // TODO: that threshold is wrong. it should be PERIOD + MIN_MATURITY_OF_BLOCK
     const threshold = moment().subtract(23, 'm').unix()
     const recentTrades = filter(this.datastore, trade => trade.date > threshold)

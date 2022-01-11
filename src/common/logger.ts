@@ -17,14 +17,15 @@ export const logger = winston.createLogger({
     winston.format.timestamp(),
     myFormat
   ),
-  transports: [
-    new winston.transports.File({ filename: 'all.log' }),
-    new winston.transports.File({ filename: 'debug.log', level: 'debug' }),
-    new winston.transports.File({ filename: 'info.log', level: 'info' }),
-    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-  ],
+  // transports: [
+  //   new winston.transports.File({ filename: 'all.log' }),
+  //   new winston.transports.File({ filename: 'debug.log', level: 'debug' }),
+  //   new winston.transports.File({ filename: 'info.log', level: 'info' }),
+  //   new winston.transports.File({ filename: 'error.log', level: 'error' }),
+  // ],
 })
 
 if (process.env.NODE_ENV !== 'test') {
+  console.log('LOG TO CONSOLE')
   logger.add(new winston.transports.Console())
 }

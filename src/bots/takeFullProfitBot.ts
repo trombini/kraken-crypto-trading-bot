@@ -7,6 +7,7 @@ import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { positionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
+import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 
 export class TakeFullProfitBot extends ProfitBot {
 
@@ -14,9 +15,10 @@ export class TakeFullProfitBot extends ProfitBot {
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
     readonly analyst: Analyst,
+    readonly killswitch: LaunchDarklyService,
     readonly config: BotConfig,
   ) {
-    super(kraken, positionService, analyst, config)
+    super(kraken, positionService, analyst, killswitch, config)
 
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: SellRecommendation) => {

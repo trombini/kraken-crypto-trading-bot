@@ -19,9 +19,9 @@ export class BuyAnalyst extends Analyst {
 
     // register indicators
     this.registerIndicator(true, 0, 15, 'UPSWING 15m', upswing(15, config.blockMaturity))
-    this.registerIndicator(false, 0.45, 240, 'RSI 4h', rsi())
+    this.registerIndicator(false, 0.45, 240, 'RSI 4h', rsi('4h'))
     this.registerIndicator(false, 0.45, 240, 'UPTREND 4h', uptrend(240, 0.5))
-    this.registerIndicator(false, 0.1, 240, 'STOCHF 4h', stochastic())
+    this.registerIndicator(false, 0.1, 240, 'STOCHF 4h', stochastic('4h'))
 
     // explanation:
     // upswing is the main driver. if this is positive, we want to buy

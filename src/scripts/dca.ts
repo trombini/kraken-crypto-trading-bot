@@ -1,10 +1,19 @@
 import { PositionsService } from '../positions/positions.service'
 import { round, mapKeys, flatMap, uniq } from 'lodash'
 import { Position } from '../positions/position.interface'
-import connect from '../common/db/connect'
 import { DcaService } from '../common/dca'
+import { config } from '../common/config'
+import connect from '../common/db/connect'
+
 
 (async function() {
+
+  await connect(config.mongoDb)
+
+  const service = new PositionsService()
+  const dcaService = new DcaService(service)
+  await dcaService.dcaOpenPositions()
+
 
 
   // const bucket = (deviation: number, number: number) => {
@@ -102,12 +111,6 @@ import { DcaService } from '../common/dca'
   // console.log(bucket(0.02, 99.90))
   // console.log(bucket(0.02, 99.99))
 
-
-  await connect('mongodb://localhost:27017/kraken-prod')
-
-  const service = new PositionsService()
-  const dcaService = new DcaService(service)
-  await dcaService.dcaOpenPositions()
 
 
 })()

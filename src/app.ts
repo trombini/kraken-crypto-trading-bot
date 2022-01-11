@@ -9,28 +9,9 @@ import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
-
-
-// TODO fix me
-// 2021-08-21T11:46:56.447Z [[34mdebug[39m] [34mBuyAnalyst, required signals: true, confidence: 0.45, summary: [{"required":true,"name":"UPSWING 15m","weight":0,"confidence":1},{"required":false,"name":"RSI 4h","weight":0.45,"confidence":1},{"required":false,"name":"UPTREND 4h","weight":0.45,"confidence":0},{"required":false,"name":"STOCHF 4h","weight":0.1,"confidence":0}][39m 
-//   2021-08-21T11:46:56.447Z [[32minfo[39m] [32mBUY SIGNAL detected for [ADAUSD] with confidence 0.45[39m 
-//   2021-08-21T11:46:56.448Z [[34mdebug[39m] [34mCreate new BUY order for ADAUSD[39m 
-//   2021-08-21T11:46:56.461Z [[34mdebug[39m] [34mAnalyse period 1440 min[39m 
-//   2021-08-21T11:46:56.463Z [[34mdebug[39m] [34mUPSWING: [ -0.004833 | -0.005952 | -0.005462 ] -> 1[39m 
-//   2021-08-21T11:46:56.463Z [[34mdebug[39m] [34mRSI: [ 61.21 ] => 1[39m 
-//   2021-08-21T11:46:56.468Z [[34mdebug[39m] [34mUPTREND: [ 0.026978 | 0.021966 | 0.012222 ] -> 0[39m 
-//   2021-08-21T11:46:56.469Z [[34mdebug[39m] [34mSTOCHASTIC: [ k: 72.65 | d: 80.84 ] => 0[39m 
-//   2021-08-21T11:46:56.469Z [[34mdebug[39m] [34mBuyAnalyst, required signals: true, confidence: 0.45, summary: [{"required":true,"name":"UPSWING 15m","weight":0,"confidence":1},{"required":false,"name":"RSI 4h","weight":0.45,"confidence":1},{"required":false,"name":"UPTREND 4h","weight":0.45,"confidence":0},{"required":false,"name":"STOCHF 4h","weight":0.1,"confidence":0}][39m 
-//   2021-08-21T11:46:57.036Z [[34mdebug[39m] [34mCurrent ASK price for ADAUSD is '2.435370'[39m 
-//   2021-08-21T11:46:57.042Z [[34mdebug[39m] [34mCalculate risk with availableAmount: 5021.07, reserve: 2000, maxBet: 2800[39m 
-//   2021-08-21T11:46:57.045Z [[32minfo[39m] [32mCreate BUY order. confidence: 0.45, risk: $ 1,260.00, volume: 517[39m 
-//   2021-08-21T11:46:57.306Z [[34mdebug[39m] [34mCreated BUY orderIds: [{"id":"OFQUGC-VXMCT-RN6CXY"}][39m 
-//   2021-08-21T11:46:57.387Z [[34mdebug[39m] [34mFetch order details for orders 'OFQUGC-VXMCT-RN6CXY'[39m 
-//   2021-08-21T11:46:57.628Z [[34mdebug[39m] [34mFetch order details for order 'OFQUGC-VXMCT-RN6CXY'[39m 
-//   2021-08-21T11:46:57.629Z [[34mdebug[39m] [34mProcessed BUY order: {"refid":null,"userref":0,"status":"open","opentm":1629546417.2712,"starttm":0,"expiretm":0,"descr":{"pair":"ADAUSD","type":"buy","ordertype":"market","price":"0","price2":"0","leverage":"none","order":"buy 517.00000000 ADAUSD @ market","close":""},"vol":"517.00000000","vol_exec":"0.00000000","cost":"0.000000","fee":"0.000000","price":"0.000000","stopprice":"0.000000","limitprice":"0.000000","misc":"","oflags":"fciq"}[39m 
-//   2021-08-21T11:46:57.654Z [[32minfo[39m] [32mBUY order created. volume: 0, price: 0[39m 
-//   2021-08-21T11:46:57.663Z [[32minfo[39m] [32mRun DCA[39m 
-//   2021-08-21T11:47:26.417Z [[34mdebug[39m] [34mAnalyse period 240 min[39m 
+import { createRecoveryService } from './positions/recovery.service'
+import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
+import { slack } from './slack/slack.service'
 
 
 (async function () {
@@ -43,8 +24,13 @@ import KrakenClient from 'kraken-api'
   const positionsService = new PositionsService()
   const dcaService = new DcaService(positionsService)
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
-  const krakenService = new KrakenService(krakenApi, config)
-  const watcher = new AssetWatcher(krakenService, config)
+  const kraken = new KrakenService(krakenApi, config)
+  const watcher = new AssetWatcher(kraken, config)
+  const recoveryService = createRecoveryService(positionsService, kraken, config)
+  const killswitch = createLaunchDarklyService()
+
+  // make sure we check killswitch when starting up. just for fun
+  const enabled = await killswitch.tripped()
 
   //
   if (config.goal > 0) {
@@ -55,6 +41,10 @@ import KrakenClient from 'kraken-api'
       })
       .then((positions) => {
         const profit = positions.reduce((acc, p) => {
+
+          console.log(`${p?.buy?.volume} - ${p?.sell?.volume}`)
+          console.log(p)
+
           const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
           return acc + profit
         }, 0)
@@ -98,7 +88,7 @@ import KrakenClient from 'kraken-api'
   //watcher.start([5, 15])
 
   // Initiate Bots
-  buyBotFactory(watcher, krakenService, positionsService, dcaService, config)
-  takeProfitBotFactory(watcher, krakenService, positionsService, config)
-  //fullProfitBotFactory(watcher, krakenService, positionsService, config)
+  buyBotFactory(watcher, kraken, positionsService, dcaService, killswitch, config)
+  takeProfitBotFactory(watcher, kraken, positionsService, killswitch, config)
+  //fullProfitBotFactory(watcher, kraken, positionsService, config)
 })()

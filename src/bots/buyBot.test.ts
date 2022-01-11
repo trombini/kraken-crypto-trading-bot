@@ -7,7 +7,8 @@ import { PositionsService } from '../positions/positions.service'
 import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
-import { DcaService } from 'src/common/dca'
+import { DcaService } from '../common/dca'
+import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 
 let dcaService: DcaService
 let positionsService: PositionsService
@@ -16,6 +17,7 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: BuyAnalyst
 let bot: BuyBot
+let killswitch: LaunchDarklyService
 
 // setup db
 setupDb('buyBot')
@@ -27,8 +29,9 @@ beforeEach(() => {
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
+  killswitch = createLaunchDarklyService()
 
-  bot = new BuyBot(krakenService, positionsService, analyst, dcaService, config)
+  bot = new BuyBot(krakenService, positionsService, analyst, dcaService, killswitch, config)
 })
 
 describe('BuyBot', () => {

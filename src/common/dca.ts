@@ -17,7 +17,7 @@ const createBuckets = (
     if (position.buy.price) {
       const b = bucket(0.1, position.buy.price)
 
-      console.log(`${b}: ${position.buy.price}`)
+      logger.debug(`${b}: ${position.buy.price}`)
 
       if (acc[b] === undefined) {
         acc[b] = []
@@ -60,7 +60,8 @@ export class DcaService {
     const allOpenPositions = await this.positions.findByStatus('open')
     const buckets = createBuckets(allOpenPositions)
 
-    console.log(buckets)
+    logger.debug('DCA buckets')
+    logger.debug(JSON.stringify(buckets))
 
     mapKeys(buckets, async (positions, key) => {
       if (positions.length > 1) {

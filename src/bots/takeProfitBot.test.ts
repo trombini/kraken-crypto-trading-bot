@@ -7,6 +7,7 @@ import { setupDb } from '../../test/test-setup'
 import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { SellAnalyst } from '../analysts/sellAnalyst'
+import { createLaunchDarklyService, LaunchDarklyService } from 'src/launchDarkly/launchdarkly.service'
 
 let positionsService: PositionsService
 let krakenApi: KrakenClient
@@ -14,6 +15,7 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
 let bot: TakeProfitBot
+let killswitch: LaunchDarklyService
 
 // setup db
 setupDb('takeProfitBot')
@@ -24,7 +26,9 @@ beforeEach(() => {
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new SellAnalyst(watcher, config)
-  bot = new TakeProfitBot(krakenService, positionsService, analyst, config)
+  killswitch = createLaunchDarklyService()
+
+  bot = new TakeProfitBot(krakenService, positionsService, analyst, killswitch, config)
 })
 
 describe('TakeProfitBot', () => {
