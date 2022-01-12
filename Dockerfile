@@ -2,7 +2,9 @@ FROM node:lts as builder
 
 WORKDIR /usr/src/app
 
+COPY .npmrc ./
 COPY package*.json ./
+
 RUN npm ci
 
 COPY . .
