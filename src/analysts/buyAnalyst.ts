@@ -17,10 +17,14 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 240)
     watcher.subscribe(this, 1440)
 
+    // register indicators CLEANED
+    this.registerIndicator(false, 0.45, 240, 'UPTREND 4h', uptrend('4h', 240, 0.5))
+    this.registerIndicator(true, 0, 15, 'UPSWING 15m', upswing('15m', 15, config.blockMaturity))
+
+
+
     // register indicators
-    this.registerIndicator(true, 0, 15, 'UPSWING 15m', upswing(15, config.blockMaturity))
     this.registerIndicator(false, 0.45, 240, 'RSI 4h', rsi('4h'))
-    this.registerIndicator(false, 0.45, 240, 'UPTREND 4h', uptrend(240, 0.5))
     this.registerIndicator(false, 0.1, 240, 'STOCHF 4h', stochastic('4h'))
 
     // explanation:

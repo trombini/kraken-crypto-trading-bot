@@ -1,5 +1,5 @@
 import { MACDResult } from '../common/macdUtils'
-import { analyse } from './upswing'
+import { filterRelevantBlocks, calculateConfidence } from './upswing'
 
 // TODO: move to test utils
 const mockMacdResult = (matured: boolean, values: number[]): MACDResult => {
@@ -20,38 +20,43 @@ describe('MACD Upswing', () => {
   it(`should fail because we don't have enough data`, () => {
     const macd = mockMacdResult(true, [1, 2])
     expect(() => {
-      analyse(macd)
+      filterRelevantBlocks(macd)
     }).toThrow()
   })
 
   it('should fail because it is still a downtrend', () => {
     const macd = mockMacdResult(true, [-1, -2, -3])
-    const result = analyse(macd)
-    expect(result).toBe(0)
+    const filteredBlocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(filteredBlocks)
+    expect(confidence).toBe(0)
   })
 
   it('should be false because it is an uptrend, upswing is over', () => {
     const macd = mockMacdResult(true, [-2, -3, -2, -1])
-    const result = analyse(macd)
-    expect(result).toBe(0)
+    const filteredBlocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(filteredBlocks)
+    expect(confidence).toBe(0)
   })
 
   it('should be false because it is already in positive', () => {
     const macd = mockMacdResult(true, [-2, -3, 1])
-    const result = analyse(macd)
-    expect(result).toBe(0)
+    const filteredBlocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(filteredBlocks)
+    expect(confidence).toBe(0)
   })
 
   it('should succeed because it an upswing', () => {
     const macd = mockMacdResult(true, [-2, -3, -2])
-    const result = analyse(macd)
-    expect(result).toBe(1)
+    const filteredBlocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(filteredBlocks)
+    expect(confidence).toBe(1)
   })
 
   it('should fail because it is not YET a downswing (because of maturity)', () => {
     const macd = mockMacdResult(false, [-2, -2, -3, -2])
-    const result = analyse(macd)
-    expect(result).toBe(0)
+    const filteredBlocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(filteredBlocks)
+    expect(confidence).toBe(0)
   })
 
 })
