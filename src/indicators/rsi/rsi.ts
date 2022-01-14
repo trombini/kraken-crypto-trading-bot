@@ -1,5 +1,5 @@
 import { OHLCBlock } from '../../common/interfaces/interfaces'
-import { flattenOhlcInput } from '../common/utils'
+import { convertToStochasticInput } from '../common/utils'
 import { RSI } from 'technicalindicators'
 import { round, takeRight } from 'lodash'
 import { logger } from '../../common/logger'
@@ -7,7 +7,7 @@ import { logger } from '../../common/logger'
 // RSI
 export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
 
-  const ohlc = flattenOhlcInput(blocks)
+  const ohlc = convertToStochasticInput(blocks)
   const history = RSI.calculate({
     period: 14,
     values: ohlc.close

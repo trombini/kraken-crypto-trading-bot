@@ -1,6 +1,7 @@
 import { filter, round } from 'lodash'
 import { OHLCBlock } from '../../common/interfaces/interfaces'
 import moment from 'moment'
+import { StochasticInput } from 'technicalindicators/declarations/momentum/Stochastic'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length
 
@@ -22,7 +23,7 @@ export const getMaturedBlocks = (interval: number, maturity: number, blocks: OHL
   return filter(blocks, o => o.time < threshold)
 }
 
-export const flattenOhlcInput = (blocks: OHLCBlock[]) => {
+export const convertToStochasticInput = (blocks: OHLCBlock[]): StochasticInput => {
   const flatOhlcBlocks = blocks.reduce((acc, block) => {
     acc.high.push(block.high)
     acc.low.push(block.low)
