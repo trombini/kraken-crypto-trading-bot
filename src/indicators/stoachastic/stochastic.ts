@@ -5,13 +5,13 @@ import { logger } from '../../common/logger'
 import { flattenOhlcInput } from '../common/utils'
 
 // Stochastic Fast
-export const stochastic = (period: string) => (blocks: OHLCBlock[]): number  => {
+export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
   const config = flattenOhlcInput(blocks)
   const stochf = Stochastic.calculate(config)
   const { k, d } = takeRight(stochf, 1)[0]
   const confidence = mapOutputToConfindence(k, d)
 
-  logger.debug(`STOCHASTIC ${period}: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
+  logger.debug(`STOCHASTIC ${name}: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
 
   return confidence
 }

@@ -5,7 +5,7 @@ import { round, takeRight } from 'lodash'
 import { logger } from '../../common/logger'
 
 // RSI
-export const rsi = (period: string) => (blocks: OHLCBlock[]): number  => {
+export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
 
   const ohlc = flattenOhlcInput(blocks)
   const history = RSI.calculate({
@@ -16,7 +16,7 @@ export const rsi = (period: string) => (blocks: OHLCBlock[]): number  => {
   const rsi = takeRight(history, 1)[0]
   const confidence = rsi < 40 ? 1 : 0
 
-  logger.debug(`RSI ${period}: [ ${round(rsi, 2)} ] => ${confidence}`)
+  logger.debug(`RSI (${name}): [ ${round(rsi, 2)} ] => ${confidence}`)
 
   return confidence
 }
