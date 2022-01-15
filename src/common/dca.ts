@@ -6,32 +6,6 @@ import { positionId } from './utils'
 
 const PRICE_RANGE = 0.02
 
-// const bucket = (deviation: number, number: number) => {
-//   const input = round(number, 2)
-//   const percent = 100 * deviation
-//   const bucket = Math.floor((input * 100) / percent)
-//   return bucket
-// }
-
-// const createBuckets = (
-//   positions: Position[],
-// ): { [key: string]: Position[] } => {
-//   return positions.reduce((acc, position) => {
-//     if (position.buy.price) {
-//       const b = bucket(0.5, position.buy.price)
-
-//       logger.debug(`${b}: ${position.buy.price}`)
-
-//       if (acc[b] === undefined) {
-//         acc[b] = []
-//       }
-//       acc[b].push(position)
-//       return acc
-//     }
-//     return acc
-//   }, {})
-// }
-
 const dollarCostAverage = (
   positions: Position[],
 ): { pair: string; volume: number; price: number } => {
@@ -58,13 +32,7 @@ const dollarCostAverage = (
 const createBuckets = (positions: Position[]): any => {
   return positions.reduce((acc: Position[][], current: Position) => {
 
-
     console.log('-------------')
-    // first position, add to accumulator
-    // if (acc.length == 0) {
-    //   acc.push([ current ])
-    //   return acc
-    // }
 
     if(current.buy.price) {
 
@@ -72,7 +40,6 @@ const createBuckets = (positions: Position[]): any => {
       const top = current.buy.price + (current.buy.price * PRICE_RANGE)
 
       console.log(`Price of current position: ${current.buy.price}, Range: ${bottom} - ${top}`)
-
 
        // check if one of the buckets (and positions included) is in the acceptable range
       for(let i = 0 ; i < acc.length ; i++) {

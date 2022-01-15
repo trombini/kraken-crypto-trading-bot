@@ -1,29 +1,21 @@
 import { round, takeRight } from 'lodash'
 import { Stochastic } from 'technicalindicators'
 import { OHLCBlock } from '../../common/interfaces/interfaces'
-import { logger } from '../../common/logger'
 import { convertToStochasticInput } from '../common/utils'
+import { logger } from '../../common/logger'
 
 // Stochastic Fast
 export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
 
-  
   const input = convertToStochasticInput(blocks)
   const stochasticOutput = Stochastic.calculate(input)
   const { k, d } = takeRight(stochasticOutput, 1)[0]
   const confidence = mapOutputToConfindence(k, d)
 
-  console.log(blocks)
-  //console.log(input)
-
-
   logger.debug(`STOCHASTIC ${name}: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
 
-  return 0
-  //return confidence
+  return confidence
 }
-
-//  k: 83.07 | d: 78.18
 
 export const mapOutputToConfindence = (k: number, d: number) => {
   if(k > 50 || d > 50) {
