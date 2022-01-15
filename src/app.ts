@@ -32,7 +32,7 @@ import { slack } from './slack/slack.service'
   // make sure we check killswitch when starting up. just for fun
   const enabled = await killswitch.tripped()
 
-  //
+  // calculate profit
   if (config.goal > 0) {
     await positionsService
       .find({

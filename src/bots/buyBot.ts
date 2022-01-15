@@ -25,8 +25,8 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
 
   const minBet = 1000
   if(realAvailableAmount < minBet) {
-    throw new Error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
-    // logger.debug(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    // throw new Error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    logger.error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
     // return 0
   }
 

@@ -7,17 +7,20 @@ import { convertToStochasticInput } from '../common/utils'
 // Stochastic Fast
 export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
 
+  
   const input = convertToStochasticInput(blocks)
   const stochasticOutput = Stochastic.calculate(input)
   const { k, d } = takeRight(stochasticOutput, 1)[0]
   const confidence = mapOutputToConfindence(k, d)
 
-  console.log(input)
+  console.log(blocks)
+  //console.log(input)
 
 
   logger.debug(`STOCHASTIC ${name}: [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
 
-  return confidence
+  return 0
+  //return confidence
 }
 
 //  k: 83.07 | d: 78.18
