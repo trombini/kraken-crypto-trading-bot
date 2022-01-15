@@ -13,7 +13,7 @@ import { DcaService } from 'src/common/dca'
 import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 import moment from 'moment'
 
-export const calculateRisk = (reserve: number, availableAmount: number, maxBet: number, confidence: number): number => {
+export const calculateRisk = (reserve: number, availableAmount: number, minBet: number, maxBet: number, confidence: number): number => {
   logger.debug(`Calculate risk with availableAmount: ${round(availableAmount, 2)}, reserve: ${reserve}, maxBet: ${maxBet}`)
 
   const realAvailableAmount = availableAmount - reserve
@@ -23,10 +23,10 @@ export const calculateRisk = (reserve: number, availableAmount: number, maxBet: 
     // return 0
   }
 
-  const minBet = 1000
+  // const minBet = 1000
   if(realAvailableAmount < minBet) {
-    // throw new Error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
-    logger.error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    throw new Error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
+    // logger.error(`availableAmount (${round(realAvailableAmount, 2)}) is less than minBet (${minBet})`)
     // return 0
   }
 
@@ -95,11 +95,12 @@ export class BuyBot {
 
     try {
       const reserve = this.config.reserve
+      const minBet = this.config.minBet
       const maxBet = this.config.maxBet
       const availableAmount = await this.kraken.balance()
       const lastAskPrice = await this.kraken.getAskPrice(recommendation.pair)
 
-      const risk = calculateRisk(reserve, availableAmount, maxBet, recommendation.confidence)
+      const risk = calculateRisk(reserve, availableAmount, minBet, maxBet, recommendation.confidence)
       const volume = caluclateVolume(risk, lastAskPrice)
 
       logger.info(`Create BUY order. confidence: ${recommendation.confidence}, risk: ${formatMoney(risk)}, volume: ${volume}`)

@@ -14,6 +14,7 @@ export interface BotConfig {
   goalStart: number
   krakenApiKey: string
   krakenApiSecret: string
+  minBet: number
   maxBet: number
   minConfidence: number
   mongoDb: string
@@ -34,6 +35,7 @@ export const config: BotConfig = {
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
+  minBet: process.env.MIN_BET ? parseFloat(process.env.MIN_BET) : 500,
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
   minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.5,
   mongoDb: process.env.MONGO || 'mongodb://localhost:27017/kraken-prod',
