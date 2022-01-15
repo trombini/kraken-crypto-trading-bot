@@ -120,18 +120,18 @@ export class DcaService {
         const dcaPosition = dollarCostAverage(bucket)
         logger.info(`DCA position: ${JSON.stringify(dcaPosition)}`)
 
-        // bucket.map(async posistion => {
-        //   logger.debug(`Mark position ${positionId(posistion)} as 'merged'`)
-        //   await this.positions.update(posistion, { status: 'merged' })
-        // })
+        bucket.map(async posistion => {
+          logger.debug(`Mark position ${positionId(posistion)} as 'merged'`)
+          await this.positions.update(posistion, { status: 'merged' })
+        })
 
-        // await this.positions.create({
-        //   pair: dcaPosition.pair,
-        //   status: 'open',
-        //   price: dcaPosition.price,
-        //   volume: dcaPosition.volume,
-        //   orderIds: orderIds,
-        // })
+        await this.positions.create({
+          pair: dcaPosition.pair,
+          status: 'open',
+          price: dcaPosition.price,
+          volume: dcaPosition.volume,
+          orderIds: orderIds,
+        })
       }
     })
   }
