@@ -17,6 +17,7 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 240)
     watcher.subscribe(this, 1440)
 
+    
     // register indicators CLEANED
     this.registerIndicator(true, 0, 15, 'UPSWING 15m', upswing('15m', 15, config.blockMaturity))
     this.registerIndicator(false, 0.38, 240, 'UPTREND 4h', uptrend('4h', 240, 0.5))
