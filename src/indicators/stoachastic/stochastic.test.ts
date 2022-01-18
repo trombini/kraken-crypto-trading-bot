@@ -879,25 +879,42 @@ describe('Stochastic Fast', () => {
     }
   })
 
-  it('should return high conficence as K value is below D', () => {
-    const confidence = mapOutputToConfindence(1, 2)
+
+  // 2022-01-18T16:18:59.271Z [debug] STOCHASTIC (4h): [ k: 27.05 | d: 39.01 ] => 0
+
+  it('should be extremely confident as K value is above D, but both are below threshold', () => {
+    const k = 30
+    const d = 10
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(1)
+  })
+
+  it('should return high conficence as K is below D', () => {
+    const k = 1
+    const d = 2
+    const confidence = mapOutputToConfindence(k, d)
     expect(confidence).toBe(0.8)
   })
 
-  it('should return middle conficence as K value is below D', () => {
-    const confidence = mapOutputToConfindence(1, 5)
+  it('should return some conficence as K value is below D', () => {
+    const k = 1
+    const d = 5
+    const confidence = mapOutputToConfindence(k, d)
     expect(confidence).toBe(0.5)
   })
 
-
-  it('should fail as K value is way below D', () => {
-    const confidence = mapOutputToConfindence(1, 8)
-    expect(confidence).toBe(0)
+  it('should return some conficence as K value is way below D', () => {
+    const k = 1
+    const d = 8
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(0.1)
   })
 
-  it('should be extremely confident as K value is way above D', () => {
-    const confidence = mapOutputToConfindence(30, 10)
-    expect(confidence).toBe(1)
+  it('should return some conficence as K value is way below D', () => {
+    const k = 27.05
+    const d = 39.01
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(0.1)
   })
 
   it('play around with Stoachastic indicator', () => {
@@ -919,8 +936,8 @@ describe('Stochastic Fast', () => {
     expect(takeRight(result1, 1)['k']).toEqual(takeRight(result2, 1)['k'])
     expect(takeRight(result1, 1)['d']).toEqual(takeRight(result2, 1)['d'])
 
-    console.log(result1)
-    console.log(result2)
+    // console.log(result1)
+    // console.log(result2)
   })
 
   it('ddd', async () => {

@@ -12,7 +12,7 @@ export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
   const { k, d } = takeRight(stochasticOutput, 1)[0]
   const confidence = mapOutputToConfindence(k, d)
 
-  logger.debug(`STOCHASTIC (${name}): [ k: ${round(k, 2)} | d: ${round(d, 2)} ] => ${confidence}`)
+  logger.debug(`STOCHASTIC (${name}) - k:${round(k, 2)} > d:${round(d, 2)} ? => ${confidence}`)
 
   return confidence
 }
@@ -27,10 +27,10 @@ export const mapOutputToConfindence = (k: number, d: number) => {
   else if(k < d && (d - k) <= 2) {
     return 0.8
   }
-  else if(k < d && (d - k) <= 4) {
+  else if(k < d && (d - k) <= 6) {
     return 0.5
   }
   else {
-    return 0
+    return 0.1
   }
 }
