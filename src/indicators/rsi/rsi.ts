@@ -4,7 +4,9 @@ import { RSI } from 'technicalindicators'
 import { round, takeRight } from 'lodash'
 import { logger } from '../../common/logger'
 
-// RSI
+const bestCaseThreshold = 30
+const goodThreshold = 40
+
 export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
 
   const ohlc = convertToStochasticInput(blocks)
@@ -15,9 +17,21 @@ export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
 
   const threshold = 40
   const rsi = takeRight(history, 1)[0]
-  const confidence = rsi < threshold ? 1 : 0
+  const confidence = getConfidence(rsi)
 
-  logger.debug(`RSI (${name}) - ${round(rsi, 2)} < ${threshold} => ${confidence}`)
+  logger.debug(`RSI (${name}) - ${round(rsi, 2)} < ${goodThreshold} => ${confidence}`)
 
   return confidence
+}
+
+export const getConfidence = (rsi: number) : number => {
+  if(rsi < bestCaseThreshold) {
+    return 1
+  }
+  else if(rsi < goodThreshold) {
+    return 0.5
+  }
+  else {
+    return 0
+  }
 }
