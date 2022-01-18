@@ -28,9 +28,9 @@ export const mapOutputToConfindence = (k: number, d: number) => {
     return 0.8
   }
   else if(k < d && (d - k) <= 6) {
-    return 0.5
+    return 0.65
   }
   else {
-    return 0.1
+    return 0.5
   }
 }

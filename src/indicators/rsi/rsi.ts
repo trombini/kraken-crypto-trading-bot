@@ -15,7 +15,6 @@ export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
     values: ohlc.close
   })
 
-  const threshold = 40
   const rsi = takeRight(history, 1)[0]
   const confidence = getConfidence(rsi)
 
