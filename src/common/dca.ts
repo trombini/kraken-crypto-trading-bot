@@ -4,7 +4,7 @@ import { Position } from '../positions/position.interface'
 import { logger } from './logger'
 import { positionId } from './utils'
 
-const PRICE_RANGE = 0.02
+const PRICE_RANGE = 0.04
 
 const dollarCostAverage = (
   positions: Position[],
@@ -74,6 +74,8 @@ export class DcaService {
 
     logger.debug('DCA buckets')
     logger.debug(JSON.stringify(buckets))
+    logger.info(`${buckets.length}`)
+
 
     mapKeys(buckets, async (bucket, key) => {
 
@@ -86,7 +88,6 @@ export class DcaService {
 
         const dcaPosition = dollarCostAverage(bucket)
         logger.info(`DCA position: ${JSON.stringify(dcaPosition)}`)
-
         bucket.map(async posistion => {
           logger.debug(`Mark position ${positionId(posistion)} as 'merged'`)
           await this.positions.update(posistion, { status: 'merged' })
