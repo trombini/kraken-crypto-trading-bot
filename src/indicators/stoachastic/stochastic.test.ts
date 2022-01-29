@@ -900,21 +900,21 @@ describe('Stochastic Fast', () => {
     const k = 1
     const d = 5
     const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.5)
+    expect(confidence).toBe(0.65)
   })
 
   it('should return some conficence as K value is way below D', () => {
     const k = 1
     const d = 8
     const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.1)
+    expect(confidence).toBe(0.5)
   })
 
   it('should return some conficence as K value is way below D', () => {
     const k = 27.05
     const d = 39.01
     const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.1)
+    expect(confidence).toBe(0.5)
   })
 
   it('play around with Stoachastic indicator', () => {

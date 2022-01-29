@@ -9,6 +9,7 @@ import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { DcaService } from '../common/dca'
 import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { max, min } from 'lodash'
 
 let dcaService: DcaService
 let positionsService: PositionsService
@@ -23,62 +24,29 @@ let killswitch: LaunchDarklyService
 setupDb('buyBot')
 
 beforeEach(() => {
+
+  killswitch = createLaunchDarklyService()
+  jest.spyOn(killswitch, 'tripped').mockResolvedValue(false)
+
   positionsService = new PositionsService()
   dcaService = new DcaService(positionsService)
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)
   analyst = new BuyAnalyst(watcher, config)
-  killswitch = createLaunchDarklyService()
 
   bot = new BuyBot(krakenService, positionsService, analyst, dcaService, killswitch, config)
 })
 
 describe('BuyBot', () => {
 
-  it('should fallback to zero if available amount is less than RESERVE', async () => {
-    const risk = calculateRisk(1000, 500, 1000, 2000, 1)
-    expect(risk).toBe(0)
-  })
-
-  it('should fallback to zero if available amount is less than MIN_BET', async () => {
-    const risk = calculateRisk(1000, 1500, 1000, 2000, 1)
-    expect(risk).toBe(0)
-  })
-
-  it('should calculate correct RISK if availableCurrency is less than MAX_BET', async () => {
-    const factor = 0.8
-    const risk = calculateRisk(0, 1100, 1000, 2000, 1)
-    expect(risk).toBe(1100 * factor)
-  })
-
-  it('should calculate correct RISK based on availableCurrency and the configured MAX_BET', async () => {
-    const risk = calculateRisk(0, 3000, 1000, 2000, 1)
-    expect(risk).toBe(2000)
-  })
-
-  it('should calculate correct RISK based on the reduced conficence', async () => {
-    const risk = calculateRisk(0, 1000, 1000, 1000, 0.6)
-    expect(risk).toBe(600)
-  })
-
-  it('should calculate correct RISK based on the reduced availableAmount and conficence', async () => {
-    const risk = calculateRisk(0, 2000, 1000, 3000, 0.6)
-    expect(risk).toBe(2000 * 0.8 * 0.6) // 0.8 is the penalty for having not enough money
-  })
-
-  it('should calculate correct volume based on last ask price', async () => {
-    const volume = caluclateVolume(1000, 2)
-    expect(volume).toBe(500)
-  })
-
   it('should fail to buy the same asset within a short period', async () => {
     // const bot = new Bot(krakenService, positionsService, analyst, config)
     const buyRecommendation = { pair: 'ADAUSD', confidence: 1 }
 
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P'} ])
-    jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
-    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
+    jest.spyOn(krakenService, 'balance').mockResolvedValue(1000)
+    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(5)
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed' })
 
     await bot.handleBuyRecommendation(buyRecommendation)
@@ -89,23 +57,23 @@ describe('BuyBot', () => {
   })
 
   it('should order correct volume based on MAX_BET and last ask price', async () => {
-    // max bet is 500
+
     const spy = jest.spyOn(krakenService, 'createBuyOrder').mockResolvedValue([{ id: 'OZORI6-KQCDS-EGXA3P' } ])
-    jest.spyOn(krakenService, 'balance').mockResolvedValue(10000)
-    jest.spyOn(krakenService, 'getAskPrice').mockResolvedValue(1.0)
     jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed' })
 
-    await bot.buyPosition({ pair: 'ADAUSD', confidence: 1 })
+    await bot.buy('ADAUSD', 1, 1, 100)
 
     expect(spy).toHaveBeenCalledWith({
       pair: 'ADAUSD',
-      volume: 500
+      volume: 100
     })
   })
 
   it('should update position details with values from Kraken API', async () => {
 
-    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({ status: 'closed', vol: '100', vol_exec: '90', price: '0.95' })
+    jest.spyOn(krakenService, 'getOrder').mockResolvedValue({
+      status: 'closed', vol: '100', vol_exec: '90', price: '0.95'
+    })
 
     const spy = jest.spyOn(positionsService, 'update')
     const position = new PositionModel({

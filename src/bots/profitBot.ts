@@ -24,7 +24,7 @@ export class ProfitBot {
   }
 
   async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
-    throw new Error('This method has to be implemented')
+    throw new Error('This method has to be implemented and should be overwritten')
   }
 
   async handleSellRecommendation(recommendation: BuyRecommendation) {
@@ -72,6 +72,8 @@ export class ProfitBot {
     }
   }
 
+  // Called after the Position has been soled to determine the real volume and average price
+  // We do this because we sell at "market" price and not "limit" price
   async evaluateProfit(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
