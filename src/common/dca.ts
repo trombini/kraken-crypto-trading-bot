@@ -32,14 +32,14 @@ const dollarCostAverage = (
 const createBuckets = (positions: Position[]): any => {
   return positions.reduce((acc: Position[][], current: Position) => {
 
-    console.log('-------------')
+    logger.debug('-------------')
 
     if(current.buy.price) {
 
       const bottom = current.buy.price - (current.buy.price * PRICE_RANGE)
       const top = current.buy.price + (current.buy.price * PRICE_RANGE)
 
-      console.log(`Price of current position: ${current.buy.price}, Range: ${bottom} - ${top}`)
+      logger.debug(`Price of current position: ${current.buy.price}, Range: ${bottom} - ${top}`)
 
        // check if one of the buckets (and positions included) is in the acceptable range
       for(let i = 0 ; i < acc.length ; i++) {
@@ -47,9 +47,9 @@ const createBuckets = (positions: Position[]): any => {
         for(let j = 0 ; j < bucket.length ; j++) {
           const pos = bucket[j]
           if(pos.buy.price) {
-            console.log(` Check against ${pos.buy.price}`)
+            logger.debug(` Check against ${pos.buy.price}`)
             if(bottom <= pos.buy.price && pos.buy.price <= top) {
-              console.log(`  Price of pos ${pos.buy.price} is in range`)
+              logger.debug(`  Price of pos ${pos.buy.price} is in range`)
               bucket.push(current)
               return acc
             }
