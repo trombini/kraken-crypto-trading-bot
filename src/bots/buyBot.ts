@@ -28,6 +28,7 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
   const totalAvailabeFunds = availableAmount - reserveAmount
 
   if (totalAvailabeFunds < 0) {
+    logger.error(`totalAvailabeFunds (${round(totalAvailabeFunds, 2)}) is below zero. We want to keep reserve of: ${reserveAmount}`)
     throw new Error(`totalAvailabeFunds (${round(totalAvailabeFunds, 2)}) is below zero. We want to keep reserve of: ${reserveAmount}`)
   }
 
