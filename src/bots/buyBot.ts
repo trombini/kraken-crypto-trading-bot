@@ -28,6 +28,7 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
   const totalAvailabeFunds = availableAmount - reserveAmount
 
   if (totalAvailabeFunds < 0) {
+    // TODO: remove
     logger.error(`totalAvailabeFunds (${round(totalAvailabeFunds, 2)}) is below zero. We want to keep reserve of: ${reserveAmount}`)
     throw new Error(`totalAvailabeFunds (${round(totalAvailabeFunds, 2)}) is below zero. We want to keep reserve of: ${reserveAmount}`)
   }
@@ -45,10 +46,13 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
 
   // Risk is too low, it is not worth buying cosindering the exchange costs
   if (risk < minBet) {
+    // TODO: remove
     logger.error(`risk (${round(risk, 2)}) is less than minBet (${minBet})`)
     throw new Error(`risk (${round(risk, 2)}) is less than minBet (${minBet})`)
   }
 
+
+  // TODO: Improve
   logger.debug(`Calculated risk ${risk}`)
 
 
