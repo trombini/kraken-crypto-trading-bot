@@ -28,15 +28,11 @@ export const inWinZoneByPercentage = (
   tax: number,
 ): boolean => {
   const initialCosts = price * volume * (1 + tax)
-  const currentProfit = currentBidPrice * volume * (1 - tax)
+  const currentProfit = (currentBidPrice * volume) - (currentBidPrice * volume * tax)
   const percentage = (100 * currentProfit) / initialCosts
 
+  logger.debug(`[WIN ZONE / Percentage]: ${round(initialCosts, 2)} -- ${round(currentProfit, 4)} -- ${round(percentage,2)}`)
 
-  const x = (currentBidPrice * volume) - (currentBidPrice * volume * tax)
-
-  logger.debug(`[WIN ZONE / Percentage]: ${round(initialCosts, 2)} -- ${round(currentProfit, 2)} -- ${round(percentage,2)}`)
-  logger.debug(x)
-  
   return percentage >= (100 + (100 * targetProfit))
 }
 
