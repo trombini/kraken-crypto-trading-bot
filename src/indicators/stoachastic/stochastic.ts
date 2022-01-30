@@ -18,6 +18,11 @@ export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
 }
 
 export const mapOutputToConfindence = (k: number, d: number) => {
+
+
+
+
+  
   if(k > 50 || d > 50) {
     if(k < 40 && d > 50) {
       return 0.1

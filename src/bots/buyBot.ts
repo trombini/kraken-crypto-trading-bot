@@ -40,10 +40,16 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
   // The risk is calculated on the availableFunds
   const risk = round(availableFunds * confidence, 2)
 
+
+
   // Risk is too low, it is not worth buying cosindering the exchange costs
   if (risk < minBet) {
+    logger.error(`risk (${round(risk, 2)}) is less than minBet (${minBet})`)
     throw new Error(`risk (${round(risk, 2)}) is less than minBet (${minBet})`)
   }
+
+  logger.debug(`Calculated risk ${risk}`)
+
 
   return risk
 
