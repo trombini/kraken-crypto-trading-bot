@@ -26,7 +26,7 @@ describe('Bot Utils', () => {
       const price = 100
       const currentBidPrice = 102
       const targetProfit = 0.02
-      const tax = 0.0016
+      const tax = 0.00259
       const result = inWinZoneByPercentage(volume, price, currentBidPrice, targetProfit, tax)
       expect(result).toBe(false)
     })
@@ -36,7 +36,7 @@ describe('Bot Utils', () => {
       const price = 100
       const currentBidPrice = 103
       const targetProfit = 0.02
-      const tax = 0.0016
+      const tax = 0.00259
       const result = inWinZoneByPercentage(volume, price, currentBidPrice, targetProfit, tax)
       expect(result).toBe(true)
     })

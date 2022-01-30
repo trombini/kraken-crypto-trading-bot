@@ -33,7 +33,7 @@ export const inWinZoneByPercentage = (
 
   logger.debug(`[WIN ZONE / Percentage]: ${round(initialCosts, 2)} -- ${round(currentProfit, 2)} -- ${round(percentage,2)}`)
 
-  return percentage > (100 + (100 * targetProfit))
+  return percentage >= (100 + (100 * targetProfit))
 }
 
 export const inWinZone = (
