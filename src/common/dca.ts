@@ -4,7 +4,7 @@ import { Position } from '../positions/position.interface'
 import { logger } from './logger'
 import { positionId } from './utils'
 
-const PRICE_RANGE = 0.05
+const PRICE_RANGE = 0.03
 
 const dollarCostAverage = (
   positions: Position[],
@@ -72,10 +72,7 @@ export class DcaService {
     const allOpenPositions = await this.positions.findByStatus('open')
     const buckets = createBuckets(allOpenPositions)
 
-    logger.debug('DCA buckets')
     logger.debug(JSON.stringify(buckets))
-    logger.info(`${buckets.length}`)
-
 
     mapKeys(buckets, async (bucket, key) => {
 
