@@ -882,7 +882,22 @@ describe('Stochastic Fast', () => {
 
   // 2022-01-18T16:18:59.271Z [debug] STOCHASTIC (4h): [ k: 27.05 | d: 39.01 ] => 0
 
-  it('should be extremely confident as K value is above D, but both are below threshold', () => {
+
+  it('should fail #', () => {
+    const k = 40
+    const d = 40
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(0)
+  })
+
+  it('should fail #2', () => {
+    const k = 40
+    const d = 10
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(0)
+  })
+
+  it('should be extremely confident as K value is above D, but both are below threshold of 40', () => {
     const k = 30
     const d = 10
     const confidence = mapOutputToConfindence(k, d)
@@ -890,43 +905,25 @@ describe('Stochastic Fast', () => {
   })
 
   it('should return high conficence as K is below D', () => {
-    const k = 1
-    const d = 2
+    const k = 30
+    const d = 32
     const confidence = mapOutputToConfindence(k, d)
     expect(confidence).toBe(0.8)
   })
 
   it('should return some conficence as K value is below D', () => {
-    const k = 1
-    const d = 5
+    const k = 30
+    const d = 35
     const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.65)
+    expect(confidence).toBe(0.6)
   })
 
   it('should return some conficence as K value is way below D', () => {
-    const k = 1
-    const d = 8
+    const k = 30
+    const d = 38
     const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.5)
+    expect(confidence).toBe(0.4)
   })
-
-  it('should return some conficence as K value is way below D', () => {
-    const k = 27.05
-    const d = 39.01
-    const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.5)
-  })
-
-
-  it('sxxxxx', () => {
-    const k = 48.6
-    const d = 36.22
-    const confidence = mapOutputToConfindence(k, d)
-    expect(confidence).toBe(0.5)
-  })
-
-
-
 
   it('play around with Stoachastic indicator', () => {
 
