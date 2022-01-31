@@ -17,28 +17,64 @@ export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
   return confidence
 }
 
+
+// Threshold 30
 export const mapOutputToConfindence = (k: number, d: number) => {
 
-
-
-
-  
-  if(k > 50 || d > 50) {
-    if(k < 40 && d > 50) {
-      return 0.1
-    }
+  if(k > 50 && d > 50) {
     return 0
   }
-  else if(k > d) {
-    return 1
+
+  if(k < 40 && d > 50) {
+    return 0.1
   }
-  else if(k < d && (d - k) <= 2) {
-    return 0.8
+
+  if(k < 40 && d < 40) {
+    // this is most bullish
+    if(k > d) {
+      return 1
+    }
+    else {
+      if(k < d && (d - k) <= 2) {
+        return 0.8
+      }
+      else if(k < d && (d - k) <= 6) {
+        return 0.6
+      }
+      else if(k < d && (d - k) <= 12) {
+        return 0.4
+      }
+      else {
+        return 0.2
+      }
+    }
   }
-  else if(k < d && (d - k) <= 6) {
-    return 0.65
-  }
-  else {
-    return 0.5
-  }
+
+  return 0
 }
+
+
+// export const mapOutputToConfindence = (k: number, d: number) => {
+
+//   if(k > 50 && d > 50) {
+//     return 0
+//   }
+
+//   if(k < 40 && d > 50) {
+//     return 0.1
+//   }
+
+//   if(k < d) {
+//     if((d - k) <= 2) {
+//       return 1.0
+//     }
+//     else if((d - k) <= 6) {
+//       return 0.8
+//     }
+//     else if((d - k) <= 12) {
+//       return 0.6
+//     }
+//   }
+
+//   return 0
+// }

@@ -917,6 +917,17 @@ describe('Stochastic Fast', () => {
     expect(confidence).toBe(0.5)
   })
 
+
+  it('sxxxxx', () => {
+    const k = 48.6
+    const d = 36.22
+    const confidence = mapOutputToConfindence(k, d)
+    expect(confidence).toBe(0.5)
+  })
+
+
+
+
   it('play around with Stoachastic indicator', () => {
 
     const newInput = {
