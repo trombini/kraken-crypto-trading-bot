@@ -26,7 +26,7 @@ import { slack } from './slack/slack.service'
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const kraken = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(kraken, config)
-  const recoveryService = createRecoveryService(positionsService, kraken, config)
+  const recoveryService = createRecoveryService(positionsService, dcaService, kraken, config)
   const killswitch = createLaunchDarklyService()
 
   // make sure we check killswitch when starting up. just for fun

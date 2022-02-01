@@ -4,7 +4,7 @@ import { Position } from '../positions/position.interface'
 import { logger } from './logger'
 import { positionId } from './utils'
 
-const PRICE_RANGE = 0.03
+const PRICE_RANGE = 0.025
 
 const dollarCostAverage = (
   positions: Position[],

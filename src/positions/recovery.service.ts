@@ -5,6 +5,7 @@ import moment from 'moment'
 import { min } from 'lodash'
 import { Position } from './position.interface'
 import { KrakenService } from 'src/kraken/krakenService'
+import { DcaService } from 'src/common/dca'
 
 // export interface IRecoveryService {
 	
@@ -12,7 +13,7 @@ import { KrakenService } from 'src/kraken/krakenService'
 
 const INTERVAL = 300
 
-export function createRecoveryService(service: PositionsService, kraken: KrakenService, config: BotConfig) {
+export function createRecoveryService(service: PositionsService, dcaService: DcaService, kraken: KrakenService, config: BotConfig) {
 
   const recover = async (position: Position) => {
     logger.info('Recover position:')
@@ -69,6 +70,9 @@ export function createRecoveryService(service: PositionsService, kraken: KrakenS
         for (const position of failed) {
           await recover(position)
         }
+
+        // Run DCA on recovered positions
+        dcaService.dcaOpenPositions()
       }
     }
     catch(err) {
