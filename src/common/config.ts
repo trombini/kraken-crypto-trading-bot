@@ -22,7 +22,8 @@ export interface BotConfig {
   reserve: number
   slackBotToken: string
   slackChannel: string
-  targetProfit: number
+  targetProfitAmount: number
+  targetProfitPercentage: number
   tax: number
 }
 
@@ -43,6 +44,7 @@ export const config: BotConfig = {
   reserve: process.env.RESERVE ? parseFloat(process.env.RESERVE) : 0,
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
-  targetProfit: process.env.TARGET_PROFIT ? parseFloat(process.env.TARGET_PROFIT) : 30,
+  targetProfitAmount: process.env.TARGET_PROFIT_AMOUNT ? parseFloat(process.env.TARGET_PROFIT_AMOUNT) : 20,
+  targetProfitPercentage: process.env.TARGET_PROFIT_PERCENTAGE ? parseFloat(process.env.TARGET_PROFIT_PERCENTAGE) : 0.04,
   tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0016,
 }

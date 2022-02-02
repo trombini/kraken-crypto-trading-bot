@@ -39,15 +39,13 @@ export const inWinZoneByPercentage = (
 export const inWinZone = (
   position: Position,
   currentBidPrice: number,
-  targetProfit: number,
+  targetProfitAmount: number,
+  targetProfitPercentage: number,
   tax: number,
 ): boolean => {
   if (!position.buy.price || !position.buy.volume) {
     throw new Error(`Not enough data to estimate win zone`)
   }
-
-  const targetProfitAmount = 20
-  const targetProfitPercentage = 0.02
 
   const resultAmount = inWinZoneByAmount(
     position.buy.volume,

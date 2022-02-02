@@ -43,7 +43,8 @@ export class ProfitBot {
     })
 
     for (const position of positions) {
-      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
+      const { targetProfitAmount, targetProfitPercentage, tax } = this.config
+      if(inWinZone(position, currentBidPrice, targetProfitAmount, targetProfitPercentage, tax)) {
         logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
         await this.sellPosition(position, currentBidPrice)
       }
