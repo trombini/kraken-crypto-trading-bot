@@ -46,21 +46,41 @@ export const inWinZone = (
     throw new Error(`Not enough data to estimate win zone`)
   }
 
-  if (targetProfit > 1) {
-    return inWinZoneByAmount(
-      position.buy.volume,
-      position.buy.price,
-      currentBidPrice,
-      targetProfit,
-      tax,
-    )
-  } else {
-    return inWinZoneByPercentage(
-      position.buy.volume,
-      position.buy.price,
-      currentBidPrice,
-      targetProfit,
-      tax,
-    )
-  }
+  const targetProfitAmount = 20
+  const targetProfitPercentage = 0.02
+
+  const resultAmount = inWinZoneByAmount(
+    position.buy.volume,
+    position.buy.price,
+    currentBidPrice,
+    targetProfitAmount,
+    tax,
+  )
+
+  const resultPercentage = inWinZoneByPercentage(
+    position.buy.volume,
+    position.buy.price,
+    currentBidPrice,
+    targetProfitPercentage,
+    tax,
+  )
+
+  return resultAmount || resultPercentage
+  // if (targetProfit > 1) {
+  //   return inWinZoneByAmount(
+  //     position.buy.volume,
+  //     position.buy.price,
+  //     currentBidPrice,
+  //     targetProfit,
+  //     tax,
+  //   )
+  // } else {
+  //   return inWinZoneByPercentage(
+  //     position.buy.volume,
+  //     position.buy.price,
+  //     currentBidPrice,
+  //     targetProfit,
+  //     tax,
+  //   )
+  // }
 }
