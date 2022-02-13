@@ -28,7 +28,6 @@ export const logger = winston.createLogger({
 // TODO: where should we log to in case of testing?
 if (process.env.NODE_ENV === 'test') {
   logger.add(new winston.transports.Console())
-
   logger.add(new winston.transports.File({ filename: 'all.log' }))
 }
 else {

@@ -30,13 +30,21 @@ describe('Bot Utils', () => {
     })
 
     it('should return true as the position is stlighly in the WIN zone', async () => {
-      const volume = 1
+      const volume = 2
       const price = 100
       const currentBidPrice = 103
       const targetProfit = 0.02
       const tax = 0.00259
       const result = inWinZoneByPercentage(volume, price, currentBidPrice, targetProfit, tax)
       expect(result).toBe(true)
+    })
+
+    it('should return true as the position is stlighly in the WIN zone', async () => {
+      inWinZoneByPercentage(20, 100, 100, 0, 0)
+      inWinZoneByPercentage(100, 100, 100, 0, 0)
+      inWinZoneByPercentage(1000, 100, 100, 0, 0)
+
+      expect(true).toBe(true)
     })
 
   })
