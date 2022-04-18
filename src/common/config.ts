@@ -12,6 +12,7 @@ export interface BotConfig {
   cashSource: string
   goal: number
   goalStart: number
+  fee: number
   krakenApiKey: string
   krakenApiSecret: string
   minBet: number
@@ -24,7 +25,6 @@ export interface BotConfig {
   slackChannel: string
   targetProfitAmount: number
   targetProfitPercentage: number
-  tax: number
 }
 
 export const config: BotConfig = {
@@ -33,6 +33,7 @@ export const config: BotConfig = {
   cashSource: process.env.CASH_SOURCE || 'ZUSD', // USDF
   goal: process.env.GOAL ? parseFloat(process.env.GOAL) : 0,
   goalStart: process.env.GOAL_START ? parseFloat(process.env.GOAL_START) : 0,
+  fee: process.env.FEE ? parseFloat(process.env.FEE) : 0.0016,
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
@@ -46,5 +47,4 @@ export const config: BotConfig = {
   slackChannel: process.env.SLACK_CHANNEL || '',
   targetProfitAmount: process.env.TARGET_PROFIT_AMOUNT ? parseFloat(process.env.TARGET_PROFIT_AMOUNT) : 20,
   targetProfitPercentage: process.env.TARGET_PROFIT_PERCENTAGE ? parseFloat(process.env.TARGET_PROFIT_PERCENTAGE) : 0.04,
-  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0016,
 }

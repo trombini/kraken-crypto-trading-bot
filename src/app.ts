@@ -42,10 +42,13 @@ import { slack } from './slack/slack.service'
       .then((positions) => {
         const profit = positions.reduce((acc, p) => {
 
-          // console.log(`${p?.buy?.volume} - ${p?.sell?.volume}`)
-          // console.log(p)
+          if(p?.sell?.volume === undefined && p?.sell?.volumeToKeep === undefined) {
+            logger.error('ERROR IN LOG. NOT ALL INFOS')
+            return acc
+          }
 
-          const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
+          const profit = p?.sell?.volumeToKeep || 0
+          // const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
           return acc + profit
         }, 0)
         const totalProfit = config.goalStart + profit

@@ -32,7 +32,7 @@ export class TakeProfitBot extends ProfitBot {
     if(position.buy.price && position.buy.volume) {
 
       const costs = position.buy.price * position.buy.volume
-      const fee = costs * this.config.tax * 2
+      const fee = costs * this.config.fee * 2
       const totalCosts = fee + costs
       const volumeToSell = round((totalCosts / currentBidPrice), 0)
       const volumeToKeep = position.buy.volume - volumeToSell
