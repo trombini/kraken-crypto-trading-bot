@@ -39,7 +39,7 @@ export const inWinZoneByPercentage = (
   logger.debug(`Determining WIN zone by Percentage`)
   logger.debug(`volume: ${volume}, targetProfit: ${round(targetProfit, 4)}, initialCosts: ${round(initialCosts, 2)}, currentProfit: ${round(currentProfit, 4)}, percentage:${round(percentage, 2)}%`)
 
-  return percentage >= (100 + (100 * targetProfit))
+  return percentage >= (100 * targetProfit)
 }
 
 export const inWinZone = (
