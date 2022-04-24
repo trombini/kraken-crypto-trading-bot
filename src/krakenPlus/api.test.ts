@@ -2,9 +2,7 @@ import { getMessageSignature } from './api'
 import { stringify } from 'query-string'
 
 describe('KrakenAPI', () => {
-
   it('Signature should be valid', async () => {
-
     const key = 'kQH5HW/8p1uGOVjbgWA7FunAmGO8lsSUXNsu3eow76sz84Q18fWxnyRzBHCd3pd5nE9qa99HAZtuZuj6F1huXg=='
     const nonce = '1616492376594'
     const uri = '/0/private/AddOrder'
@@ -14,7 +12,7 @@ describe('KrakenAPI', () => {
       pair: 'XBTUSD',
       price: '37500',
       type: 'buy',
-      volume: '1.25'
+      volume: '1.25',
     }
 
     const signature = getMessageSignature(uri, stringify(params), key, nonce)
