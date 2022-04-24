@@ -3,23 +3,30 @@ import { calculateMACD, getMaturedHistogram } from './utils'
 import { logger } from '../../common/logger'
 import { MACDResult } from './macd.interface'
 
-export const uptrend = (period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
+export const uptrend = (name: string, period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, blocks)
-  return analyse(macd)
+  const filteredBlocks = filterRelevantBlocks(macd)
+  const confidence = calculateConfidence(filteredBlocks)
+
+  logger.debug(`UPTREND (${name}): [ ${filteredBlocks[0]} | ${filteredBlocks[1]} | ${filteredBlocks[2]} ] -> ${confidence}`)
+
+  return confidence
 }
 
-export const analyse = (macd: MACDResult): number => {
+export const filterRelevantBlocks = (macd: MACDResult) => {
   if(macd.blocks.length < 3) {
     throw Error('Not enough data')
   }
+  return getMaturedHistogram(macd, 3)
+}
 
-  // v0 oldest, v1 middel, v2 now
-  const b = getMaturedHistogram(macd, 3)
-  // OR b1 === b2
-  const result = b[0] < b[1] && b[1] < b[2]
-  const confidence = result ? 1 : 0
+export const calculateConfidence = (blocks: number[]): number => {
+  if(blocks.length < 3) {
+    throw Error('Not enough data')
+  }
 
-  logger.debug(`UPTREND: [ ${b[0]} | ${b[1]} | ${b[2]} ] -> ${confidence}`)
-
-  return confidence
+    // v0 oldest, v1 middel, v2 now
+    const result = blocks[0] < blocks[1] && blocks[1] < blocks[2]
+    const confidence = result ? 1 : 0
+    return confidence
 }

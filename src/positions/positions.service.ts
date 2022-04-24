@@ -42,6 +42,13 @@ export class PositionsService {
     return pos !== null ? pos : undefined
   }
 
+  async findByStakedStatus(staked: boolean): Promise<Position[]> {
+    return PositionModel.find({
+      staked,
+      status: 'open'
+    })
+  }
+
   async findByStatus(status: string): Promise<Position[]> {
     return PositionModel.find({ status })
   }

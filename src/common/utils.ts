@@ -15,7 +15,7 @@ export const formatMoney = (number: number) => {
   return numeral(number).format('$ 0,0.00')
 }
 
-export const positionId = (position: Position) =>
+export const generatePositionId = (position: Position) =>
   `[${position.pair}_${round(position.buy.price || 0, 4)}_${round(position.buy.volume || 0, 2)}]`
 
 // export const calculateExitStrategy = (expectedProfit: number, trade: Trade): Order => {

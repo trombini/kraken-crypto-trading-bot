@@ -2,32 +2,9 @@ import { flatMap, mapKeys, round } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { logger } from './logger'
-import { positionId } from './utils'
+import { generatePositionId } from './utils'
 
-const bucket = (deviation: number, number: number) => {
-  const input = round(number, 2)
-  const percent = 100 * deviation
-  return Math.floor((input * 100) / percent)
-}
-
-const createBuckets = (
-  positions: Position[],
-): { [key: string]: Position[] } => {
-  return positions.reduce((acc, position) => {
-    if (position.buy.price) {
-      const b = bucket(0.1, position.buy.price)
-
-      logger.debug(`${b}: ${position.buy.price}`)
-
-      if (acc[b] === undefined) {
-        acc[b] = []
-      }
-      acc[b].push(position)
-      return acc
-    }
-    return acc
-  }, {})
-}
+const PRICE_RANGE = 0.015
 
 const dollarCostAverage = (
   positions: Position[],
@@ -52,6 +29,41 @@ const dollarCostAverage = (
   }
 }
 
+const createBuckets = (positions: Position[]): any => {
+  return positions.reduce((acc: Position[][], current: Position) => {
+
+    logger.debug('-------------')
+
+    if(current.buy.price) {
+
+      const bottom = current.buy.price - (current.buy.price * PRICE_RANGE)
+      const top = current.buy.price + (current.buy.price * PRICE_RANGE)
+
+      logger.debug(`Price of current position: ${current.buy.price}, Range: ${bottom} - ${top}`)
+
+       // check if one of the buckets (and positions included) is in the acceptable range
+      for(let i = 0 ; i < acc.length ; i++) {
+        const bucket = acc[i]
+        for(let j = 0 ; j < bucket.length ; j++) {
+          const pos = bucket[j]
+          if(pos.buy.price) {
+            logger.debug(` Check against ${pos.buy.price}`)
+            if(bottom <= pos.buy.price && pos.buy.price <= top) {
+              logger.debug(`  Price of pos ${pos.buy.price} is in range`)
+              bucket.push(current)
+              return acc
+            }
+          }
+        }
+      }
+    }
+
+    // current didn't fit into bucket
+    acc.push([current])
+    return acc
+  }, [])
+}
+
 export class DcaService {
   constructor(private readonly positions: PositionsService) {}
 
@@ -60,20 +72,22 @@ export class DcaService {
     const allOpenPositions = await this.positions.findByStatus('open')
     const buckets = createBuckets(allOpenPositions)
 
-    logger.debug('DCA buckets')
     logger.debug(JSON.stringify(buckets))
 
-    mapKeys(buckets, async (positions, key) => {
-      if (positions.length > 1) {
-        const orderIds = flatMap(positions.map((p) => p.buy.orderIds)).map(
-          (id) => id!,
-        )
-        const dcaPosition = dollarCostAverage(positions)
-        logger.info(`DCA position: ${JSON.stringify(dcaPosition)}`)
+    mapKeys(buckets, async (bucket, key) => {
 
-        positions.map(async (pos) => {
-          logger.debug(`Mark position ${positionId(pos)} as 'merged'`)
-          await this.positions.update(pos, { status: 'merged' })
+      if (bucket.length > 1) {
+        const orderIds: string[] = flatMap(
+          bucket
+            .map((position: Position) => position.buy.orderIds)
+            .map((id: string) => id!)
+        )
+
+        const dcaPosition = dollarCostAverage(bucket)
+        logger.info(`DCA position: ${JSON.stringify(dcaPosition)}`)
+        bucket.map(async posistion => {
+          logger.debug(`Mark position ${generatePositionId(posistion)} as 'merged'`)
+          await this.positions.update(posistion, { status: 'merged' })
         })
 
         await this.positions.create({

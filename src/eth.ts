@@ -1,7 +1,7 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { buyBotFactory, takeFullProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
-import { formatMoney, formatNumber, positionId } from './common/utils'
+import { formatMoney, formatNumber, generatePositionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { PositionsService } from './positions/positions.service'
@@ -53,7 +53,7 @@ import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
         (acc, position) => {
           if (position.buy.price && position.buy.volume) {
             logger.info(
-              `Start watching sell opportunity for ${positionId(position)}`,
+              `Start watching sell opportunity for ${generatePositionId(position)}`,
             )
             return {
               costs: acc.costs + position.buy.price * position.buy.volume,

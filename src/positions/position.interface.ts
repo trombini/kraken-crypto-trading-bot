@@ -12,6 +12,7 @@ export interface Position extends mongoose.Document {
   date: string
   pair: string
   status: string
+  staked: boolean
   buy: {
     orderIds?: string[]
     price?: number

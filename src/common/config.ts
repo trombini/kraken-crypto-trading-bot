@@ -12,8 +12,10 @@ export interface BotConfig {
   cashSource: string
   goal: number
   goalStart: number
+  fee: number
   krakenApiKey: string
   krakenApiSecret: string
+  minBet: number
   maxBet: number
   minConfidence: number
   mongoDb: string
@@ -21,8 +23,8 @@ export interface BotConfig {
   reserve: number
   slackBotToken: string
   slackChannel: string
-  targetProfit: number
-  tax: number
+  targetProfitAmount: number
+  targetProfitPercentage: number
 }
 
 export const config: BotConfig = {
@@ -31,9 +33,11 @@ export const config: BotConfig = {
   cashSource: process.env.CASH_SOURCE || 'ZUSD', // USDF
   goal: process.env.GOAL ? parseFloat(process.env.GOAL) : 0,
   goalStart: process.env.GOAL_START ? parseFloat(process.env.GOAL_START) : 0,
+  fee: process.env.FEE ? parseFloat(process.env.FEE) : 0.0016,
   interval: process.env.INTERVAL ? parseFloat(process.env.INTERVAL) : 15,
   krakenApiKey: process.env.KRAKEN_API_KEY || '',
   krakenApiSecret: process.env.KRAKEN_API_SECRET || '',
+  minBet: process.env.MIN_BET ? parseFloat(process.env.MIN_BET) : 500,
   maxBet: process.env.MAX_BET ? parseFloat(process.env.MAX_BET) : 500,
   minConfidence: process.env.MIN_CONFIDENCE ? parseFloat(process.env.MIN_CONFIDENCE) : 0.5,
   mongoDb: process.env.MONGO || 'mongodb://localhost:27017/kraken-prod',
@@ -41,6 +45,6 @@ export const config: BotConfig = {
   reserve: process.env.RESERVE ? parseFloat(process.env.RESERVE) : 0,
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
-  targetProfit: process.env.TARGET_PROFIT ? parseFloat(process.env.TARGET_PROFIT) : 30,
-  tax: process.env.TAX ? parseFloat(process.env.TAX) : 0.0016,
+  targetProfitAmount: process.env.TARGET_PROFIT_AMOUNT ? parseFloat(process.env.TARGET_PROFIT_AMOUNT) : 20,
+  targetProfitPercentage: process.env.TARGET_PROFIT_PERCENTAGE ? parseFloat(process.env.TARGET_PROFIT_PERCENTAGE) : 0.04,
 }

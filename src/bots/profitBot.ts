@@ -1,7 +1,7 @@
 import { round } from 'lodash'
 import { Position } from '../positions/position.interface'
 import { BotConfig } from '../common/config'
-import { formatMoney, positionId } from '../common/utils'
+import { formatMoney, generatePositionId } from '../common/utils'
 import { slack } from '../slack/slack.service'
 import { logger } from '../common/logger'
 import { KrakenService } from '../kraken/krakenService'
@@ -24,7 +24,7 @@ export class ProfitBot {
   }
 
   async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
-    throw new Error('This method has to be implemented')
+    throw new Error('This method has to be implemented and should be overwritten')
   }
 
   async handleSellRecommendation(recommendation: BuyRecommendation) {
@@ -43,12 +43,13 @@ export class ProfitBot {
     })
 
     for (const position of positions) {
-      if(inWinZone(position, currentBidPrice, this.config.targetProfit, this.config.tax)) {
-        logger.info(`Position ${positionId(position)} is in WIN zone. Sell now! 🤑`)
+      const { targetProfitAmount, targetProfitPercentage, fee } = this.config
+      if(inWinZone(position, currentBidPrice, targetProfitAmount, targetProfitPercentage, fee)) {
+        logger.info(`Position ${generatePositionId(position)} is in WIN zone. Sell now! 🤑`)
         await this.sellPosition(position, currentBidPrice)
       }
       else {
-        logger.info(`Unfortunately position ${positionId(position)} is not yet in WIN zone 🤬`)
+        logger.info(`Unfortunately position ${generatePositionId(position)} is not yet in WIN zone 🤬`)
       }
     }
   }
@@ -67,11 +68,13 @@ export class ProfitBot {
 
   sendSlackMessage(position?: Position) {
     if(position) {
-      const msg = `Successfully SOLD ${positionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}`
+      const msg = `Successfully SOLD ${generatePositionId(position)} volume ${round(position?.sell?.volume || 0)} for ${formatMoney(position?.sell?.price || 0)}`
       slack(this.config).send(msg)
     }
   }
 
+  // Called after the Position has been soled to determine the real volume and average price
+  // We do this because we sell at "market" price and not "limit" price
   async evaluateProfit(position: Position) {
     try {
       logger.debug(`Fetch order details for orders '${position.sell.orderIds?.join(',')}'`)
@@ -81,7 +84,7 @@ export class ProfitBot {
         const order = await this.kraken.getOrder({ id: orderId })
 
         if(order === undefined) {
-          throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${positionId(position)}`)
+          throw new Error(`SELL order '${JSON.stringify(orderId)}' returned 'undefined'. we need to fix this manally. Position ${generatePositionId(position)}`)
         }
 
         // update position to keep track of profit
@@ -101,7 +104,7 @@ export class ProfitBot {
       }
     }
     catch(err) {
-      logger.error(`Error evaluating profit for ${positionId(position)}:`, err)
+      logger.error(`Error evaluating profit for ${generatePositionId(position)}:`, err)
     }
   }
 

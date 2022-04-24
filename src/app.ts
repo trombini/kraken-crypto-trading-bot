@@ -1,18 +1,18 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { buyBotFactory, takeProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
-import { formatMoney, formatNumber, positionId } from './common/utils'
+import { formatMoney, formatNumber, generatePositionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
 import { DcaService } from './common/dca'
-import connect from './common/db/connect'
-import KrakenClient from 'kraken-api'
 import { createRecoveryService } from './positions/recovery.service'
 import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
-import { slack } from './slack/slack.service'
-
+import { StakingBot } from './staking/stakingBot'
+import { createAPI } from './krakenPlus'
+import connect from './common/db/connect'
+import KrakenClient from 'kraken-api'
 
 (async function () {
   console.log(config)
@@ -26,13 +26,13 @@ import { slack } from './slack/slack.service'
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const kraken = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(kraken, config)
-  const recoveryService = createRecoveryService(positionsService, kraken, config)
+  const recoveryService = createRecoveryService(positionsService, dcaService, kraken, config)
   const killswitch = createLaunchDarklyService()
 
   // make sure we check killswitch when starting up. just for fun
   const enabled = await killswitch.tripped()
 
-  //
+  // calculate profit
   if (config.goal > 0) {
     await positionsService
       .find({
@@ -42,10 +42,13 @@ import { slack } from './slack/slack.service'
       .then((positions) => {
         const profit = positions.reduce((acc, p) => {
 
-          console.log(`${p?.buy?.volume} - ${p?.sell?.volume}`)
-          console.log(p)
+          if(p?.sell?.volume === undefined && p?.sell?.volumeToKeep === undefined) {
+            logger.error('ERROR IN LOG. NOT ALL INFOS')
+            return acc
+          }
 
-          const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
+          const profit = p?.sell?.volumeToKeep || 0
+          // const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
           return acc + profit
         }, 0)
         const totalProfit = config.goalStart + profit
@@ -64,7 +67,7 @@ import { slack } from './slack/slack.service'
         (acc, position) => {
           if (position.buy.price && position.buy.volume) {
             logger.info(
-              `Start watching sell opportunity for ${positionId(position)}`,
+              `Start watching sell opportunity for ${generatePositionId(position)}`,
             )
             return {
               costs: acc.costs + position.buy.price * position.buy.volume,
@@ -87,7 +90,11 @@ import { slack } from './slack/slack.service'
   watcher.start([5, 15, 240, 1440])
   //watcher.start([5, 15])
 
-  // Initiate Bots
+  // Staking bot
+  const krakenApi2 = createAPI(config.krakenApiKey, config.krakenApiSecret)
+  const stakingBot = new StakingBot(watcher, krakenApi2, positionsService, config)
+
+  // Initiate Buy and Sell bots
   buyBotFactory(watcher, kraken, positionsService, dcaService, killswitch, config)
   takeProfitBotFactory(watcher, kraken, positionsService, killswitch, config)
   //fullProfitBotFactory(watcher, kraken, positionsService, config)

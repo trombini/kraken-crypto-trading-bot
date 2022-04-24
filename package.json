@@ -1,11 +1,13 @@
 {
   "name": "crypto-trading-bot",
-  "version": "1.3.5",
+  "version": "1.53.0",
   "description": "",
   "main": "kraken.js",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node ./dist/src/app.js --unhandled-rejections=strict",
+    "start:dev": "nodemon --watch './**/*.ts' --exec 'ts-node' ./src/app.ts",
+    "start:dddd": "nodemon --watch './src/**/*.ts' --exec 'node ./dist/src/app.js'",
     "dev:debug": "node --inspect ./dist/src/app.js",
     "dev": "tsc --watch",
     "build": "tsc",
@@ -27,13 +29,17 @@
     "eslint-plugin-prettier": "^3.3.1",
     "glob": "^7.1.6",
     "jest": "^26.6.3",
+    "nodemon": "^2.0.15",
     "prettier": "^2.2.1",
     "ts-jest": "^26.5.1",
+    "ts-node": "^10.7.0",
     "typescript": "^4.1.5"
   },
   "dependencies": {
+    "@d3fc/d3fc-technical-indicator": "^8.1.0",
     "@slack/web-api": "^6.0.0",
     "axios": "^0.21.1",
+    "d3fc": "^15.2.4",
     "dotenv": "^8.2.0",
     "global-agent": "^2.1.12",
     "kraken-api": "^1.0.1",
@@ -44,6 +50,8 @@
     "numeral": "^2.0.6",
     "promise-deferred": "^2.0.3",
     "qs": "^6.5.2",
+    "query-string": "^7.1.1",
+    "ta.js": "^1.6.0",
     "technicalindicators": "^3.1.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3"

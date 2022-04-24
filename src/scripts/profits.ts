@@ -9,7 +9,7 @@ import connect from '../common/db/connect'
   const service = new PositionsService()
   service.find({ pair: config.pair, status: 'sold' }).then(positions => {
     const result = positions.reduce((acc, pos) => {
-      console.log(`${pos.id} ${pos?.buy?.volume} - ${pos?.sell?.volume} => ${pos?.sell?.volumeToKeep}`)
+      //console.log(`${pos.id} ${pos?.buy?.volume} - ${pos?.sell?.volume} => ${pos?.sell?.volumeToKeep}`)
       const profit = (pos?.buy?.volume || 0) - (pos?.sell?.volume || 0)
       return {
         total: acc.total + profit,
@@ -17,6 +17,6 @@ import connect from '../common/db/connect'
       }
     }, { total: 0, positions: 0 })
 
-    console.log(result)
+    //console.log(result)
   })
 })()

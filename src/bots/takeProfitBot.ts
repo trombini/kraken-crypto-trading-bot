@@ -6,7 +6,7 @@ import { BotConfig } from '../common/config'
 import { round } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
-import { positionId } from '../common/utils'
+import { generatePositionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
 import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 
@@ -29,20 +29,19 @@ export class TakeProfitBot extends ProfitBot {
   }
 
   async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
-    if(position.buy.price && position.buy.volume) {
-
+    if (position.buy.price && position.buy.volume) {
       const costs = position.buy.price * position.buy.volume
-      const fee = costs * this.config.tax * 2
+      const fee = costs * this.config.fee * 2
       const totalCosts = fee + costs
       const volumeToSell = round((totalCosts / currentBidPrice), 0)
       const volumeToKeep = position.buy.volume - volumeToSell
 
       if(volumeToKeep < 0) {
-        throw Error(`Expected profit for ${positionId(position)} would be negative. Stop the sell!`)
+        throw Error(`Expected profit for ${generatePositionId(position)} would be negative. Stop the sell!`)
       }
 
       try {
-        logger.info(`Create SELL order for ${positionId(position)}. volume: ${volumeToSell}, price: ~ ${currentBidPrice}, keep: ${volumeToKeep}`)
+        logger.info(`Create SELL order for ${generatePositionId(position)}. volume: ${volumeToSell}, price: ~ ${currentBidPrice}, keep: ${volumeToKeep}`)
 
         // update the status of the position so that we don't end up selling it multiple times
         await this.positionService.update(position, {
@@ -52,7 +51,7 @@ export class TakeProfitBot extends ProfitBot {
 
         // create SELL order with Kraken
         const orderIds = await this.kraken.createSellOrder({ pair: position.pair, volume: volumeToSell })
-        logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
+        logger.info(`Successfully created SELL order for ${generatePositionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds
         const updatedPosition = await this.positionService.update(position, {
@@ -64,7 +63,7 @@ export class TakeProfitBot extends ProfitBot {
         return updatedPosition
       }
       catch(err) {
-        logger.error(`Error SELL ${positionId(position)}:`, err)
+        logger.error(`Error SELL ${generatePositionId(position)}:`, err)
         logger.error(JSON.stringify(err))
       }
     }

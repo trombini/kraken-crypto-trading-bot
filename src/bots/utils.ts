@@ -25,42 +25,67 @@ export const inWinZoneByPercentage = (
   price: number,
   currentBidPrice: number,
   targetProfit: number,
-  tax: number,
+  fee: number,
 ): boolean => {
-  const initialCosts = price * volume * (1 + tax)
-  const currentProfit = currentBidPrice * volume * (1 - tax)
-  const percentage = (100 * currentProfit) / initialCosts
 
-  logger.debug(`[WIN ZONE / Percentage]: ${initialCosts} -- ${currentProfit} -- ${percentage}`)
+  const purchaseFee = price * volume * fee
+  const initialCosts = (price * volume) + purchaseFee
 
-  return percentage > 100 + (100 * targetProfit)
+  const salesFee = currentBidPrice * volume * fee
+  const currentProfit = (currentBidPrice * volume) - salesFee
+  const percentage = ((100 * currentProfit) / initialCosts - 100)
+  // const realTargetProfit = Math.pow(volume, -1) + 0.01
+
+  logger.debug(`Determining WIN zone by Percentage`)
+  logger.debug(`volume: ${volume}, targetProfit: ${round(targetProfit, 4)}, initialCosts: ${round(initialCosts, 2)}, currentProfit: ${round(currentProfit, 4)}, percentage:${round(percentage, 2)}%`)
+  logger.debug(`${round(percentage, 2)} >= (${100 * targetProfit})`)
+
+  return percentage >= (100 * targetProfit)
 }
 
 export const inWinZone = (
   position: Position,
   currentBidPrice: number,
-  targetProfit: number,
+  targetProfitAmount: number,
+  targetProfitPercentage: number,
   tax: number,
 ): boolean => {
   if (!position.buy.price || !position.buy.volume) {
     throw new Error(`Not enough data to estimate win zone`)
   }
 
-  if (targetProfit > 1) {
-    return inWinZoneByAmount(
-      position.buy.volume,
-      position.buy.price,
-      currentBidPrice,
-      targetProfit,
-      tax,
-    )
-  } else {
-    return inWinZoneByPercentage(
-      position.buy.volume,
-      position.buy.price,
-      currentBidPrice,
-      targetProfit,
-      tax,
-    )
-  }
+  const resultAmount = inWinZoneByAmount(
+    position.buy.volume,
+    position.buy.price,
+    currentBidPrice,
+    targetProfitAmount,
+    tax,
+  )
+
+  const resultPercentage = inWinZoneByPercentage(
+    position.buy.volume,
+    position.buy.price,
+    currentBidPrice,
+    targetProfitPercentage,
+    tax,
+  )
+
+  return resultAmount || resultPercentage
+  // if (targetProfit > 1) {
+  //   return inWinZoneByAmount(
+  //     position.buy.volume,
+  //     position.buy.price,
+  //     currentBidPrice,
+  //     targetProfit,
+  //     tax,
+  //   )
+  // } else {
+  //   return inWinZoneByPercentage(
+  //     position.buy.volume,
+  //     position.buy.price,
+  //     currentBidPrice,
+  //     targetProfit,
+  //     tax,
+  //   )
+  // }
 }

@@ -1,5 +1,5 @@
 import { MACDResult } from '../common/macdUtils'
-import { analyse } from './uptrend'
+import { calculateConfidence, filterRelevantBlocks } from './uptrend'
 
 // TODO: move to test utils
 const mockMacdResult = (matured: boolean, values: number[]): MACDResult => {
@@ -20,7 +20,7 @@ describe('MACD Uptrend', () => {
   it(`should fail because we don't have enough data`, () => {
     const macd = mockMacdResult(true, [1, 2])
     expect(() => {
-      analyse(macd)
+      filterRelevantBlocks(macd)
     }).toThrow()
   })
 
@@ -44,8 +44,9 @@ describe('MACD Uptrend', () => {
 
   it('should succeed because it an uptrend', () => {
     const macd = mockMacdResult(true, [-1, 0, 1])
-    const result = analyse(macd)
-    expect(result).toBe(1)
+    const blocks = filterRelevantBlocks(macd)
+    const confidence = calculateConfidence(blocks)
+    expect(confidence).toBe(1)
   })
 
   // it('should fail because it is not YET a downswing (because of maturity)', () => {

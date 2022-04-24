@@ -62,7 +62,7 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
       return acc + (result.weight * result.confidence)
     }, 0), 2)
 
-    logger.debug(`${this.constructor.name}, required signals: ${mandatorySignalsPositive}, confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined, 2)}`)
+    logger.debug(`${this.constructor.name}, required signals: ${mandatorySignalsPositive}, confidence: ${round(confidence, 2)}, summary: ${JSON.stringify(result, undefined)}`)
 
     if (mandatorySignalsPositive && confidence >= 0) {
     //if (mandatorySignalsPositive && confidence >= this.config.minConfidence) {
