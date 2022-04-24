@@ -16,39 +16,37 @@ export const getMessageSignature = (path: string, message: string, secret: strin
 }
 
 export const rawRequest = async (path: string, headers: any, params: any): Promise<AxiosResponse> => {
-	const instance = axios.create({
-		baseURL: BASE_URL,
-		timeout: 5000,
-		headers
-	})
+  const instance = axios.create({
+    baseURL: BASE_URL,
+    timeout: 5000,
+    headers,
+  })
 
-	return await instance.post(path, stringify(params))
+  return await instance.post(path, stringify(params))
 }
 
 export const responseHandler = (response) => {
-	if(response.data.error && response.data.error.length) {
-		const error = response.data.error
-			.filter((e) => e.startsWith('E'))
-			.map((e) => e.substr(1))
-		if(!error.length) {
-			throw new Error("Kraken API returned an unknown error");
-		}
-		throw new Error(error.join(', '))
-	}
+  if (response.data.error && response.data.error.length) {
+    const error = response.data.error.filter((e) => e.startsWith('E')).map((e) => e.substr(1))
+    if (!error.length) {
+      throw new Error('Kraken API returned an unknown error')
+    }
+    throw new Error(error.join(', '))
+  }
 
-	// all good
-	return response
+  // all good
+  return response
 }
 
 export const publicMethod = async (key: string, secret: string, method: string, params: any): Promise<any> => {
-	const path = `/0/public/${method}`
-	const response = await rawRequest(path, {}, params)
-	const data = responseHandler(response)
-	return data
+  const path = `/0/public/${method}`
+  const response = await rawRequest(path, {}, params)
+  const data = responseHandler(response)
+  return data
 }
 
 export const privateMethod = async (key: string, secret: string, method: string, params: any): Promise<any> => {
-	if (!params.nonce) {
+  if (!params.nonce) {
     params = {
       nonce: moment().unix() * 1000 * 1000,
       ...params,
@@ -56,13 +54,13 @@ export const privateMethod = async (key: string, secret: string, method: string,
   }
 
   const path = `/0/private/${method}`
-	const signature = getMessageSignature(path, stringify(params), secret, params.nonce)
-	const headers = {
-		'API-Key': key,
-		'API-Sign': signature,
-	}
+  const signature = getMessageSignature(path, stringify(params), secret, params.nonce)
+  const headers = {
+    'API-Key': key,
+    'API-Sign': signature,
+  }
 
-	const response = await rawRequest(path, headers, params)
-	const data = responseHandler(response)
-	return data
+  const response = await rawRequest(path, headers, params)
+  const data = responseHandler(response)
+  return data
 }
