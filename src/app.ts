@@ -1,18 +1,18 @@
 import { AssetWatcher } from './assetWatcher/assetWatcher'
 import { buyBotFactory, takeProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
-import { formatMoney, formatNumber, positionId } from './common/utils'
+import { formatMoney, formatNumber, generatePositionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
 import { logger } from './common/logger'
 import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
 import { DcaService } from './common/dca'
-import connect from './common/db/connect'
-import KrakenClient from 'kraken-api'
 import { createRecoveryService } from './positions/recovery.service'
 import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
-import { slack } from './slack/slack.service'
-
+import { StakingBot } from './staking/stakingBot'
+import { createAPI } from './krakenPlus'
+import connect from './common/db/connect'
+import KrakenClient from 'kraken-api'
 
 (async function () {
   console.log(config)
@@ -67,7 +67,7 @@ import { slack } from './slack/slack.service'
         (acc, position) => {
           if (position.buy.price && position.buy.volume) {
             logger.info(
-              `Start watching sell opportunity for ${positionId(position)}`,
+              `Start watching sell opportunity for ${generatePositionId(position)}`,
             )
             return {
               costs: acc.costs + position.buy.price * position.buy.volume,
@@ -90,7 +90,11 @@ import { slack } from './slack/slack.service'
   watcher.start([5, 15, 240, 1440])
   //watcher.start([5, 15])
 
-  // Initiate Bots
+  // Staking bot
+  const krakenApi2 = createAPI(config.krakenApiKey, config.krakenApiSecret)
+  const stakingBot = new StakingBot(watcher, krakenApi2, positionsService, config)
+
+  // Initiate Buy and Sell bots
   buyBotFactory(watcher, kraken, positionsService, dcaService, killswitch, config)
   takeProfitBotFactory(watcher, kraken, positionsService, killswitch, config)
   //fullProfitBotFactory(watcher, kraken, positionsService, config)

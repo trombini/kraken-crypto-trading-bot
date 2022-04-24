@@ -103,7 +103,6 @@ export class BuyBot {
     readonly config: BotConfig,
   ) {
     this.cache = []
-
     if (this.analyst) {
       this.analyst.on(ANALYST_EVENTS.BUY, (recommendation: BuyRecommendation) => {
         this.handleBuyRecommendation(recommendation)
@@ -113,8 +112,10 @@ export class BuyBot {
 
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<void> {
     // Make sure we don't buy if Killswitch is tripped
+
+
     if (await this.killswitch.tripped()) {
-      logger.debug('CANT BUY BECAUSE OF KILLSWITCH')
+      logger.debug('Would like to buy but can\' as KILLSWITCH is triggered.')
       slack(this.config).send(`I wanted to BUY at ${recommendation.lastPrice} but Killswitch is active.`)
       return
     }

@@ -5,6 +5,7 @@ const PositionSchema: Schema = new Schema({
   date: { type: String, required: true },
   pair: { type: String, required: true },
   status: { type: String, required: true },
+  staked: { type: Boolean, default: false },
   buy: {
     orderIds: [{ type: String }],
     price: { type: Number },

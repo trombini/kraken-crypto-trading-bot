@@ -2,7 +2,7 @@ import { flatMap, mapKeys, round } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { logger } from './logger'
-import { positionId } from './utils'
+import { generatePositionId } from './utils'
 
 const PRICE_RANGE = 0.015
 
@@ -86,7 +86,7 @@ export class DcaService {
         const dcaPosition = dollarCostAverage(bucket)
         logger.info(`DCA position: ${JSON.stringify(dcaPosition)}`)
         bucket.map(async posistion => {
-          logger.debug(`Mark position ${positionId(posistion)} as 'merged'`)
+          logger.debug(`Mark position ${generatePositionId(posistion)} as 'merged'`)
           await this.positions.update(posistion, { status: 'merged' })
         })
 

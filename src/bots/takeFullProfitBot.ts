@@ -5,7 +5,7 @@ import { logger } from '../common/logger'
 import { BotConfig } from '../common/config'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
-import { positionId } from '../common/utils'
+import { generatePositionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
 import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 
@@ -30,7 +30,7 @@ export class TakeFullProfitBot extends ProfitBot {
   async createSellOrder(position: Position, currentBidPrice: number): Promise<Position | undefined> {
     if(position.buy.price && position.buy.volume) {
       try {
-        logger.info(`Create SELL order for ${positionId(position)}. volume: ${position.buy.volume}, price: ~ ${currentBidPrice}, keep: 0`)
+        logger.info(`Create SELL order for ${generatePositionId(position)}. volume: ${position.buy.volume}, price: ~ ${currentBidPrice}, keep: 0`)
 
         // update the status of the position so that we don't end up selling it multiple times
         await this.positionService.update(position, {
@@ -44,7 +44,7 @@ export class TakeFullProfitBot extends ProfitBot {
           volume: position.buy.volume
         })
 
-        logger.info(`Successfully created SELL order for ${positionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
+        logger.info(`Successfully created SELL order for ${generatePositionId(position)}. orderIds: ${JSON.stringify(orderIds)}`)
 
         // mark position as sold and keep track of the orderIds
         await this.positionService.update(position, {
@@ -56,7 +56,7 @@ export class TakeFullProfitBot extends ProfitBot {
         return this.positionService.findById(position.id)
       }
       catch(err) {
-        logger.error(`Error SELL ${positionId(position)}:`, err)
+        logger.error(`Error SELL ${generatePositionId(position)}:`, err)
         logger.error(JSON.stringify(err))
       }
     }
