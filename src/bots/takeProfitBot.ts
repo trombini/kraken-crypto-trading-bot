@@ -23,8 +23,7 @@ export class TakeProfitBot extends ProfitBot {
 
     if (analyst) {
       analyst.on(ANALYST_EVENTS.SELL, (data: BuyRecommendation) => {
-        throw Error('REdINTRODUCE!!!')
-        //this.handleSellRecommendation(data)
+        this.handleSellRecommendation(data)
       })
     }
   }

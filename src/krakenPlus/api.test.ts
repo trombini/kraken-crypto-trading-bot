@@ -1,5 +1,5 @@
-import { getMessageSignature } from './api'
 import { stringify } from 'query-string'
+import { getMessageSignature } from './utils'
 
 describe('KrakenAPI', () => {
   it('Signature should be valid', async () => {
