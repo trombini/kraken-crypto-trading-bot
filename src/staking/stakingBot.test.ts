@@ -12,8 +12,13 @@ describe('StakingBot', () => {
     expect(result).toBe(false)
   })
 
-  it('Should unsteak position', async () => {
+  it('Should unsteak position as it is close to being sold', async () => {
     const result = determineIfUnstake(95, 100)
+    expect(result).toBe(true)
+  })
+
+  it('Should unsteak position as it is already in the win zone', async () => {
+    const result = determineIfUnstake(105, 100)
     expect(result).toBe(true)
   })
 
