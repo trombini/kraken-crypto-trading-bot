@@ -67,7 +67,7 @@ import KrakenClient from 'kraken-api'
         (acc, position) => {
           if (position.buy.price && position.buy.volume) {
             logger.info(
-              `Start watching sell opportunity for ${generatePositionId(position)}`,
+              `Start watching sell opportunity for ${generatePositionId(position)} ${position.staked ? '(staked)' : ''}`,
             )
             return {
               costs: acc.costs + position.buy.price * position.buy.volume,

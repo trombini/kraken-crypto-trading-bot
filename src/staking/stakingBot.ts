@@ -12,7 +12,7 @@ export const determineIfStake = (currentAskPrice: number, bid: number): boolean 
 }
 
 export const determineIfUnstake = (currentAskPrice: number, bid: number): boolean => {
-  // console.log(`${(currentAskPrice / bid)} >= 0.95`)
+  logger.debug(`Calculate UNSTAKE: ${(currentAskPrice / bid)} >= 0.95`)
   return (currentAskPrice / bid) >= 0.95
 }
 
