@@ -16,6 +16,7 @@ import KrakenClient from 'kraken-api'
 
 (async function () {
   console.log(config)
+  console.log('ddd')
 
   setInterval(() => {}, 10000)
 

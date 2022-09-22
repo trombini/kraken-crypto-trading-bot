@@ -8,6 +8,7 @@ import { logger } from '../common/logger'
 
 export const determineIfStake = (currentAskPrice: number, bid: number): boolean => {
   // console.log(`${(currentAskPrice / bid)} <= 0.93`)
+  logger.debug(`Calculate STAKE: ${(currentAskPrice / bid)} <= 0.93`)
   return (currentAskPrice / bid) <= 0.93
 }
 
