@@ -2,10 +2,10 @@ import { Analyst, ANALYST_EVENTS } from './analyst'
 import { BotConfig } from '../common/config'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { logger } from '../common/logger'
-import { upswing } from '../indicators/macd/upswing'
 import { stochastic } from '../indicators/stoachastic/stochastic'
-import { uptrend } from '../indicators/macd/uptrend'
 import { rsi } from '../indicators/rsi/rsi'
+import * as macd from '../indicators/macd'
+
 
 export class BuyAnalyst extends Analyst {
 
@@ -17,9 +17,11 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 240)
     watcher.subscribe(this, 1440)
 
-    // register indicators CLEANED
-    this.registerIndicator(true, 0.05, 15, 'UPSWING 15m', upswing('15m', 15, config.blockMaturity))
-    this.registerIndicator(false, 0.33, 240, 'UPTREND 4h', uptrend('4h', 240, 0.5))
+    // required indicators
+    this.registerIndicator(true, 0.05, 15, 'UPSWING 15m', macd.upswing('15m', 15, config.blockMaturity))
+
+    // optional indicators
+    this.registerIndicator(false, 0.33, 240, 'UPTREND 4h', macd.uptrend('4h', 240, 0.5))
     this.registerIndicator(false, 0.38, 240, 'RSI 4h', rsi('4h'))
     this.registerIndicator(false, 0.24, 240, 'STOCHF 4h', stochastic('4h'))
 
@@ -31,7 +33,7 @@ export class BuyAnalyst extends Analyst {
 
     // StochF
     // Direction of the trend of the line. If pointing downwards -> bad confidence.
-    // Angle if it will be taken over by signal trendline
+    // Positive if it is taken over by signal trendline
   }
 
   sendRecommendationToBot(pair: string, confidence: number) {
