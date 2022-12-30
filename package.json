@@ -1,6 +1,6 @@
 {
   "name": "crypto-trading-bot",
-  "version": "1.58.0",
+  "version": "1.59.0",
   "description": "",
   "main": "kraken.js",
   "scripts": {
