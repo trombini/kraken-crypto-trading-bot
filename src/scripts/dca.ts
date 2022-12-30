@@ -8,6 +8,6 @@ import connect from '../common/db/connect'
   await connect(config.mongoDb)
 
   const service = new PositionsService()
-  const dcaService = new DcaService(service)
+  const dcaService = new DcaService(config, service)
   await dcaService.dcaOpenPositions()
 })()

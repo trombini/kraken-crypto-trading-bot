@@ -3,7 +3,7 @@ import { buyBotFactory, takeProfitBotFactory } from './bots/factory'
 import { config } from './common/config'
 import { formatMoney, formatNumber, generatePositionId } from './common/utils'
 import { KrakenService } from './kraken/krakenService'
-import { logger } from './common/logger'
+import { Logger } from './common/logger'
 import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
 import { DcaService } from './common/dca'
@@ -15,15 +15,16 @@ import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
 
 (async function () {
+  const logger = Logger('Main')
+
   console.log(config)
-  console.log('ddd')
 
   setInterval(() => {}, 10000)
 
   await connect(config.mongoDb)
 
   const positionsService = new PositionsService()
-  const dcaService = new DcaService(positionsService)
+  const dcaService = new DcaService(config, positionsService)
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const kraken = new KrakenService(krakenApi, config)
   const watcher = new AssetWatcher(kraken, config)

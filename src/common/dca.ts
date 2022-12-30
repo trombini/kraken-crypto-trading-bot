@@ -1,8 +1,11 @@
-import { flatMap, mapKeys, round } from 'lodash'
+import { flatMap, mapKeys } from 'lodash'
 import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
-import { logger } from './logger'
+import { Logger } from './logger'
 import { generatePositionId } from './utils'
+import { BotConfig } from './config'
+
+const logger = Logger('DcaService')
 
 const PRICE_RANGE = 0.015
 
@@ -65,9 +68,17 @@ const createBuckets = (positions: Position[]): any => {
 }
 
 export class DcaService {
-  constructor(private readonly positions: PositionsService) {}
+  constructor(
+    private readonly config: BotConfig,
+    private readonly positions: PositionsService
+  ) {}
 
   async dcaOpenPositions() {
+    if (!this.config.dcaEnabled) {
+      logger.debug('DCA is disabled')
+      return
+    }
+
     logger.info(`Run DCA`)
     const allOpenPositions = await this.positions.findByStatus('open')
     const buckets = createBuckets(allOpenPositions)

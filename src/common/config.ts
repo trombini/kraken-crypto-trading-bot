@@ -10,6 +10,7 @@ export interface BotConfig {
   blockMaturity: number
   bypassKrakenApi: boolean
   cashSource: string
+  dcaEnabled: boolean
   goal: number
   goalStart: number
   fee: number
@@ -31,6 +32,7 @@ export const config: BotConfig = {
   blockMaturity: process.env.BLOCK_MATURITY ? parseFloat(process.env.BLOCK_MATURITY) : 0.5,
   bypassKrakenApi: process.env.BYPASS_KRAKEN_API === 'true' ? true : false,
   cashSource: process.env.CASH_SOURCE || 'ZUSD', // USDF
+  dcaEnabled: process.env.DCA_ENABLED === 'true' ? true : false,
   goal: process.env.GOAL ? parseFloat(process.env.GOAL) : 0,
   goalStart: process.env.GOAL_START ? parseFloat(process.env.GOAL_START) : 0,
   fee: process.env.FEE ? parseFloat(process.env.FEE) : 0.0016,

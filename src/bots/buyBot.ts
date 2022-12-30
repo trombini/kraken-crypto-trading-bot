@@ -13,7 +13,6 @@ import { DcaService } from 'src/common/dca'
 import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 import moment from 'moment'
 
-
 /**
  * @param reserve Amount we want to hold as reserve
  * @param availableAmount Amount of money we have available on exchange
@@ -22,7 +21,13 @@ import moment from 'moment'
  * @param confidence Confidence in the market
  * @returns amount we are fine to invest
  */
-export const calculateRisk = (reserveAmount: number, availableAmount: number, minBet: number, maxRisk: number, confidence: number): number => {
+export const calculateRisk = (
+  reserveAmount: number,
+  availableAmount: number,
+  minBet: number,
+  maxRisk: number,
+  confidence: number,
+): number => {
   logger.debug(`Calculate risk with availableAmount: ${round(availableAmount, 2)}, reserveAmount: ${reserveAmount}, maxRisk: ${maxRisk}`)
 
   const totalAvailabeFunds = availableAmount - reserveAmount
@@ -34,15 +39,11 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
   }
 
   // available funds is what ever is smaller. MaxRisk or 25% of the total available funds
-  const availableFunds = maxRisk < (totalAvailabeFunds * 0.25) ?
-    maxRisk : (totalAvailabeFunds * 0.25)
-
+  const availableFunds = maxRisk < totalAvailabeFunds * 0.25 ? maxRisk : totalAvailabeFunds * 0.25
 
   // The risk is the amount we are willing to bet in a single order
   // The risk is calculated on the availableFunds
   const risk = round(availableFunds * confidence, 2)
-
-
 
   // Risk is too low, it is not worth buying cosindering the exchange costs
   if (risk < minBet) {
@@ -51,19 +52,14 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
     throw new Error(`risk (${round(risk, 2)}) is less than minBet (${minBet})`)
   }
 
-
   // TODO: Improve
   logger.debug(`Calculated risk ${risk}`)
 
-
   return risk
-
-
 
   // if(risk < maxFunds) {
   //   return risk
   // }
-
 
   // if(risk > maxFunds) {
   //   logger.debug(`Cap total risk at 25% of available funds or maxRisk`)
@@ -71,8 +67,6 @@ export const calculateRisk = (reserveAmount: number, availableAmount: number, mi
   // }
 
   // return 0
-
-
 
   // // The risk is below all threshold we have set. We are good to go
   // if(risk < maxAvailableFundsInRelationToTotal && risk < maxRisk) {
@@ -89,7 +83,6 @@ export const caluclateVolume = (risk: number, lastAskPrice: number) => {
 }
 
 export class BuyBot {
-
   cache: any[]
   watcher: AssetWatcher | undefined
   upswingAnalyst: Analyst | undefined
@@ -113,9 +106,8 @@ export class BuyBot {
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<void> {
     // Make sure we don't buy if Killswitch is tripped
 
-
     if (await this.killswitch.tripped()) {
-      logger.debug('Would like to buy but can\' as KILLSWITCH is triggered.')
+      logger.debug("Would like to buy but can' as KILLSWITCH is triggered.")
       slack(this.config).send(`I wanted to BUY at ${recommendation.lastPrice} but Killswitch is active.`)
       return
     }
@@ -126,25 +118,23 @@ export class BuyBot {
     if (recentTrades.length > 0) {
       logger.warn(`Won't buy ${recommendation.pair} as we just bought it X minutes ago.`)
       return
-    }
-    else {
+    } else {
       try {
         const { risk, volume } = await this.evaluateBuyRecommendation(recommendation)
-        if(risk > 0 && volume > 0) {
+        if (risk > 0 && volume > 0) {
           const position = await this.buy(recommendation.pair, recommendation.confidence, risk, volume)
           if (position) {
             await this.fetchOrderDetails(position)
             await this.dcaService.dcaOpenPositions()
           }
         }
-      }
-      catch(err) {
+      } catch (err) {
         logger.error(err)
       }
     }
   }
 
-  async evaluateBuyRecommendation(recommendation: BuyRecommendation): Promise<{ risk: number, volume: number}> {
+  async evaluateBuyRecommendation(recommendation: BuyRecommendation): Promise<{ risk: number; volume: number }> {
     const reserve = this.config.reserve
     const minBet = this.config.minBet
     const maxBet = this.config.maxBet
@@ -155,13 +145,13 @@ export class BuyBot {
       const risk = calculateRisk(reserve, availableAmount, minBet, maxBet, recommendation.confidence)
       const volume = caluclateVolume(risk, lastAskPrice)
       return {
-        risk, volume
+        risk,
+        volume,
       }
-    }
-    catch(err) {
+    } catch (err) {
       return {
         risk: 0,
-        volume: 0
+        volume: 0,
       }
     }
   }
@@ -178,20 +168,20 @@ export class BuyBot {
     try {
       const orderIds = await this.kraken.createBuyOrder({ pair, volume })
       const position = await this.positionsService.create({
-        pair, volume,
+        pair,
+        volume,
         orderIds: orderIds.map((id) => id.id),
       })
 
       // make sure we keep track of trade to that we don't buy it again right away
       this.cache.push({
         date: moment().unix(),
-        pair
+        pair,
       })
 
       // return latest version of the position
       return this.positionsService.findById(position.id)
-    }
-    catch (err) {
+    } catch (err) {
       logger.error(`Error BUY position`)
       logger.error(err)
     }

@@ -1,8 +1,10 @@
 import { OHLCBlock } from '../../common/interfaces/interfaces'
-import { logger } from '../../common/logger'
+import { Logger } from '../../common/logger'
 import { allPositives } from '../common/utils'
 import { MACDResult } from './macd.interface'
 import { calculateMACD, getMaturedHistogram } from './utils'
+
+const logger = Logger('IndicatorDownswing')
 
 export const downswing = (period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, blocks)

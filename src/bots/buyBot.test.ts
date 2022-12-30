@@ -29,7 +29,7 @@ beforeEach(() => {
   jest.spyOn(killswitch, 'tripped').mockResolvedValue(false)
 
   positionsService = new PositionsService()
-  dcaService = new DcaService(positionsService)
+  dcaService = new DcaService(config, positionsService)
   krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   krakenService = new KrakenService(krakenApi, config)
   watcher = new AssetWatcher(krakenService, config)

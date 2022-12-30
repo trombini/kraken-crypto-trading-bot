@@ -4,10 +4,11 @@ import { AssetsWatcherUpdateEvent, AssetWatcherObserver } from '../assetWatcher/
 import { PositionsService } from '../positions/positions.service'
 import { generatePositionId } from '../common/utils'
 import { IKrakenApi } from '../krakenPlus'
-import { logger } from '../common/logger'
+import { Logger } from '../common/logger'
+
+const logger = Logger('StakingBot')
 
 export const determineIfStake = (currentAskPrice: number, bid: number): boolean => {
-  // console.log(`${(currentAskPrice / bid)} <= 0.93`)
   logger.debug(`Calculate STAKE: ${(currentAskPrice / bid)} <= 0.93`)
   return (currentAskPrice / bid) <= 0.93
 }
@@ -18,12 +19,18 @@ export const determineIfUnstake = (currentAskPrice: number, bid: number): boolea
 }
 
 export class StakingBot implements AssetWatcherObserver {
-  constructor(readonly watcher: AssetWatcher, readonly kraken: IKrakenApi, readonly positions: PositionsService, readonly config: BotConfig) {
-    watcher.subscribe(this, 5)
+  constructor(readonly assetWatcher: AssetWatcher, readonly kraken: IKrakenApi, readonly positions: PositionsService, readonly config: BotConfig) {
+    assetWatcher.subscribe(this, 5)
   }
 
   async analyseAssetData(data: AssetsWatcherUpdateEvent): Promise<void> {
+
+    const lastBidPrice = await this.kraken.ticker.askPrice(this.config.pair)
     const lastAskPrice = await this.kraken.ticker.askPrice(this.config.pair)
+
+    console.log('lastBidPrice', lastBidPrice)
+    console.log('lastAskPrice', lastAskPrice)
+
     if (lastAskPrice) {
       const openPositions = await this.positions.findByStatus('open')
       for (const p of openPositions) {

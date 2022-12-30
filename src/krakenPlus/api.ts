@@ -1,5 +1,7 @@
-import { logger } from '../common/logger'
+import { Logger } from '../common/logger'
 import { privateMethod, publicMethod } from './utils'
+
+const logger = Logger('KrakenApi')
 
 export interface IKrakenApi {
   staking: {
@@ -7,7 +9,8 @@ export interface IKrakenApi {
     unstake(amount: number): Promise<void>
   }
   ticker: {
-    askPrice(pair: string): Promise<number>
+    askPrice(pair: string): Promise<number>,
+    bidPrice(pair: string): Promise<number>,
   }
 }
 
@@ -30,15 +33,26 @@ const unstake = (apiKey: string, apiSecret: string) => async (amount: number) =>
   }
 }
 
-const askPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
+const bidPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
   //return privateMethod(apiKey, apiSecret, 'Staking/Assets', params)
   return publicMethod(apiKey, apiSecret, 'Ticker', { pair }).then((response) => {
     const tickerData = response.data.result[pair.toUpperCase()]
     const bid = tickerData['b'][0]
-    logger.debug(`Current BID price for ${pair} is '${bid}'`)
+    logger.debug(`[KrakenAPI] Current BID price for ${pair} is '${bid}'`)
     return bid
   })
 }
+
+const askPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
+  //return privateMethod(apiKey, apiSecret, 'Staking/Assets', params)
+  return publicMethod(apiKey, apiSecret, 'Ticker', { pair }).then((response) => {
+    const tickerData = response.data.result[pair.toUpperCase()]
+    const bid = tickerData['a'][0]
+    logger.debug(`[KrakenAPI] Current ASK price for ${pair} is '${bid}'`)
+    return bid
+  })
+}
+
 
 export function createAPI(apiKey: string, apiSecret: string): IKrakenApi {
   return {
@@ -48,6 +62,7 @@ export function createAPI(apiKey: string, apiSecret: string): IKrakenApi {
     },
     ticker: {
       askPrice: askPrice(apiKey, apiSecret),
+      bidPrice: bidPrice(apiKey, apiSecret),
     },
   }
 }
