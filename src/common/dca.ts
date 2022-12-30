@@ -75,7 +75,7 @@ export class DcaService {
 
   async dcaOpenPositions() {
     if (!this.config.dcaEnabled) {
-      logger.debug('DCA is disabled')
+      logger.debug('Should run DCA but it is disabled')
       return
     }
 
