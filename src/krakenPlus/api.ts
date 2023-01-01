@@ -1,3 +1,4 @@
+import { round } from 'lodash'
 import { Logger } from '../common/logger'
 import { privateMethod, publicMethod } from './utils'
 
@@ -37,7 +38,7 @@ const bidPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
   //return privateMethod(apiKey, apiSecret, 'Staking/Assets', params)
   return publicMethod(apiKey, apiSecret, 'Ticker', { pair }).then((response) => {
     const tickerData = response.data.result[pair.toUpperCase()]
-    const bid = tickerData['b'][0]
+    const bid = round(tickerData['b'][0], 3)
     logger.debug(`[KrakenAPI] Current BID price for ${pair} is '${bid}'`)
     return bid
   })
@@ -47,7 +48,7 @@ const askPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
   //return privateMethod(apiKey, apiSecret, 'Staking/Assets', params)
   return publicMethod(apiKey, apiSecret, 'Ticker', { pair }).then((response) => {
     const tickerData = response.data.result[pair.toUpperCase()]
-    const bid = tickerData['a'][0]
+    const bid = round(tickerData['a'][0], 3)
     logger.debug(`[KrakenAPI] Current ASK price for ${pair} is '${bid}'`)
     return bid
   })

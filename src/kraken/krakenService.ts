@@ -1,12 +1,14 @@
-import { last } from 'lodash'
+import { last, round } from 'lodash'
 import { BotConfig } from '../common/config'
-import { logger } from '../common/logger'
+import { Logger } from '../common/logger'
 import { Order, OrderId } from '../common/interfaces/interfaces'
 import { OHLCBlock } from '../common/interfaces/interfaces'
 import { KrakenAddOrderApiResponse } from './kraken.interface'
 import { v4 as uuidv4 } from 'uuid'
 import KrakenClient from 'kraken-api'
 import moment from 'moment'
+
+const logger = Logger('KrakenService')
 
 const fakeCallbak = () => {}
 
@@ -63,7 +65,7 @@ export class KrakenService {
   async getAskPrice(pair: string): Promise<number> {
     return this.getTicker(pair)
       .then((response) => {
-        const ask = response['a'][0]
+        const ask = round(response['a'][0], 3)
         logger.debug(`Current ASK price for ${pair} is '${ask}'`)
         return ask
       })
@@ -73,7 +75,7 @@ export class KrakenService {
   async getBidPrice(pair: string): Promise<number> {
     return this.getTicker(pair)
       .then((response) => {
-        const bid = response['b'][0]
+        const bid =  round(response['b'][0], 3)
         logger.debug(`Current BID price for ${pair} is '${bid}'`)
         return bid
       })

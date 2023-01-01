@@ -1,7 +1,9 @@
 import { AssetsWatcherUpdateEvent, AssetWatcherObserver } from './assetWatcher.interface'
 import { BotConfig } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
-import { logger } from '../common/logger'
+import { Logger } from '../common/logger'
+
+const logger = Logger('AssetWatcher')
 
 const delay = 6
 export class AssetWatcher {

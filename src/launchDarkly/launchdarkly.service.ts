@@ -1,6 +1,8 @@
 
 import * as LaunchDarkly from 'launchdarkly-node-server-sdk'
-import { logger } from '../common/logger'
+import { Logger } from '../common/logger'
+
+const logger = Logger('LaunchDarklyService')
 
 export interface LaunchDarklyService {
   tripped(): Promise<boolean>
