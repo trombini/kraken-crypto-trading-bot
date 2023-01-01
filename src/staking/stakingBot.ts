@@ -8,23 +8,27 @@ import { Logger } from '../common/logger'
 
 const logger = Logger('StakingBot')
 
-export const determineIfStake = (currentAskPrice: number, bid: number): boolean => {
-  logger.debug(`Calculate STAKE: ${(currentAskPrice / bid)} <= 0.93`)
-  return (currentAskPrice / bid) <= 0.93
+export const determineIfStake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
+  logger.debug(`Calculate STAKE: ${currentAskPrice / bid} < ${threshold}`)
+  return currentAskPrice / bid < threshold
 }
 
-export const determineIfUnstake = (currentAskPrice: number, bid: number): boolean => {
-  logger.debug(`Calculate UNSTAKE: ${(currentAskPrice / bid)} >= 0.95`)
-  return (currentAskPrice / bid) >= 0.95
+export const determineIfUnstake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
+  logger.debug(`Calculate UNSTAKE: ${currentAskPrice / bid} >= ${threshold}`)
+  return currentAskPrice / bid >= threshold
 }
 
 export class StakingBot implements AssetWatcherObserver {
-  constructor(readonly assetWatcher: AssetWatcher, readonly kraken: IKrakenApi, readonly positions: PositionsService, readonly config: BotConfig) {
+  constructor(
+    readonly assetWatcher: AssetWatcher,
+    readonly kraken: IKrakenApi,
+    readonly positions: PositionsService,
+    readonly config: BotConfig,
+  ) {
     assetWatcher.subscribe(this, 5)
   }
 
   async analyseAssetData(data: AssetsWatcherUpdateEvent): Promise<void> {
-
     const lastBidPrice = await this.kraken.ticker.askPrice(this.config.pair)
     const lastAskPrice = await this.kraken.ticker.askPrice(this.config.pair)
 
@@ -34,8 +38,8 @@ export class StakingBot implements AssetWatcherObserver {
     if (lastAskPrice) {
       const openPositions = await this.positions.findByStatus('open')
       for (const p of openPositions) {
-        const bidPrice = (p.buy.price || 0)
-        if (p.staked === true && determineIfUnstake(lastAskPrice, bidPrice)) {
+        const bidPrice = p.buy.price || 0
+        if (p.staked === true && determineIfUnstake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
           logger.debug(`UNSTAKE ${generatePositionId(p)} ${p.buy.volume}`)
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.unstake(p.buy.volume)
@@ -45,8 +49,8 @@ export class StakingBot implements AssetWatcherObserver {
       }
 
       for (const p of openPositions) {
-        const bidPrice = (p.buy.price || 0)
-        if (p.staked === false && determineIfStake(lastAskPrice, bidPrice)) {
+        const bidPrice = p.buy.price || 0
+        if (p.staked === false && determineIfStake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
           logger.debug(`STAKE ${generatePositionId(p)} ${p.buy.volume}`)
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.stake(p.buy.volume)
