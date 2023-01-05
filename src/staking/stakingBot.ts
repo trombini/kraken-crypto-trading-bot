@@ -5,16 +5,17 @@ import { PositionsService } from '../positions/positions.service'
 import { generatePositionId } from '../common/utils'
 import { IKrakenApi } from '../krakenPlus'
 import { Logger } from '../common/logger'
+import { round } from 'lodash'
 
 const logger = Logger('StakingBot')
 
 export const determineIfStake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
-  logger.debug(`Calculate STAKE: ${currentAskPrice / bid} < ${threshold}`)
+  logger.debug(`Calculate STAKE: ${round(currentAskPrice / bid, 3)} < ${threshold}`)
   return currentAskPrice / bid < threshold
 }
 
 export const determineIfUnstake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
-  logger.debug(`Calculate UNSTAKE: ${currentAskPrice / bid} >= ${threshold}`)
+  logger.debug(`Calculate UNSTAKE: ${round(currentAskPrice / bid, 3)} >= ${threshold}`)
   return currentAskPrice / bid >= threshold
 }
 
@@ -32,15 +33,12 @@ export class StakingBot implements AssetWatcherObserver {
     const lastBidPrice = await this.kraken.ticker.askPrice(this.config.pair)
     const lastAskPrice = await this.kraken.ticker.askPrice(this.config.pair)
 
-    console.log('lastBidPrice', lastBidPrice)
-    console.log('lastAskPrice', lastAskPrice)
-
     if (lastAskPrice) {
       const openPositions = await this.positions.findByStatus('open')
       for (const p of openPositions) {
         const bidPrice = p.buy.price || 0
         if (p.staked === true && determineIfUnstake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
-          logger.debug(`UNSTAKE ${generatePositionId(p)} ${p.buy.volume}`)
+          logger.debug(`Unstake position ${generatePositionId(p)} ${p.buy.volume}`)
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.unstake(p.buy.volume)
             await this.positions.update(p, { staked: false })
@@ -51,7 +49,7 @@ export class StakingBot implements AssetWatcherObserver {
       for (const p of openPositions) {
         const bidPrice = p.buy.price || 0
         if (p.staked === false && determineIfStake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
-          logger.debug(`STAKE ${generatePositionId(p)} ${p.buy.volume}`)
+          logger.debug(`Stake position ${generatePositionId(p)} ${p.buy.volume}`)
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.stake(p.buy.volume)
             await this.positions.update(p, { staked: true })

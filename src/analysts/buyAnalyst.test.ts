@@ -1,15 +1,17 @@
 import KrakenClient from 'kraken-api'
 import { KrakenService } from '../kraken/krakenService'
-import { OHLCBlock } from '../common/interfaces/interfaces'
 import { config } from '../common/config'
 import { logger } from '../common/logger'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from './buyAnalyst'
+import { createAPI, IKrakenApi } from '../krakenPlus'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 
-let krakenApi: KrakenClient
+let krakenApi: IKrakenApi
+let krakenClient: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
-let blocks: OHLCBlock[]
+let blocks: OhlcCandle[]
 
 beforeAll(() => {
   logger.debug('before all')
@@ -17,9 +19,11 @@ beforeAll(() => {
 
 beforeEach(() => {
 
-  krakenApi = new KrakenClient('key', 'secret')
-  krakenService = new KrakenService(krakenApi, config)
-  watcher = new AssetWatcher(krakenService, config)
+  krakenApi = createAPI('ddd', 'dd')
+  krakenClient = new KrakenClient('key', 'secret')
+  krakenService = new KrakenService(krakenClient, config)
+  watcher = new AssetWatcher(krakenService, krakenApi, config)
+
   blocks = [{
     time: 1,
     open: 1,

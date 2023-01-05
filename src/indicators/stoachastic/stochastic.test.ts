@@ -1,14 +1,12 @@
-import { MACDResult } from '../common/macdUtils'
 import { mapOutputToConfindence } from './stochastic'
 import { Stochastic } from 'technicalindicators'
 import { StochasticInput } from 'technicalindicators/declarations/momentum/Stochastic'
-import { tail, takeRight } from 'lodash'
-import { OHLCBlock } from 'src/common/interfaces/interfaces'
-import * as ta from 'ta.js'
+import { takeRight } from 'lodash'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 
 describe('Stochastic Fast', () => {
 
-  let blocks: OHLCBlock[]
+  let blocks: OhlcCandle[]
   let input: StochasticInput
 
   beforeEach(() => {

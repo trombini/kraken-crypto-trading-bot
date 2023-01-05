@@ -9,9 +9,11 @@ import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { TakeFullProfitBot } from './takeFullProfitBot'
 import { SellAnalyst } from '../analysts/sellAnalyst'
 import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { createAPI, IKrakenApi } from '../krakenPlus'
 
 let positionsService: PositionsService
-let krakenApi: KrakenClient
+let krakenApi: IKrakenApi
+let krakenClient: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
@@ -22,10 +24,13 @@ let killswitch: LaunchDarklyService
 setupDb('takeFullProfitBot')
 
 beforeEach(() => {
+
+  krakenApi = createAPI('key', 'secret')
+  krakenClient = new KrakenClient('key', 'secret')
+  krakenService = new KrakenService(krakenClient, config)
+
   positionsService = new PositionsService()
-  krakenApi = new KrakenClient('key', 'secret')
-  krakenService = new KrakenService(krakenApi, config)
-  watcher = new AssetWatcher(krakenService, config)
+  watcher = new AssetWatcher(krakenService, krakenApi, config)
   analyst = new BuyAnalyst(watcher, config)
   killswitch = createLaunchDarklyService()
 

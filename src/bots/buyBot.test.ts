@@ -10,10 +10,12 @@ import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { DcaService } from '../common/dca'
 import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
 import { max, min } from 'lodash'
+import { IKrakenApi, createAPI } from '../krakenPlus'
 
 let dcaService: DcaService
 let positionsService: PositionsService
-let krakenApi: KrakenClient
+let krakenApi: IKrakenApi
+let krakenClient: KrakenClient
 let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: BuyAnalyst
@@ -28,11 +30,13 @@ beforeEach(() => {
   killswitch = createLaunchDarklyService()
   jest.spyOn(killswitch, 'tripped').mockResolvedValue(false)
 
+  krakenApi = createAPI(config.krakenApiKey, config.krakenApiSecret)
+  krakenClient = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
+  krakenService = new KrakenService(krakenClient, config)
+
   positionsService = new PositionsService()
   dcaService = new DcaService(config, positionsService)
-  krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
-  krakenService = new KrakenService(krakenApi, config)
-  watcher = new AssetWatcher(krakenService, config)
+  watcher = new AssetWatcher(krakenService, krakenApi, config)
   analyst = new BuyAnalyst(watcher, config)
 
   bot = new BuyBot(krakenService, positionsService, analyst, dcaService, killswitch, config)

@@ -29,13 +29,13 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
     })
   }
 
-  // Called by the AssetWatcher we observe
+  // This method is called by the AssetWatcher we are observing
   async analyseAssetData(event: AssetsWatcherUpdateEvent): Promise<void> {
 
     logger.debug(`Analyse period ${event.period} min`)
 
     // save data for later
-    this.data[event.period] = event.blocks
+    this.data[event.period] = event.candles
 
     const result = this.indicators.map((currentIndicator) => {
       const { required, weight, period, name, indicator } = currentIndicator

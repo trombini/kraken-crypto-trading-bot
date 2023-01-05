@@ -19,10 +19,11 @@ import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
   await connect(config.mongoDb)
 
   const positionsService = new PositionsService()
-  const dcaService = new DcaService(config, positionsService)
   const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
   const krakenService = new KrakenService(krakenApi, config)
-  const watcher = new AssetWatcher(krakenService, config)
+
+  const dcaService = new DcaService(config, positionsService)
+  const watcher = new AssetWatcher(krakenService, krakenApi, config)
   const killswitch = createLaunchDarklyService()
 
   //

@@ -1,30 +1,16 @@
-import { last, round } from 'lodash'
+import { round } from 'lodash'
 import { BotConfig } from '../common/config'
 import { Logger } from '../common/logger'
 import { Order, OrderId } from '../common/interfaces/interfaces'
-import { OHLCBlock } from '../common/interfaces/interfaces'
 import { KrakenAddOrderApiResponse } from './kraken.interface'
 import { v4 as uuidv4 } from 'uuid'
 import KrakenClient from 'kraken-api'
-import moment from 'moment'
 
 const logger = Logger('KrakenService')
 
 const fakeCallbak = () => {}
 
 const apiErrorHandler = response => response
-
-// array (<time>, <open>, <high>, <low>, <close>, <vwap>, <volume>, <count>)
-export const mapOhlcResultToObject = (result: any[]): OHLCBlock => {
-  return {
-    time: parseFloat(result[0]),
-    open: parseFloat(result[1]),
-    high: parseFloat(result[2]),
-    low: parseFloat(result[3]),
-    close: parseFloat(result[4]),
-    volume: parseFloat(result[6]),
-  }
-}
 
 export class KrakenService {
   constructor(readonly krakenApi: KrakenClient, readonly config: BotConfig) {}
@@ -35,22 +21,6 @@ export class KrakenService {
       .api('Balance', {}, () => {})
       .then(response => {
         return response.result[this.config.cashSource]
-      })
-  }
-
-  async getOHLCData(pair: string, period: number): Promise<any> {
-    const periods = 100
-    const since = moment().subtract(period * periods, 'm').unix()
-    return this.krakenApi
-      .api('OHLC', { pair, since, interval: period }, () => {})
-      .then(response => response.result[this.config.pair] )
-      .then(result => {
-        const blocks = result.map(mapOhlcResultToObject)
-        const head = last(blocks)
-        return {
-          head,
-          blocks,
-        }
       })
   }
 

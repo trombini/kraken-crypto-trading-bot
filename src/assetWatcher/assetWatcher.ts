@@ -2,26 +2,32 @@ import { AssetsWatcherUpdateEvent, AssetWatcherObserver } from './assetWatcher.i
 import { BotConfig } from '../common/config'
 import { KrakenService } from '../kraken/krakenService'
 import { Logger } from '../common/logger'
+import { IKrakenApi } from '../krakenPlus'
 
 const logger = Logger('AssetWatcher')
 
 const delay = 6
+
 export class AssetWatcher {
   intervals: any[]
   observers: any[]
 
-  constructor(readonly kraken: KrakenService, readonly config: BotConfig) {
+  constructor(
+    readonly kraken: KrakenService,
+    readonly newKrakenApiClient: IKrakenApi,
+    readonly config: BotConfig
+  ) {
     this.intervals = []
     this.observers = []
   }
 
   async fetchData(period: number): Promise<AssetsWatcherUpdateEvent> {
-    const result = await this.kraken.getOHLCData(this.config.pair, period)
+    const result = await this.newKrakenApiClient.ohlc(this.config.pair, period)
     return {
       period,
       pair: this.config.pair,
       head: result.head,
-      blocks: result.blocks
+      candles: result.blocks
     }
   }
 

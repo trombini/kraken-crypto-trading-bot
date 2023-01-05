@@ -1,5 +1,5 @@
-import { MACDResult } from '../common/macdUtils'
 import { analyse } from './downswing'
+import { MACDResult } from './utils'
 
 const mockMacdResult = (matured: boolean, values: number[]): MACDResult => {
   return {

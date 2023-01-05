@@ -1,13 +1,13 @@
 import { round, takeRight } from 'lodash'
 import { Stochastic } from 'technicalindicators'
-import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { convertToStochasticInput } from '../common/utils'
 import { logger } from '../../common/logger'
+import { OhlcCandle } from '../../krakenPlus/ohlc/ohlc'
 
 // Stochastic Fast
-export const stochastic = (name: string) => (blocks: OHLCBlock[]): number  => {
+export const stochastic = (name: string) => (candles: OhlcCandle[]): number  => {
 
-  const input = convertToStochasticInput(blocks)
+  const input = convertToStochasticInput(candles)
   const stochasticOutput = Stochastic.calculate(input)
   const { k, d } = takeRight(stochasticOutput, 1)[0]
   const confidence = mapOutputToConfindence(k, d)

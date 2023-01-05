@@ -1,13 +1,13 @@
-import { OHLCBlock } from '../../common/interfaces/interfaces'
 import { convertToStochasticInput } from '../common/utils'
 import { RSI } from 'technicalindicators'
 import { round, takeRight } from 'lodash'
 import { logger } from '../../common/logger'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 
 const bestCaseThreshold = 30
 const goodThreshold = 40
 
-export const rsi = (name: string) => (blocks: OHLCBlock[]): number  => {
+export const rsi = (name: string) => (blocks: OhlcCandle[]): number  => {
 
   const ohlc = convertToStochasticInput(blocks)
   const history = RSI.calculate({

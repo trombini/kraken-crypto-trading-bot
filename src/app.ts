@@ -23,11 +23,13 @@ import KrakenClient from 'kraken-api'
 
   await connect(config.mongoDb)
 
+  const krakenApi = createAPI(config.krakenApiKey, config.krakenApiSecret)
+  const krakenClient = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
+  const kraken = new KrakenService(krakenClient, config)
+
   const positionsService = new PositionsService()
   const dcaService = new DcaService(config, positionsService)
-  const krakenApi = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)
-  const kraken = new KrakenService(krakenApi, config)
-  const watcher = new AssetWatcher(kraken, config)
+  const watcher = new AssetWatcher(kraken, krakenApi, config)
   const recoveryService = createRecoveryService(positionsService, dcaService, kraken, config)
   const killswitch = createLaunchDarklyService()
 

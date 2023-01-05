@@ -1,11 +1,11 @@
-import { OHLCBlock } from '../common/interfaces/interfaces'
+import { OhlcCandle } from '../krakenPlus/ohlc/ohlc'
 
 // TODO: rename interface
 export interface AssetsWatcherUpdateEvent {
   period: number
   pair: string
-  head: OHLCBlock
-  blocks: OHLCBlock[]
+  head: OhlcCandle
+  candles: OhlcCandle[]
 }
 
 export interface AssetWatcherObserver {

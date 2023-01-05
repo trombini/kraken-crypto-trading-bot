@@ -1,5 +1,5 @@
-import { MACDResult } from '../common/macdUtils'
 import { filterRelevantBlocks, calculateConfidence } from './upswing'
+import { MACDResult } from './utils'
 
 // TODO: move to test utils
 const mockMacdResult = (matured: boolean, values: number[]): MACDResult => {

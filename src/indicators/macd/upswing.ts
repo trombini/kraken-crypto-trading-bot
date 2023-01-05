@@ -1,10 +1,9 @@
-import { OHLCBlock } from '../../common/interfaces/interfaces'
-import { calculateMACD, getMaturedHistogram } from './utils'
+import { calculateMACD, getMaturedHistogram, MACDResult } from './utils'
 import { allNegatives } from '../common/utils'
 import { logger } from '../../common/logger'
-import { MACDResult } from './macd.interface'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 
-export const upswing = (name: string, period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
+export const upswing = (name: string, period: number, requiredBlockMaturity: number) => (blocks: OhlcCandle[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, blocks)
   const filteredBlocks = filterRelevantBlocks(macd)
   const confidence = calculateConfidence(filteredBlocks)

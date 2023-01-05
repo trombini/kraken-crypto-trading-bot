@@ -1,13 +1,13 @@
 import { filter, round } from 'lodash'
-import { OHLCBlock } from '../../common/interfaces/interfaces'
-import moment from 'moment'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 import { StochasticInput } from 'technicalindicators/declarations/momentum/Stochastic'
+import moment from 'moment'
 
 export const allNegatives = (values: number[]) => filter(values, (e) => e < 0).length == values.length
 
 export const allPositives = (values: number[]) => filter(values, (e) => e > 0).length == values.length
 
-export const getBlockMaturity = (interval: number, block?: OHLCBlock): number => {
+export const getBlockMaturity = (interval: number, block?: OhlcCandle): number => {
   if(block) {
     const now = moment().unix()
     const age = now - block.time
@@ -16,14 +16,14 @@ export const getBlockMaturity = (interval: number, block?: OHLCBlock): number =>
   return 0
 }
 
-export const getMaturedBlocks = (interval: number, maturity: number, blocks: OHLCBlock[]) : OHLCBlock[] => {
+export const getMaturedBlocks = (interval: number, maturity: number, blocks: OhlcCandle[]) : OhlcCandle[] => {
   const now = moment().unix()
   const margin = (interval * 60) * maturity
   const threshold = now - margin
   return filter(blocks, o => o.time < threshold)
 }
 
-export const convertToStochasticInput = (blocks: OHLCBlock[]): StochasticInput => {
+export const convertToStochasticInput = (blocks: OhlcCandle[]): StochasticInput => {
   const flatOhlcBlocks = blocks.reduce((acc, block) => {
     acc.high.push(block.high)
     acc.low.push(block.low)

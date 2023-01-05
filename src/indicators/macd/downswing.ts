@@ -1,12 +1,11 @@
-import { OHLCBlock } from '../../common/interfaces/interfaces'
+import { OhlcCandle } from 'src/krakenPlus/ohlc/ohlc'
 import { Logger } from '../../common/logger'
 import { allPositives } from '../common/utils'
-import { MACDResult } from './macd.interface'
-import { calculateMACD, getMaturedHistogram } from './utils'
+import { calculateMACD, getMaturedHistogram, MACDResult } from './utils'
 
 const logger = Logger('IndicatorDownswing')
 
-export const downswing = (period: number, requiredBlockMaturity: number) => (blocks: OHLCBlock[]): number => {
+export const downswing = (period: number, requiredBlockMaturity: number) => (blocks: OhlcCandle[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, blocks)
   return analyse(macd)
 }
