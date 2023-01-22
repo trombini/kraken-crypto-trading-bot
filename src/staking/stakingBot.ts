@@ -16,7 +16,7 @@ export const determineIfStake = (threshold: number, currentAskPrice: number, bid
 
 export const determineIfUnstake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
   logger.debug(`Calculate UNSTAKE: ${round(currentAskPrice / bid, 3)} >= ${threshold}`)
-  return currentAskPrice / bid >= threshold
+  return currentAskPrice / bid >= (threshold + 0.01)
 }
 
 export class StakingBot implements AssetWatcherObserver {
