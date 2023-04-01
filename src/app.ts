@@ -14,15 +14,25 @@ import { createAPI } from './krakenPlus'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
 
+
+const sleep = (ms: number) => {
+  new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 // (async function () {
 
 //   const krakenApi = createAPI(config.krakenApiKey, config.krakenApiSecret)
-//   const result = await krakenApi.staking.stake(10)
-//   console.log(result)
+//   krakenApi.staking.stake(10)
+//   krakenApi.staking.stake(10)
+//   krakenApi.staking.stake(10)
+//   krakenApi.staking.stake(10)
+
+//   await sleep(10000)
 
 // })()
 
 (async function () {
+
   const logger = Logger('Main')
 
   console.log(config)

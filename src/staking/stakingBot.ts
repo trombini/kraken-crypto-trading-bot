@@ -36,7 +36,7 @@ export class StakingBot implements AssetWatcherObserver {
 
     if (lastAskPrice) {
       const openPositions = await this.positions.findByStatus('open')
-      for (const p of openPositions) {
+      for await (const p of openPositions) {
         const bidPrice = p.buy.price || 0
         if (p.staked === true && determineIfUnstake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
           logger.debug(`Unstake position ${generatePositionId(p)} ${p.buy.volume}`)
@@ -47,7 +47,7 @@ export class StakingBot implements AssetWatcherObserver {
         }
       }
 
-      for (const p of openPositions) {
+      for await (const p of openPositions) {
         const bidPrice = p.buy.price || 0
         if (p.staked === false && determineIfStake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
           logger.debug(`Stake position ${generatePositionId(p)} ${p.buy.volume}`)
