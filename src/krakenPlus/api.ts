@@ -8,7 +8,7 @@ const logger = Logger('KrakenApiV2')
 
 const stake = (apiKey: string, apiSecret: string) => async (amount: number) => {
   if (amount > 0) {
-    await privateMethod(apiKey, apiSecret, 'Stake', {
+    return await privateMethod(apiKey, apiSecret, 'Stake', {
       asset: 'ADA',
       method: 'ada-staked',
       amount,
@@ -18,7 +18,7 @@ const stake = (apiKey: string, apiSecret: string) => async (amount: number) => {
 
 const unstake = (apiKey: string, apiSecret: string) => async (amount: number) => {
   if (amount > 0) {
-    await privateMethod(apiKey, apiSecret, 'Unstake', {
+    return await privateMethod(apiKey, apiSecret, 'Unstake', {
       asset: 'ADA.S',
       amount,
     })

@@ -1,7 +1,10 @@
 import axios, { AxiosResponse } from 'axios'
 import { createHash, createHmac } from 'crypto'
 import { stringify } from 'query-string'
+import { Logger } from '../common/logger'
 import moment from 'moment'
+
+const logger = Logger('KrakenApiV2.utils')
 
 const BASE_URL = 'https://api.kraken.com'
 
@@ -52,6 +55,9 @@ export const privateMethod = async (key: string, secret: string, method: string,
       ...params,
     }
   }
+
+  logger.info(`Sending private request to ${method} with params: ${JSON.stringify(params)}`)
+  // logger.debug(`Sending private request to ${method} with params: ${JSON.stringify(params)}`)
 
   const path = `/0/private/${method}`
   const signature = getMessageSignature(path, stringify(params), secret, params.nonce)
