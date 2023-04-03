@@ -60,6 +60,7 @@ export class StakingBot implements AssetWatcherObserver {
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.stake(p.buy.volume)
             await this.positions.update(p, { staked: true })
+            await sleep(1000)
           }
         }
       }
