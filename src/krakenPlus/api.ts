@@ -48,8 +48,8 @@ const askPrice = (apiKey: string, apiSecret: string) => (pair: string) => {
 export interface IKrakenApi {
   ohlc(pair: string, period: number): Promise<any>,
   staking: {
-    stake(amount: number): Promise<void>
-    unstake(amount: number): Promise<void>
+    stake(amount: number): Promise<any>
+    unstake(amount: number): Promise<any>
   }
   ticker: {
     askPrice(pair: string): Promise<number>,

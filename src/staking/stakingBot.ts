@@ -20,6 +20,11 @@ export const determineIfUnstake = (thresholdInput: number, currentAskPrice: numb
   return currentAskPrice / bid >= threshold
 }
 
+const sleep = (ms: number) => {
+  logger.debug(`Sleep for ${ms} ms`)
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export class StakingBot implements AssetWatcherObserver {
   constructor(
     readonly assetWatcher: AssetWatcher,
@@ -43,6 +48,7 @@ export class StakingBot implements AssetWatcherObserver {
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.unstake(p.buy.volume)
             await this.positions.update(p, { staked: false })
+            await sleep(1000)
           }
         }
       }
