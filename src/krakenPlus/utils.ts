@@ -51,7 +51,8 @@ export const publicMethod = async (key: string, secret: string, method: string, 
 export const privateMethod = async (key: string, secret: string, method: string, params: any): Promise<any> => {
   if (!params.nonce) {
     params = {
-      nonce: moment().unix() * 1000 * 1000,
+      // nonce: moment().unix() * 1000 * 1000,
+      nonce: Date.now(),
       ...params,
     }
   }

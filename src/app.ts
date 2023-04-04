@@ -13,6 +13,7 @@ import { StakingBot } from './staking/stakingBot'
 import { createAPI } from './krakenPlus'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
+import moment from 'moment'
 
 
 const sleep = (ms: number, input: string) => {
