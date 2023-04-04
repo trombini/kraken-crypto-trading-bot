@@ -52,7 +52,7 @@ export const privateMethod = async (key: string, secret: string, method: string,
   if (!params.nonce) {
     params = {
       // nonce: moment().unix() * 1000 * 1000,
-      nonce: Date.now(),
+      nonce: Date.now() * 1000,
       ...params,
     }
   }
