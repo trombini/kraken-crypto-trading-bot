@@ -25,6 +25,7 @@ export interface BotConfig {
   slackBotToken: string
   slackChannel: string
   stakingThreshold: number
+  unstakingThreshold: number
   targetProfitAmount: number
   targetProfitPercentage: number
 }
@@ -49,6 +50,7 @@ export const config: BotConfig = {
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
   stakingThreshold: process.env.STAKING_THRESHOLD ? parseFloat(process.env.STAKING_THRESHOLD) : 0.99,
+  unstakingThreshold: process.env.UNSTAKING_THRESHOLD ? parseFloat(process.env.UNSTAKING_THRESHOLD) : 1.01,
   targetProfitAmount: process.env.TARGET_PROFIT_AMOUNT ? parseFloat(process.env.TARGET_PROFIT_AMOUNT) : 20,
   targetProfitPercentage: process.env.TARGET_PROFIT_PERCENTAGE ? parseFloat(process.env.TARGET_PROFIT_PERCENTAGE) : 0.04,
 }

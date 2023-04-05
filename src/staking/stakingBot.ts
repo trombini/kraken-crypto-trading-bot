@@ -14,8 +14,7 @@ export const determineIfStake = (threshold: number, currentAskPrice: number, bid
   return currentAskPrice / bid < threshold
 }
 
-export const determineIfUnstake = (thresholdInput: number, currentAskPrice: number, bid: number): boolean => {
-  const threshold = thresholdInput + 0.01
+export const determineIfUnstake = (threshold: number, currentAskPrice: number, bid: number): boolean => {
   logger.debug(`Calculate UNSTAKE: ${round(currentAskPrice / bid, 3)} >= ${threshold}`)
   return currentAskPrice / bid >= threshold
 }
@@ -43,7 +42,7 @@ export class StakingBot implements AssetWatcherObserver {
       const openPositions = await this.positions.findByStatus('open')
       for await (const p of openPositions) {
         const bidPrice = p.buy.price || 0
-        if (p.staked === true && determineIfUnstake(this.config.stakingThreshold, lastAskPrice, bidPrice)) {
+        if (p.staked === true && determineIfUnstake(this.config.unstakingThreshold, lastAskPrice, bidPrice)) {
           logger.debug(`Unstake position ${generatePositionId(p)} ${p.buy.volume}`)
           if (p.buy.volume && p.buy.volume > 0) {
             await this.kraken.staking.unstake(p.buy.volume)
