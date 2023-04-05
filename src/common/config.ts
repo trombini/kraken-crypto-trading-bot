@@ -48,7 +48,7 @@ export const config: BotConfig = {
   reserve: process.env.RESERVE ? parseFloat(process.env.RESERVE) : 0,
   slackBotToken: process.env.SLACK_BOT_TOKEN || '',
   slackChannel: process.env.SLACK_CHANNEL || '',
-  stakingThreshold: process.env.STAKING_THRESHOLD ? parseFloat(process.env.STAKING_THRESHOLD) : 0.96,
+  stakingThreshold: process.env.STAKING_THRESHOLD ? parseFloat(process.env.STAKING_THRESHOLD) : 0.99,
   targetProfitAmount: process.env.TARGET_PROFIT_AMOUNT ? parseFloat(process.env.TARGET_PROFIT_AMOUNT) : 20,
   targetProfitPercentage: process.env.TARGET_PROFIT_PERCENTAGE ? parseFloat(process.env.TARGET_PROFIT_PERCENTAGE) : 0.04,
 }

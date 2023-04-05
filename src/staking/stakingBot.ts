@@ -15,7 +15,7 @@ export const determineIfStake = (threshold: number, currentAskPrice: number, bid
 }
 
 export const determineIfUnstake = (thresholdInput: number, currentAskPrice: number, bid: number): boolean => {
-  const threshold = thresholdInput + 0.01
+  const threshold = thresholdInput + 0.05
   logger.debug(`Calculate UNSTAKE: ${round(currentAskPrice / bid, 3)} >= ${threshold}`)
   return currentAskPrice / bid >= threshold
 }
