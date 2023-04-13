@@ -18,13 +18,13 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 1440)
 
     // required indicators
-    this.registerIndicator(true, 0.05, 15, 'UPSWING 15m', macd.upswing('15m', 15, config.blockMaturity))
+    this.registerIndicator(true, 0.05, 15, 'UPSWING (15m)', macd.upswing('15m', 15, config.blockMaturity))
 
     // optional indicators
-    this.registerIndicator(false, 0.35, 240, 'UPTREND 4h', macd.uptrend('4h', 240, 0.5))
-    this.registerIndicator(false, 0.16, 240, 'BOOM', macd.strongUpwardsMomentum('4h', 240, 0.5))
-    this.registerIndicator(false, 0.30, 240, 'RSI 4h', rsi('4h'))
-    this.registerIndicator(false, 0.19, 240, 'STOCHF 4h', stochastic('4h'))
+    this.registerIndicator(false, 0.35, 240, 'UPTREND (4h)', macd.uptrend('4h', 240, 0.5))
+    this.registerIndicator(false, 0.16, 240, 'STRONG-UPWARDS-MOMENTUM (4h)', macd.strongUpwardsMomentum('4h', 240, 0.5))
+    this.registerIndicator(false, 0.30, 240, 'RSI (4h)', rsi('4h'))
+    this.registerIndicator(false, 0.19, 240, 'STOCHF (4h)', stochastic('4h'))
 
     // explanation:
     // upswing is the main driver. if this is positive, we want to buy
