@@ -22,7 +22,7 @@ export class BuyAnalyst extends Analyst {
 
     // optional indicators
     this.registerIndicator(false, 0.35, 240, 'UPTREND 4h', macd.uptrend('4h', 240, 0.5))
-    this.registerIndicator(false, 0.16, 240, 'BOOM', macd.uptrendV2('4h', 240, 0.5))
+    this.registerIndicator(false, 0.16, 240, 'BOOM', macd.strongUpwardsMomentum('4h', 240, 0.5))
     this.registerIndicator(false, 0.30, 240, 'RSI 4h', rsi('4h'))
     this.registerIndicator(false, 0.19, 240, 'STOCHF 4h', stochastic('4h'))
 

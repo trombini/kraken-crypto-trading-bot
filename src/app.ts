@@ -41,12 +41,6 @@ const sleep = (ms: number, input: string) => {
 
 (async function () {
 
-  const a = moment().unix() * 1000 * 1000
-  const b = Date.now() * 1000
-
-  console.log(a)
-  console.log(b)
-
   const logger = Logger('Main')
 
   console.log(config)

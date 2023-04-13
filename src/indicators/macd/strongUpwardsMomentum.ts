@@ -4,13 +4,13 @@ import { OhlcCandle } from '../../krakenPlus/ohlc/ohlc'
 import { last, round, takeRight } from 'lodash'
 import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MACD'
 
-// TODO: find a better name!
-export const uptrendV2 = (name: string, period: number, requiredBlockMaturity: number) => (candles: OhlcCandle[]): number => {
+// Be more confident if the MACD is still below the ZERO line. Meaning it might have more momentum left to go up vs if it would be already above ZERO.
+export const strongUpwardsMomentum = (name: string, period: number, requiredBlockMaturity: number) => (candles: OhlcCandle[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, candles)
   const filteredBlock = last(macd.blocks)
   const confidence = calculateConfidence(filteredBlock)
 
-  logger.debug(`UPTREND MACD (${name}): [ ${filteredBlock?.MACD ? round(filteredBlock?.MACD, 4) : 'null' } ] -> ${confidence}`)
+  logger.debug(`MACD STRONG UPWARDS MOMENTUM(${name}): [ ${filteredBlock?.MACD ? round(filteredBlock?.MACD, 4) : 'null' } ] -> ${confidence}`)
 
   return confidence
 }
@@ -28,10 +28,11 @@ export const calculateConfidence = (macd?: MACDOutput): number => {
   if(!macd || !macd.MACD) {
     return 0
   }
-
-  if(macd.MACD > 0) {
+  // MACD is ABOVE zero
+  else if(macd.MACD > 0) {
     return 0.5
   }
+  // MACD is EQUAL or BELOW zero
   else {
     return 1
   }
