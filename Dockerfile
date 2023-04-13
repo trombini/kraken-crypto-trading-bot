@@ -2,6 +2,8 @@ FROM node:lts as builder
 
 WORKDIR /usr/src/app
 
+RUN npm -v
+
 COPY .npmrc ./
 COPY package*.json ./
 
@@ -9,6 +11,7 @@ RUN npm ci
 
 COPY . .
 RUN npm run build
+
 
 #
 #

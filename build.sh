@@ -19,8 +19,12 @@ echo "| Login to AWS"
 aws ecr get-login-password --region $REGION --profile $PROFILE | docker login --username AWS --password-stdin $REPO
 
 echo "| Build docker container"
+cp ~/.npmrc .npmrc
 docker build -t $IMAGE:$VERSION --platform=linux/amd64 .
 
 echo "| Push docker image to repository"
 docker tag $IMAGE:$VERSION $REPO/$IMAGE:$VERSION
 docker push $REPO/$IMAGE:$VERSION
+
+echo "| Cleanup"
+rm .npmrc
