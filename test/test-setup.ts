@@ -14,7 +14,7 @@ async function dropAllCollections () {
     const collection = mongoose.connection.collections[collectionName]
     try {
       await collection.drop()
-    } catch (error) {
+    } catch (error: any) {
       // Sometimes this error happens, but you can safely ignore it
       if (error.message === 'ns not found') return
       // This error occurs when you use it.todo. You can
@@ -30,11 +30,7 @@ export const setupDb = (databaseName: string) => {
   // Connect to Mongoose
   beforeAll(async () => {
     const url = `mongodb://127.0.0.1/${databaseName}`
-    await mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false
-    })
+    await mongoose.connect(url, {})
   })
 
   // Cleans up database between each test
