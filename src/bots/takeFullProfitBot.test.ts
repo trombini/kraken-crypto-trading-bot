@@ -8,7 +8,7 @@ import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { TakeFullProfitBot } from './takeFullProfitBot'
 import { SellAnalyst } from '../analysts/sellAnalyst'
-import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { createFeatureToggleService, FeatureToggleService } from '../featureToggle/featureToggle.service'
 import { createAPI, IKrakenApi } from '../krakenPlus'
 
 let positionsService: PositionsService
@@ -18,7 +18,7 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
 let bot: TakeFullProfitBot
-let killswitch: LaunchDarklyService
+let killswitch: FeatureToggleService
 
 // setup db
 setupDb('takeFullProfitBot')
@@ -32,7 +32,7 @@ beforeEach(() => {
   positionsService = new PositionsService()
   watcher = new AssetWatcher(krakenService, krakenApi, config)
   analyst = new BuyAnalyst(watcher, config)
-  killswitch = createLaunchDarklyService()
+  killswitch = createFeatureToggleService()
 
   bot = new TakeFullProfitBot(krakenService, positionsService, analyst, killswitch, config)
 })

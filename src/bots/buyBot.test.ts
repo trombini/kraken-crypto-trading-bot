@@ -8,7 +8,7 @@ import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { DcaService } from '../common/dca'
-import { createLaunchDarklyService, LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { createFeatureToggleService, FeatureToggleService } from '../featureToggle/featureToggle.service'
 import { max, min } from 'lodash'
 import { IKrakenApi, createAPI } from '../krakenPlus'
 
@@ -20,15 +20,15 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: BuyAnalyst
 let bot: BuyBot
-let killswitch: LaunchDarklyService
+let killswitch: FeatureToggleService
 
 // setup db
 setupDb('buyBot')
 
 beforeEach(() => {
 
-  killswitch = createLaunchDarklyService()
-  jest.spyOn(killswitch, 'tripped').mockResolvedValue(false)
+  killswitch = createFeatureToggleService()
+  jest.spyOn(killswitch, 'buyEnabled').mockResolvedValue(false)
 
   krakenApi = createAPI(config.krakenApiKey, config.krakenApiSecret)
   krakenClient = new KrakenClient(config.krakenApiKey, config.krakenApiSecret)

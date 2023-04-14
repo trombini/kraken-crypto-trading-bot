@@ -41,6 +41,7 @@
     "axios": "^0.21.4",
     "d3fc": "^15.2.6",
     "dotenv": "^8.2.0",
+    "flagsmith-nodejs": "^2.5.2",
     "global-agent": "^2.1.12",
     "kraken-api": "^1.0.1",
     "launchdarkly-node-server-sdk": "^6.2.0",

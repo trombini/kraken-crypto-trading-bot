@@ -9,7 +9,7 @@ import { PositionsService } from '../positions/positions.service'
 import { Analyst } from '../analysts/analyst'
 import { BuyRecommendation } from '../common/interfaces/interfaces'
 import { inWinZone } from './utils'
-import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { FeatureToggleService } from '../featureToggle/featureToggle.service'
 
 export class ProfitBot {
 
@@ -17,7 +17,7 @@ export class ProfitBot {
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
     readonly analyst: Analyst,
-    readonly killswitch: LaunchDarklyService,
+    readonly killswitch: FeatureToggleService,
     readonly config: BotConfig
   ) {
 
@@ -30,7 +30,7 @@ export class ProfitBot {
   async handleSellRecommendation(recommendation: BuyRecommendation) {
 
     // Make sure we don't sell if Killswitch is tripped
-    if(await this.killswitch.tripped()) {
+    if(!await this.killswitch.sellEnabled()) {
       logger.debug('CANT SELL BECAUSE OF KILLSWITCH')
       slack(this.config).send(`I wanted to SELL at ${recommendation.lastPrice} but Killswitch is active.`)
       return

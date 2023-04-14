@@ -8,7 +8,7 @@ import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import { createRecoveryService } from './positions/recovery.service'
-import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
+import { FeatureToggleService, createFeatureToggleService } from './featureToggle/featureToggle.service'
 import { StakingBot } from './staking/stakingBot'
 import { createAPI } from './krakenPlus'
 import connect from './common/db/connect'
@@ -39,6 +39,7 @@ const sleep = (ms: number, input: string) => {
 
 // })()
 
+
 (async function () {
 
   const logger = Logger('Main')
@@ -57,10 +58,16 @@ const sleep = (ms: number, input: string) => {
   const dcaService = new DcaService(config, positionsService)
   const watcher = new AssetWatcher(kraken, krakenApi, config)
   const recoveryService = createRecoveryService(positionsService, dcaService, kraken, config)
-  const killswitch = createLaunchDarklyService()
+  const killswitch = createFeatureToggleService()
 
   // make sure we check killswitch when starting up. just for fun
-  const enabled = await killswitch.tripped()
+  await killswitch.buyEnabled()
+  await killswitch.sellEnabled()
+  setInterval(async () => {
+    await killswitch.buyEnabled()
+    await killswitch.sellEnabled()
+  }, 60000)
+
 
   // calculate profit
   if (config.goal > 0) {

@@ -7,7 +7,7 @@ import { PositionsService } from '../positions/positions.service'
 import { Position } from '../positions/position.interface'
 import { generatePositionId } from '../common/utils'
 import { ProfitBot } from './profitBot'
-import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { FeatureToggleService } from '../featureToggle/featureToggle.service'
 
 export class TakeFullProfitBot extends ProfitBot {
 
@@ -15,7 +15,7 @@ export class TakeFullProfitBot extends ProfitBot {
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
     readonly analyst: Analyst,
-    readonly killswitch: LaunchDarklyService,
+    readonly killswitch: FeatureToggleService,
     readonly config: BotConfig,
   ) {
     super(kraken, positionService, analyst, killswitch, config)

@@ -9,7 +9,7 @@ import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
-import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
+import { createFeatureToggleService } from './featureToggle/featureToggle.service'
 
 (async function () {
   console.log(config)
@@ -24,7 +24,7 @@ import { createLaunchDarklyService } from './launchDarkly/launchdarkly.service'
 
   const dcaService = new DcaService(config, positionsService)
   const watcher = new AssetWatcher(krakenService, krakenApi, config)
-  const killswitch = createLaunchDarklyService()
+  const killswitch = createFeatureToggleService()
 
   //
   if (config.goal > 0) {

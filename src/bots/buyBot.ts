@@ -10,7 +10,7 @@ import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
 import { Position } from '../positions/position.interface'
 import { formatMoney } from '../common/utils'
 import { DcaService } from 'src/common/dca'
-import { LaunchDarklyService } from '../launchDarkly/launchdarkly.service'
+import { FeatureToggleService } from '../featureToggle/featureToggle.service'
 import moment from 'moment'
 
 /**
@@ -92,7 +92,7 @@ export class BuyBot {
     readonly positionsService: PositionsService,
     readonly analyst: Analyst,
     readonly dcaService: DcaService,
-    readonly killswitch: LaunchDarklyService,
+    readonly killswitch: FeatureToggleService,
     readonly config: BotConfig,
   ) {
     this.cache = []
@@ -106,7 +106,7 @@ export class BuyBot {
   async handleBuyRecommendation(recommendation: BuyRecommendation): Promise<void> {
     // Make sure we don't buy if Killswitch is tripped
 
-    if (await this.killswitch.tripped()) {
+    if (!await this.killswitch.buyEnabled()) {
       logger.debug("Would like to buy but can' as KILLSWITCH is triggered.")
       slack(this.config).send(`I wanted to BUY at ${recommendation.lastPrice} but Killswitch is active.`)
       return
