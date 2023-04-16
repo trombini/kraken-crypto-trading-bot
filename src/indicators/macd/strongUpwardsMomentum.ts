@@ -8,28 +8,29 @@ import { MACDOutput } from 'technicalindicators/declarations/moving_averages/MAC
 export const strongUpwardsMomentum = (name: string, period: number, requiredBlockMaturity: number) => (candles: OhlcCandle[]): number => {
   const macd = calculateMACD(period, requiredBlockMaturity, candles)
   const filteredBlock = last(macd.blocks)
+  // const filteredBlock2 = filterRelevantBlocks(macd)
   const confidence = calculateConfidence(filteredBlock)
 
-  logger.debug(`MACD STRONG UPWARDS MOMENTUM(${name}): [ ${filteredBlock?.MACD ? round(filteredBlock?.MACD, 4) : 'null' } ] -> ${confidence}`)
+  logger.debug(`MACD STRONG UPWARDS MOMENTUM (${name}): [ ${filteredBlock?.histogram ? round(filteredBlock?.histogram, 4) : 'null' } ] -> ${confidence}`)
 
   return confidence
 }
 
-export const filterRelevantBlocks = (macd: MACDResult): MACDOutput[]=> {
-  if(macd.blocks.length < 3) {
-    throw Error('Not enough data')
-  }
+// export const filterRelevantBlocks = (macd: MACDResult): MACDOutput[]=> {
+//   if(macd.blocks.length < 3) {
+//     throw Error('Not enough data')
+//   }
 
-  return takeRight(macd.blocks, 1)
-}
+//   return takeRight(macd.blocks, 1)
+// }
 
 export const calculateConfidence = (macd?: MACDOutput): number => {
 
-  if(!macd || !macd.MACD) {
+  if(!macd || !macd.histogram) {
     return 0
   }
   // MACD is ABOVE zero
-  else if(macd.MACD > 0) {
+  else if(macd.histogram > 0) {
     return 0.5
   }
   // MACD is EQUAL or BELOW zero
