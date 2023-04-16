@@ -33,8 +33,17 @@ export const calculateConfidence = (macd?: MACDOutput): number => {
   else if(macd.histogram > 0) {
     return 0.5
   }
-  // MACD is EQUAL or BELOW zero
-  else {
-    return 1
+
+  // MACD is BELOW zero
+  else if(macd.histogram < 0.002) {
+    return 1.0
   }
+  else if(macd.histogram < 0.0015) {
+    return 0.9
+  }
+  else if(macd.histogram < 0.001) {
+    return 0.8
+  }
+
+  return 0
 }
