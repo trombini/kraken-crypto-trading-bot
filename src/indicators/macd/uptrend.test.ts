@@ -1,4 +1,4 @@
-import { calculateConfidence, filterRelevantBlocks } from './uptrend'
+import { calculateConfidence, filterLatestHistogramData } from './uptrend'
 import { MACDResult } from './utils'
 
 // TODO: move to test utils
@@ -20,7 +20,7 @@ describe('MACD Uptrend', () => {
   it(`should fail because we don't have enough data`, () => {
     const macd = mockMacdResult(true, [1, 2])
     expect(() => {
-      filterRelevantBlocks(macd)
+      filterLatestHistogramData(macd)
     }).toThrow()
   })
 
@@ -44,7 +44,7 @@ describe('MACD Uptrend', () => {
 
   it('should succeed because it an uptrend', () => {
     const macd = mockMacdResult(true, [-1, 0, 1])
-    const blocks = filterRelevantBlocks(macd)
+    const blocks = filterLatestHistogramData(macd)
     const confidence = calculateConfidence(blocks)
     expect(confidence).toBe(1)
   })
