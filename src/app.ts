@@ -42,6 +42,26 @@ const sleep = (ms: number, input: string) => {
 
 (async function () {
 
+
+
+  const histogram = -0.0007
+  // MACD is BELOW zero
+  if(histogram < -0.002) {
+    console.log(1.0)
+  }
+  else if(histogram < -0.0015) {
+    console.log(0.9)
+  }
+  else if(histogram < -0.001) {
+    console.log(0.8)
+
+  }
+  console.log(0)
+
+
+
+
+
   const logger = Logger('Main')
 
   console.log(config)
