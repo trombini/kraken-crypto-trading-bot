@@ -75,7 +75,7 @@ const sleep = (ms: number, input: string) => {
   // calculate profit
   if (config.goal > 0) {
     await profitLossService.getProfitLoss()
-    setInterval(profitLossService.getProfitLoss, 300000)
+    setInterval(profitLossService.getProfitLoss, 1800000) // all 30 min
   }
 
   //
