@@ -14,6 +14,7 @@ import { createAPI } from './krakenPlus'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
 import moment from 'moment'
+import { createProfitLossService } from './profit/profitLoss.service'
 
 
 const sleep = (ms: number, input: string) => {
@@ -42,15 +43,6 @@ const sleep = (ms: number, input: string) => {
 
 (async function () {
 
-  const k = 1;
-  function sigmoid(z) {
-    return 1 / (1 + Math.exp(-z/k));
-  }
-
-  console.log(sigmoid(-1))
-  console.log(sigmoid(100))
-
-
   const logger = Logger('Main')
 
   console.log(config)
@@ -66,10 +58,12 @@ const sleep = (ms: number, input: string) => {
   const positionsService = new PositionsService()
   const dcaService = new DcaService(config, positionsService)
   const watcher = new AssetWatcher(kraken, krakenApi, config)
-  const recoveryService = createRecoveryService(positionsService, dcaService, kraken, config)
-  const killswitch = createFeatureToggleService()
+  const profitLossService = createProfitLossService(positionsService, config)
+
+  createRecoveryService(positionsService, dcaService, kraken, config)
 
   // make sure we check killswitch when starting up. just for fun
+  const killswitch = createFeatureToggleService()
   await killswitch.buyEnabled()
   await killswitch.sellEnabled()
   setInterval(async () => {
@@ -80,29 +74,8 @@ const sleep = (ms: number, input: string) => {
 
   // calculate profit
   if (config.goal > 0) {
-    await positionsService
-      .find({
-        pair: config.pair,
-        status: 'sold',
-      })
-      .then((positions) => {
-        const profit = positions.reduce((acc, p) => {
-
-          if(p?.sell?.volume === undefined && p?.sell?.volumeToKeep === undefined) {
-            logger.error('ERROR IN LOG. NOT ALL INFOS')
-            return acc
-          }
-
-          const profit = p?.sell?.volumeToKeep || 0
-          // const profit = (p?.buy?.volume || 0) - (p?.sell?.volume || 0)
-          return acc + profit
-        }, 0)
-        const totalProfit = config.goalStart + profit
-        const goal = (totalProfit / config.goal) * 100
-        logger.info(
-          `Goal of ${formatMoney(config.goal)} reached by ${round(goal, 2,)} %  (${config.goalStart} + ${round(profit, 0)}) 🚀`,
-        )
-      })
+    await profitLossService.getProfitLoss()
+    setInterval(profitLossService.getProfitLoss, 300000)
   }
 
   //

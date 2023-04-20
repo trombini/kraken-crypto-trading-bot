@@ -1,9 +1,9 @@
-import { Position } from '../positions/position.interface'
+// import { Position } from '../positions/position.interface'
 
-export interface Profit {
-  date: string,
-  volume: number
-  soldFor: number
-  profit: number
-  position?: Position
-}
+// export interface Profit {
+//   date: string,
+//   volume: number
+//   soldFor: number
+//   profit: number
+//   position?: Position
+// }
