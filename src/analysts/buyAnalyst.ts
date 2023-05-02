@@ -24,7 +24,7 @@ export class BuyAnalyst extends Analyst {
 
     this.registerIndicator(false, 0.25, 240, 'UPTREND (4h)', macd.uptrend('4h', 240, 0.5))
 
-    this.registerIndicator(false, 0.20, 240, 'STRONG-UPWARDS-MOMENTUM (4h)', macd.strongUpwardsMomentum('4h', 240, 0.5))
+    this.registerIndicator(false, 0.20, 240, 'MACD BELOW ZERo (4h)', macd.belowZero('4h', 240, 0.5))
 
     this.registerIndicator(false, 0.18, 240, 'RSI (4h)', rsi('4h'))
 
