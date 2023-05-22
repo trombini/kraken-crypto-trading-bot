@@ -106,8 +106,7 @@ const sleep = (ms: number, input: string) => {
 
   //
   // start asset watcher
-  watcher.start([5, 15, 240, 1440])
-  //watcher.start([5, 15])
+  watcher.start([5, 15, 240, 1440, 10080])
 
   // Staking bot
   const krakenApi2 = createAPI(config.krakenApiKey, config.krakenApiSecret)

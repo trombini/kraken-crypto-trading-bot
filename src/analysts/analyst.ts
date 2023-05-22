@@ -44,7 +44,8 @@ export class Analyst extends events.EventEmitter implements AssetWatcherObserver
         logger.warn(`Not enough data for indicator ${currentIndicator.name}`)
       }
 
-      const confidence = this.data[period] === undefined ? -1 : indicator(this.data[period])
+      const confidence =
+        this.data[period] === undefined ? 0 : indicator(this.data[period])
       return {
         required,
         name,

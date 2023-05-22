@@ -28,6 +28,5 @@ export const calculateConfidence = (blocks: number[]): number => {
   // v0 oldest, v1 middel, v2 now
   const result = blocks[0] < blocks[1] && blocks[1] < blocks[2]
   const confidence = result ? 1 : 0
-
   return confidence
 }

@@ -15,20 +15,21 @@ export class BuyAnalyst extends Analyst {
     watcher.subscribe(this, 15)
     watcher.subscribe(this, 240)
     watcher.subscribe(this, 1440)
+    watcher.subscribe(this, 10080)
 
     // required indicators
     this.registerIndicator(true, 0.00001, 15, 'UPSWING (15m)', macd.upswing('15m', 15, config.blockMaturity))
 
     // optional indicators
-    this.registerIndicator(false, 0.34, 1440, 'UPTREND (1d)', macd.uptrend('1d', 1440, 0.5))
+    this.registerIndicator(false, 0.20, 10080, 'UPTREND (1w)', macd.uptrend('1w', 10080, 0.5))
+    this.registerIndicator(false, 0.20, 1440, 'UPTREND (1d)', macd.uptrend('1d', 1440, 0.5))
+    this.registerIndicator(false, 0.20, 240, 'UPTREND (4h)', macd.uptrend('4h', 240, 0.5))
 
-    this.registerIndicator(false, 0.30, 240, 'UPTREND (4h)', macd.uptrend('4h', 240, 0.5))
+    this.registerIndicator(false, 0.13, 240, 'RSI (4h)', rsi('4h'))
 
-    this.registerIndicator(false, 0.16, 240, 'RSI (4h)', rsi('4h'))
+    this.registerIndicator(false, 0.13, 240, 'STOCHF (4h)', stochastic('4h'))
 
-    this.registerIndicator(false, 0.12, 240, 'STOCHF (4h)', stochastic('4h'))
-
-    this.registerIndicator(false, 0.08, 240, 'MACD BELOW ZERO (4h)', macd.belowZero('4h', 240, 0.5))
+    this.registerIndicator(false, 0.13, 240, 'MACD BELOW ZERO (4h)', macd.belowZero('4h', 240, 0.5))
 
     // explanation:
     // upswing is the main driver. if this is positive, we want to buy

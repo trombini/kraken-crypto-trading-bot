@@ -30,9 +30,8 @@ export const mapOhlcResultToObject = (result: any[]): OhlcCandle => {
 
 export const ohlc = (client: KrakenClient) => async (pair: string, period: number): Promise<OhlcApiResult> => {
   const periods = 100
-  const since = moment()
-    .subtract(period * periods, 'm')
-    .unix()
+  // Subtract X minutes
+  const since = moment().subtract(period * periods, 'm').unix()
   return client
     .api('OHLC', { pair, since, interval: period }, () => {})
     .then((response) => response.result[pair])
