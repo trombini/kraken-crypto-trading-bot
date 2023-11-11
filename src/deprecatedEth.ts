@@ -9,7 +9,7 @@ import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
-import { createFeatureToggleService } from './featureToggle/featureToggle.service'
+import useFeatureToggle from './featureToggle/useFeatureTogle'
 
 (async function () {
   console.log(config)
@@ -24,7 +24,7 @@ import { createFeatureToggleService } from './featureToggle/featureToggle.servic
 
   const dcaService = new DcaService(config, positionsService)
   const watcher = new AssetWatcher(krakenService, krakenApi, config)
-  const killswitch = createFeatureToggleService()
+  const killswitch = useFeatureToggle()
 
   //
   if (config.goal > 0) {

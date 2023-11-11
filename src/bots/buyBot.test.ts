@@ -8,9 +8,9 @@ import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { BuyAnalyst } from '../analysts/buyAnalyst'
 import { DcaService } from '../common/dca'
-import { createFeatureToggleService, FeatureToggleService } from '../featureToggle/featureToggle.service'
 import { max, min } from 'lodash'
 import { IKrakenApi, createAPI } from '../krakenPlus'
+import useFeatureToggle, { FeatureToggle } from 'src/featureToggle/useFeatureTogle'
 
 let dcaService: DcaService
 let positionsService: PositionsService
@@ -20,14 +20,14 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: BuyAnalyst
 let bot: BuyBot
-let killswitch: FeatureToggleService
+let killswitch: FeatureToggle
 
 // setup db
 setupDb('buyBot')
 
 beforeEach(() => {
 
-  killswitch = createFeatureToggleService()
+  killswitch = useFeatureToggle()
   jest.spyOn(killswitch, 'buyEnabled').mockResolvedValue(false)
 
   krakenApi = createAPI(config.krakenApiKey, config.krakenApiSecret)

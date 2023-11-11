@@ -9,7 +9,7 @@ import { PositionsService } from '../positions/positions.service'
 import { Analyst } from '../analysts/analyst'
 import { BuyRecommendation } from '../common/interfaces/interfaces'
 import { inWinZone } from './utils'
-import { FeatureToggleService } from '../featureToggle/featureToggle.service'
+import { FeatureToggle } from 'src/featureToggle/useFeatureTogle'
 
 export class ProfitBot {
 
@@ -17,7 +17,7 @@ export class ProfitBot {
     readonly kraken: KrakenService,
     readonly positionService: PositionsService,
     readonly analyst: Analyst,
-    readonly killswitch: FeatureToggleService,
+    readonly killswitch: FeatureToggle,
     readonly config: BotConfig
   ) {
 

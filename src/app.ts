@@ -8,13 +8,13 @@ import { PositionsService } from './positions/positions.service'
 import { round } from 'lodash'
 import { DcaService } from './common/dca'
 import { createRecoveryService } from './positions/recovery.service'
-import { FeatureToggleService, createFeatureToggleService } from './featureToggle/featureToggle.service'
 import { StakingBot } from './staking/stakingBot'
 import { createAPI } from './krakenPlus'
 import connect from './common/db/connect'
 import KrakenClient from 'kraken-api'
 import moment from 'moment'
 import { createProfitLossService } from './profit/profitLoss.service'
+import useFeatureToggle from './featureToggle/useFeatureTogle'
 
 
 const sleep = (ms: number, input: string) => {
@@ -63,7 +63,8 @@ const sleep = (ms: number, input: string) => {
   createRecoveryService(positionsService, dcaService, kraken, config)
 
   // make sure we check killswitch when starting up. just for fun
-  const killswitch = createFeatureToggleService()
+  const killswitch = useFeatureToggle()
+  // const killswitch = createFeatureToggleService()
   await killswitch.buyEnabled()
   await killswitch.sellEnabled()
   setInterval(async () => {

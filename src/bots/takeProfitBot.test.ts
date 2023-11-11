@@ -7,8 +7,8 @@ import { setupDb } from '../../test/test-setup'
 import PositionModel from '../positions/position.model'
 import { AssetWatcher } from '../assetWatcher/assetWatcher'
 import { SellAnalyst } from '../analysts/sellAnalyst'
-import { createFeatureToggleService, FeatureToggleService } from '../featureToggle/featureToggle.service'
 import { createAPI, IKrakenApi } from '../krakenPlus'
+import useFeatureToggle, { FeatureToggle } from 'src/featureToggle/useFeatureTogle'
 
 let positionsService: PositionsService
 let krakenApi: IKrakenApi
@@ -17,7 +17,7 @@ let krakenService: KrakenService
 let watcher: AssetWatcher
 let analyst: SellAnalyst
 let bot: TakeProfitBot
-let killswitch: FeatureToggleService
+let killswitch: FeatureToggle
 
 // setup db
 setupDb('takeProfitBot')
@@ -31,7 +31,7 @@ beforeEach(() => {
   positionsService = new PositionsService()
   watcher = new AssetWatcher(krakenService, krakenApi, config)
   analyst = new SellAnalyst(watcher, config)
-  killswitch = createFeatureToggleService()
+  killswitch = useFeatureToggle()
 
   bot = new TakeProfitBot(krakenService, positionsService, analyst, killswitch, config)
 })

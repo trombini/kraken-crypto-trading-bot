@@ -10,8 +10,8 @@ import { Analyst, ANALYST_EVENTS } from '../analysts/analyst'
 import { Position } from '../positions/position.interface'
 import { formatMoney } from '../common/utils'
 import { DcaService } from 'src/common/dca'
-import { FeatureToggleService } from '../featureToggle/featureToggle.service'
 import moment from 'moment'
+import { FeatureToggle } from 'src/featureToggle/useFeatureTogle'
 
 /**
  * @param reserve Amount we want to hold as reserve
@@ -92,7 +92,7 @@ export class BuyBot {
     readonly positionsService: PositionsService,
     readonly analyst: Analyst,
     readonly dcaService: DcaService,
-    readonly killswitch: FeatureToggleService,
+    readonly killswitch: FeatureToggle,
     readonly config: BotConfig,
   ) {
     this.cache = []
